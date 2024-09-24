@@ -20,14 +20,14 @@ const Navbar = (): ReactElement => {
             >
               Home
             </div>
-            <div
+            {/* <div
               className="Navbar-body-link"
               onClick={() => {
                 navigate("/game")
               }}
             >
               Game
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

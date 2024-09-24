@@ -6,13 +6,13 @@
 @import '~bootstrap/scss/bootstrap-grid.scss';
 
 // Include modular style files
-// @import 'animate.css';
+@import 'animate.css';
 @import 'components';
 @import 'variables';
 @import 'utilities';
-// @import 'widget';
+@import 'widget';
 // @import 'game';
-// @import 'formik';
+@import 'formik';
 
 :root {
   // define colors
@@ -40,7 +40,7 @@
   // default settings for the body
   body {
     font-size: var(--fare-font-size-4);
-    background-color: var(--fare-color-dark-50);
+    background-color: var(--fare-color-blue-100);
     color: var(--fare-color-dark-1000);
   }
   

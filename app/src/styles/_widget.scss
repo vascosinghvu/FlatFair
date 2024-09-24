@@ -1,0 +1,47 @@
+.FormWidget {
+    display: flex;
+    justify-content: center;
+    margin-top: 5%;
+
+    &-body {
+        width: 30%;
+        height: fit-content;
+
+        // &-logo {
+        //     display: block;
+        //     background-image: url('../assets/Hextronics-Logo-White.png');
+        //     background-size: contain;
+        //     background-repeat: no-repeat;
+        //     height: 60px;
+        //     width: auto;
+        //     margin: 56px 0 40px 20px;
+        // }
+
+        &-content {
+            padding: 56px 48px;
+            box-shadow: var(--hextronics-shadow-ambient); 
+            background-color: var(--hextronics-color-dark-1000);
+            border-radius: var(--hextronics-border-radius-8);    
+        }
+    }
+}
+
+.SuccessWidget {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+
+    &-body {
+        width: 30%;
+        height: fit-content;
+    }
+
+    &-icon {
+        width: 100;
+        display: flex;
+        justify-content: center;
+        color: var(--hextronics-color-yellow-1000);
+        font-size: var(--hextronics-font-size-72);
+    }
+}

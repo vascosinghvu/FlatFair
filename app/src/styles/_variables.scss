@@ -3,12 +3,12 @@
 
 //add spaces so that the hex codes are lined up
 $fare-color-yellow:   #B9F63E;
-$fare-color-blue:     #2274A5;
-$fare-color-green:    #6fcf97;
-$fare-color-purple:   #C29BD4;
+$fare-color-blue:     #96ACB4;
+$fare-color-green:    #4D936D;
+$fare-color-purple:   #C3BEE2;
 $fare-color-red:      #DB504A;
 $fare-color-light:    #ffffff;
-$fare-color-gray:     #131f41;
+$fare-color-gray:     #415458;
 $fare-color-dark:     #15343C;
 
 // allow the colors to be used in inline styles
@@ -71,8 +71,8 @@ $zIndex: -10 -5 0 5 10 50 100 1000;
     --fare-z-#{$zIndex}: #{$zIndex};
   }
 
-  --fare-shadow-dark: var(--fare-color-dark-25) 0px 7px 15px 0px;  
-  --fare-shadow-ambient: var(--fare-color-gray-100) 0px 15px 35px 0px;
+  --fare-shadow-dark: var(--fare-color-dark-50) 0px 7px 15px 0px;  
+  --fare-shadow-ambient: var(--fare-color-dark-100) 0px 15px 35px 0px;
 }
 
 // font weights
