@@ -1,9 +1,14 @@
 import express, { Request, Response, Application } from "express"
-import dotenv from "dotenv"
 import cors from "cors"
+import dbConnect from "./config/dbConnect"
+import mongoose from "mongoose"
 
-// Load environment variables from .env file
-dotenv.config()
+import { Group, IGroup } from "./model/Group"
+import { User, IUser } from "./model/User"
+import { Expense } from "./model/Expense"
+import { populate } from "dotenv"
+
+dbConnect()
 
 const app: Application = express()
 app.use(cors())
@@ -25,7 +30,7 @@ app.post("/test", (req: Request, res: Response) => {
   })
 })
 
-app.post("/create-group", (req: Request, res: Response) => {
+app.post("/create-group", async (req: Request, res: Response) =>  {
   const { groupName, groupDescription, members } = req.body
 
   // Validate request body
@@ -44,8 +49,29 @@ app.post("/create-group", (req: Request, res: Response) => {
   // Log the received data for debugging
   console.log("Received group data:", { groupName, groupDescription, members })
 
+
   // Perform necessary operations to create the group, e.g., saving to a database
   // For now, we'll just send a success response
+
+  // Send information to the database
+  const newGroup = new Group({
+    groupName,
+    groupDescription,
+    members: members,
+    leader: members[0],
+  })
+  await newGroup.save();
+
+  // Add group to the user's groups using populate
+  console.log("Pre-populate", newGroup)
+  const groupMembers = await newGroup.populate("members");
+  console.log("Post-populate", groupMembers)
+  for (const member of groupMembers.members as IUser[]) {
+    console.log("Member", member)
+    console.log("Member groups", member.groups)
+    member.groups.push(newGroup._id);
+    member.save();
+  }
 
   return res.status(200).json({
     message: "Group created successfully",
