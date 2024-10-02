@@ -81,7 +81,7 @@ const CreateGroup = (): ReactElement => {
     <>
       <Navbar />
       <div className="FormWidget">
-        <div className="FormWidget-body animate__animated animate__fadeInDown">
+        <div className="FormWidget-body animate__animated animate__slideInDown">
           <div className="Block">
             <div className="Block-header">Create a New Group</div>
             <div className="Block-subtitle">
