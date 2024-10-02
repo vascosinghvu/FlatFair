@@ -18,7 +18,7 @@ const Modal = (props: ModalProps): ReactElement => {
     <>
       <div className="Modal-overlay" onClick={props.action}></div>
       <div
-        className={`Modal animate__animated animate__SlideInDown ${
+        className={`Modal animate__animated animate__slideInDown ${
           props.large ?? false ? "Modal-large" : ""
         }`}
       >
