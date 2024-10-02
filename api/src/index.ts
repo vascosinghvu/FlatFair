@@ -7,6 +7,7 @@ import { Group, IGroup } from "./model/Group"
 import { User, IUser } from "./model/User"
 import { Expense } from "./model/Expense"
 import { populate } from "dotenv"
+import { type } from "os"
 
 dbConnect()
 
@@ -31,7 +32,7 @@ app.post("/test", (req: Request, res: Response) => {
 })
 
 app.post("/create-group", async (req: Request, res: Response) =>  {
-  const { groupName, groupDescription, members } = req.body
+  const { groupName, groupDescription, members } = req.body //members are emails
 
   // Validate request body
   if (
@@ -50,17 +51,30 @@ app.post("/create-group", async (req: Request, res: Response) =>  {
   console.log("Received group data:", { groupName, groupDescription, members })
 
 
-  // Perform necessary operations to create the group, e.g., saving to a database
-  // For now, we'll just send a success response
+  // Use $in to find all users whose email is in the members array
+  const users = await User.find({ email: { $in: members } });
+  console.log("Users found:", users);
 
-  // Send information to the database
+  // If no valid users, return 404
+  if (users.length === 0) {
+    return res.status(404).json({
+      message: "No valid users found with the provided emails"
+    });
+  }
+
+  // Extract the ObjectIds of the found users
+  const memberIds = users.map((user) => user._id);
+
+  // Create the new group document
   const newGroup = new Group({
     groupName,
     groupDescription,
-    members: members,
-    leader: members[0],
-  })
+    members: memberIds,  // Add the ObjectIds of the found users
+    leader: memberIds[0],  // Assuming the first user is the leader
+  });
+
   await newGroup.save();
+  console.log('Group created successfully:', newGroup);
 
   // Add group to the user's groups using populate
   console.log("Pre-populate", newGroup)
