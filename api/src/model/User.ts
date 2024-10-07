@@ -3,7 +3,7 @@ import { Group, IGroup } from './Group';
 
 // Define the IUser interface
 interface IUser extends Document {
-    _id: Schema.Types.ObjectId;
+    auth0id: string;
     name: string;
     email: string;
     password: string;
@@ -14,7 +14,7 @@ interface IUser extends Document {
 
 // Mongoose User Schema
 const userSchema: Schema<IUser> = new Schema({
-    // _id: { type: String, default: uuid.v4 },
+    auth0id: { type: String, required: true },
     name: { type: String, required: true },
     email: { type: String, required: true },
     password: { type: String, required: true },

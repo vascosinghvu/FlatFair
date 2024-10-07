@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar"
 import AsyncSubmit from "../components/AsyncSubmit"
 import { useNavigate } from "react-router-dom"
 import Modal from "../components/Modal"
+import LoginButton from "../components/LoginButton"
 
 const Home = () => {
   const [isModal, setIsModal] = useState(false)
@@ -326,6 +327,7 @@ const Home = () => {
       >
         Open Modal
       </div>
+      <LoginButton />
     </>
   )
 }
