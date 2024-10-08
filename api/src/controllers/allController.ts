@@ -86,9 +86,30 @@ const createGroup = async (req: Request, res: Response) => {
     })
     }
 
-    // Controller for checking login status
-    const checkLoginStatus = (req: any, res: Response) => {
+    // Controller for creating user if necessary
+    const createUser = async (req: any, res: Response) => {
         console.log("Checking login status")
+        console.log(req.oidc.isAuthenticated() ? "Logged in" : "Logged out")
+
+        //check if authenticated user has User in the database
+        console.log(req.oidc.isAuthenticated())
+        if (req.oidc.isAuthenticated()) {
+            console.log("Authenticated")
+            const user = await User.findOne({ auth0id: req.oidc.user.sub });
+            console.log(user)
+            console.log(!user)
+            if (!user) {
+                const newUser = new User({
+                    auth0id: req.oidc.user.sub,
+                    name: req.oidc.user.nickname,
+                    email: req.oidc.user.email,
+                    groups: [],
+                    friends: []
+                });
+                newUser.save();
+            }
+
+        }
         res.redirect('http://localhost:3000/profile');
     };
 
@@ -104,5 +125,5 @@ const createGroup = async (req: Request, res: Response) => {
         res.oidc.login();  // Initiates Auth0 login
     };
 
-export default { test, createGroup, checkLoginStatus, getProfile, login }
+export default { test, createGroup, createUser, getProfile, login }
 // export default { test, createGroup, }

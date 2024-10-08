@@ -6,9 +6,9 @@ interface IUser extends Document {
     auth0id: string;
     name: string;
     email: string;
-    password: string;
     groups: (Schema.Types.ObjectId | IGroup)[];
     friends: (Schema.Types.ObjectId | IUser)[];
+    balances: { [friend: string]: number };
     addFriend: (friendId: string) => Promise<void>;
 }
 
@@ -17,7 +17,7 @@ const userSchema: Schema<IUser> = new Schema({
     auth0id: { type: String, required: true },
     name: { type: String, required: true },
     email: { type: String, required: true },
-    password: { type: String, required: true },
+    balances: { type: Map<String, Number>, default: {} },
     groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
     friends: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 });

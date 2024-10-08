@@ -10,7 +10,7 @@ router.route('/test').post(allController.test)
 router.route('/create-group').post(allController.createGroup)
 
 // Route for login status
-router.route('/').get(allController.checkLoginStatus);
+router.route('/').get(allController.createUser);
 
 // Route for user profile
 router.route('/profile').get(requiresAuth(), allController.getProfile);
