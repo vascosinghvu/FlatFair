@@ -1,101 +1,66 @@
 import express, { Request, Response, Application } from "express"
+import './definitionFile'
 import cors from "cors"
 import dbConnect from "./config/dbConnect"
-import mongoose from "mongoose"
 
-import { Group, IGroup } from "./model/Group"
-import { User, IUser } from "./model/User"
-import { Expense } from "./model/Expense"
-import { populate } from "dotenv"
-import { type } from "os"
+import { IGetUserAuthInfoRequest } from "./definitionFile.js"
+
+// import { setupAuth, ensureAuthenticated } from './auth'; // Import your auth setup
+import { NextFunction } from "express";
+import { auth, requiresAuth, Session } from 'express-openid-connect'
+import session from "express-session"
+
+import routes from "./routes/allRoutes"
+// import { auth } from "express-openid-connect";
+
 
 dbConnect()
 
 const app: Application = express()
-app.use(cors())
+
+
+// CORS options
+const corsOptions = {
+  origin: 'http://localhost:3000', // Allow only your React frontend
+  credentials: true, // Allow credentials (cookies, etc.)
+};
+app.use(cors(corsOptions))
 app.use(express.json()) // To parse JSON bodies
-const port = process.env.PORT || 8000
+// const port = process.env.PORT || 8000
+const port = 8000
 
-// Test POST endpoint
-app.post("/test", (req: Request, res: Response) => {
-  console.log(req.body) // Log the request body to check what you are receiving
-
-  const { key } = req.body // Extract "key" from the request body
-  if (!key) {
-    return res.status(400).json({ message: "No key provided" })
+// Setup express-session middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+      secure: false, // Set true if using HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
   }
+}));
 
-  return res.status(200).json({
-    message: "Data received successfully",
-    receivedKey: key,
-  })
-})
+// Auth0 configuration
+const config = {
+  authRequired: false,
+  auth0Logout: true,
+  secret: process.env.SESSION_SECRET || 'your-secret',
+  baseURL: 'http://localhost:8000', // Redirect to React app on login
+  clientID: process.env.AUTH0_CLIENT_ID || 'your-client-id',
+  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}` || 'your-auth0-domain',
+  clientSecret: process.env.AUTH0_CLIENT_SECRET || 'your-client-secret',
+  routes: {
+      callback: '/callback',
+      postLogoutRedirect: 'http://localhost:3000', // Redirect to React app on logout
+  },
+};
 
-app.post("/create-group", async (req: Request, res: Response) =>  {
-  const { groupName, groupDescription, members } = req.body //members are emails
+// Auth0 middleware for handling authentication
+app.use(auth(config));
 
-  // Validate request body
-  if (
-    !groupName ||
-    !groupDescription ||
-    !Array.isArray(members) ||
-    members.length === 0
-  ) {
-    return res.status(400).json({
-      message:
-        "Invalid data. Please provide group name, description, and at least one member.",
-    })
-  }
-
-  // Log the received data for debugging
-  console.log("Received group data:", { groupName, groupDescription, members })
-
-
-  // Use $in to find all users whose email is in the members array
-  const users = await User.find({ email: { $in: members } });
-  console.log("Users found:", users);
-
-  // If no valid users, return 404
-  if (users.length === 0) {
-    return res.status(404).json({
-      message: "No valid users found with the provided emails"
-    });
-  }
-
-  // Extract the ObjectIds of the found users
-  const memberIds = users.map((user) => user._id);
-
-  // Create the new group document
-  const newGroup = new Group({
-    groupName,
-    groupDescription,
-    members: memberIds,  // Add the ObjectIds of the found users
-    leader: memberIds[0],  // Assuming the first user is the leader
-  });
-
-  await newGroup.save();
-  console.log('Group created successfully:', newGroup);
-
-  // Add group to the user's groups using populate
-  console.log("Pre-populate", newGroup)
-  const groupMembers = await newGroup.populate("members");
-  console.log("Post-populate", groupMembers)
-  for (const member of groupMembers.members as IUser[]) {
-    console.log("Member", member)
-    console.log("Member groups", member.groups)
-    member.groups.push(newGroup._id);
-    member.save();
-  }
-
-  return res.status(200).json({
-    message: "Group created successfully",
-    group: {
-      groupName,
-      groupDescription,
-      members,
-    },
-  })
-})
+// Use the routes from allRoutes.ts
+app.use(routes)
 
 // Start the server
 app.listen(port, () => {
