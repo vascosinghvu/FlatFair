@@ -1,0 +1,17 @@
+.Home {
+    padding: 0px 32px;
+    display: flex;
+    flex-direction: column;
+
+    &-title {
+        font-size: var(--fare-font-size-30);
+        font-weight: 700;
+        margin: 20px 0;
+    }
+
+    // &-subtitle {
+    //     font-size: var(--fare-font-size-20);
+    //     font-weight: 400;
+    //     margin-bottom: 20px;
+    // }    
+}
