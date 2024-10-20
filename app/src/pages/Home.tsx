@@ -310,24 +310,60 @@ const Home = () => {
         />
       )}
       <Navbar />
-      <h1>Home</h1>
-      <div
-        onClick={() => {
-          navigate("/create-group")
-        }}
-        className="Button Button-color--dark-1000"
-      >
-        Create Group
+      <div className="Home">
+        <div className="Home-title">Welcome back, *User*</div>
+        <div className="row d-flex Justify-content--spaceBetween">
+          <div className="col-lg-3">
+            <div className="Block">
+              <div className="Block-header">Account Details</div>
+              <div className="Block-subtitle"> Manage your account.</div>
+            </div>
+          </div>
+          <div className="col-lg-5 Flex Flex-column">
+            <div className="Block">
+              <div className="Block-header">Expenses</div>
+              <div className="Block-subtitle">
+                Understand your spending trends.
+              </div>
+            </div>
+            <div className="Block Margin-top--20">
+              <div className="Block-header">Purchase History</div>
+              <div className="Block-subtitle">View your recent purchases.</div>
+            </div>
+          </div>
+          <div className="col-lg-3">
+            <div className="Block">
+              <div className="Block-header">Groups</div>
+              <div className="Block-subtitle"> Manage your groups.</div>
+              <div
+                onClick={() => {
+                  navigate("/create-group")
+                }}
+                className="Button Button-color--dark-1000"
+              >
+                Create Group
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* <div
+          onClick={() => {
+            navigate("/create-group")
+          }}
+          className="Button Button-color--dark-1000"
+        >
+          Create Group
+        </div>
+        <div
+          onClick={() => {
+            setIsModal(true)
+          }}
+          className="Button Button-color--dark-1000 Margin-top--10"
+        >
+          Open Modal
+        </div>
+        <LoginButton /> */}
       </div>
-      <div
-        onClick={() => {
-          setIsModal(true)
-        }}
-        className="Button Button-color--dark-1000 Margin-top--10"
-      >
-        Open Modal
-      </div>
-      <LoginButton />
     </>
   )
 }
