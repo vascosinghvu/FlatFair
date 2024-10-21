@@ -15,7 +15,30 @@
         font-size: var(--fare-font-size-24);
         font-weight: 400;
         margin-bottom: 20px;
-    }   
+    } 
+    
+    &-group {
+
+        display: flex;
+        flex-direction: column;
+    
+        &-title {
+            font-size: var(--fare-font-size-18);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+    
+        &-body {
+            font-size: var(--fare-font-size-14);
+            font-weight: 400;
+            color: var(--fare-color-dark-500);
+            margin-bottom: 10px;
+        }
+    
+        &:not(:last-child) {
+            margin-bottom: 10px;
+        }
+    }
 }
 
 .Purchase {
@@ -56,29 +79,6 @@
     }
 
     // if not last child, add 20px of space underneath
-    &:not(:last-child) {
-        margin-bottom: 10px;
-    }
-}
-
-.Group {
-
-    display: flex;
-    flex-direction: column;
-
-    &-title {
-        font-size: var(--fare-font-size-18);
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
-
-    &-body {
-        font-size: var(--fare-font-size-14);
-        font-weight: 400;
-        color: var(--fare-color-dark-500);
-        margin-bottom: 10px;
-    }
-
     &:not(:last-child) {
         margin-bottom: 10px;
     }
