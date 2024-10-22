@@ -4,10 +4,11 @@ import * as yup from "yup"
 import { Formik, Form, Field, FieldArray } from "formik"
 import Modal from "../components/Modal"
 import AsyncSubmit from "../components/AsyncSubmit"
+import Icon from "../components/Icon"
 
 const Group = () => {
   const [isModal, setIsModal] = useState(false)
-
+  const [isEditModal, setEditModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [selection, setSelection] = useState("Equally") // Default to "Equally"
@@ -96,6 +97,16 @@ const Group = () => {
     }
   }
 
+  interface Member {
+    name: string
+    role: string
+  }
+
+  const members: Member[] = [
+    { name: "Charlotte Conze", role: "Admin" },
+    { name: "Vasco Singh", role: "Member" },
+  ]
+
   // Custom validation logic to check split values
   const validateForm = (values: { members: any[]; cost: number }) => {
     let errors = {}
@@ -137,6 +148,54 @@ const Group = () => {
     setErrorMessage("")
     return errors
   }
+
+  function formatTime(date: Date): string {
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+    const period = hours >= 12 ? "PM" : "AM"
+    const formattedHours = hours % 12 || 12 // Convert to 12-hour format
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes
+    return `${formattedHours}:${formattedMinutes} ${period}`
+  }
+
+  interface GroupPurchase {
+    timestamp: Date
+    name: string
+    description: string
+    amount: number
+    status: string
+  }
+
+  const transactions: GroupPurchase[] = [
+    {
+      timestamp: new Date("2024-10-21T22:54:00"), // 10:54 PM
+      name: "Charlotte Conze",
+      description: "Chipotle",
+      amount: 75.32,
+      status: "Pending",
+    },
+    {
+      timestamp: new Date("2024-10-21T09:15:00"), // 9:15 AM
+      name: "Vasco Singh",
+      description: "Starbucks",
+      amount: 15.67,
+      status: "Completed",
+    },
+    {
+      timestamp: new Date("2024-10-21T14:30:00"), // 2:30 PM
+      name: "Ryan Sullivan",
+      description: "Uber",
+      amount: 23.45,
+      status: "Pending",
+    },
+    {
+      timestamp: new Date("2024-10-21T17:45:00"), // 5:45 PM
+      name: "Brandon Chandler",
+      description: "Grocery Store",
+      amount: 48.12,
+      status: "Completed",
+    },
+  ]
 
   return (
     <>
@@ -308,6 +367,14 @@ const Group = () => {
         />
       )}
 
+      {isEditModal && (
+        <Modal
+          header="Manage Group Member"
+          subheader="Edit the role of a group member"
+          action={() => setEditModal(false)}
+        />
+      )}
+
       <Navbar />
       <div className="Group">
         <div className="Group-top">
@@ -317,9 +384,62 @@ const Group = () => {
         <div className="row d-flex">
           <div className="col-lg-3">
             <div className="Group-header">Members</div>
+            {members.map((member, index) => (
+              <div className="Card Flex Flex-row Margin-bottom--20 Flex-row--verticallyCentered">
+                <div className="Purchase-item">
+                  <div
+                    className={`Group-letter Margin-right--10 Background-color--${
+                      member.role === "Admin" ? "purple" : "maroon"
+                    }-1000`}
+                  >
+                    {members[0].name.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+                <div key={index}>
+                  {member.name}
+                  <div className="Text-color--dark-700 Text-fontSize--14">
+                    {member.role}
+                  </div>
+                </div>
+                <div className="Group-icon" onClick={() => setEditModal(true)}>
+                  <Icon glyph="ellipsis-v" />
+                </div>
+              </div>
+            ))}
           </div>
           <div className="col-lg-6">
             <div className="Group-header">Group Purchase History</div>
+            {transactions.map((transaction, index) => (
+              <div key={index} className="Card Purchase">
+                <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
+                  <div className="Purchase-item " style={{ width: 75 }}>
+                    {formatTime(transaction.timestamp)}
+                  </div>
+                  <div className="Purchase-item Padding-x--20">
+                    <div className="Purchase-item-icon">
+                      {transaction.name.charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+                  <div className="Purchase-item">
+                    {transaction.name}
+                    <div className="Purchase-item-subtitle">
+                      {transaction.description}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="Purchase-item">${transaction.amount}</div>
+                <div
+                  className={`Badge Badge-color--${
+                    transaction.status === "Pending" ? "yellow" : "purple"
+                  }-1000 Margin-left--20`}
+                  style={{ width: 100 }}
+                >
+                  {transaction.status}
+                </div>
+              </div>
+            ))}
+
             <div
               onClick={() => {
                 setIsModal(true)
@@ -329,7 +449,10 @@ const Group = () => {
               Create New Expense
             </div>
           </div>
-          <div className="col-lg-3">jiewof </div>
+          <div className="col-lg-3">
+            {" "}
+            <div className="Group-header">Amounts</div>
+          </div>
         </div>
       </div>
     </>

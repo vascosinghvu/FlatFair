@@ -24,4 +24,29 @@
         font-weight: 700;
         margin-bottom: 10px;
     }
+
+    &-letter {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        // background-color: var(--fare-color-blue-1000);
+        color: var(--fare-color-light-1000);
+        font-weight: bold;
+        font-size: var(--fare-font-size-24);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden; /* Ensure content doesn't overflow */
+        // background: linear-gradient(145deg, var(--fare-color-purple-1000), var(--fare-color-purple-100));
+
+    }
+
+    &-icon {
+        margin-left: auto;
+
+        &:hover {
+            cursor: pointer;
+            color: var(--fare-color-yellow-1000);
+        }
+    }
 }

@@ -122,7 +122,7 @@ const Home = () => {
                   <div className="Purchase-item " style={{ width: 75 }}>
                     {formatTime(transaction.timestamp)}
                   </div>
-                  <div className="Purchase-item Padding--20">
+                  <div className="Purchase-item Padding-x--20">
                     <div className="Purchase-item-icon">
                       {transaction.name.charAt(0).toUpperCase()}
                     </div>
@@ -162,7 +162,7 @@ const Home = () => {
                     {group.members.join(", ")}
                   </div>
                   <div
-                    className="Button Button--hollow Button-color--purple-1000"
+                    className="Button Button--hollow Button-color--maroon-1000"
                     onClick={() => {
                       navigate("/group")
                     }}
