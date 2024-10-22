@@ -5,6 +5,7 @@ import { Formik, Form, Field, FieldArray } from "formik"
 import Modal from "../components/Modal"
 import AsyncSubmit from "../components/AsyncSubmit"
 import Icon from "../components/Icon"
+import { Button } from "react-bootstrap"
 
 const Group = () => {
   const [isModal, setIsModal] = useState(false)
@@ -13,6 +14,7 @@ const Group = () => {
   const [success, setSuccess] = useState(false)
   const [selection, setSelection] = useState("Equally") // Default to "Equally"
   const [errorMessage, setErrorMessage] = useState("")
+  const [settleModal, setSettleModal] = useState(false)
 
   const initialValues = {
     item: "",
@@ -367,6 +369,15 @@ const Group = () => {
         />
       )}
 
+      {settleModal && (
+        <Modal
+          header="Settle Up"
+          subheader="Settle up your group expenses"
+          action={() => setSettleModal(false)}
+          body={<div className="Form-group"></div>}
+        />
+      )}
+
       {isEditModal && (
         <Modal
           header="Manage Group Member"
@@ -452,6 +463,38 @@ const Group = () => {
           <div className="col-lg-3">
             {" "}
             <div className="Group-header">Amounts</div>
+            <div className="Block">
+              <div className="Block-header">Total Due</div>
+              <div className="Block-subtitle">$120.00</div>
+
+              <div className="Flex Flex-row Margin-bottom--20">
+                <div className="">Brandon: </div>
+                <div className="Text-color--dark-700 Margin-left--auto">
+                  $40.00
+                </div>
+              </div>
+
+              <div className="Flex Flex-row Margin-bottom--20">
+                <div className="">Vasco: </div>
+                <div className="Text-color--dark-700 Margin-left--auto">
+                  $40.00
+                </div>
+              </div>
+
+              <div className="Flex Flex-row Margin-bottom--20">
+                <div className="">Ryan: </div>
+                <div className="Text-color--dark-700 Margin-left--auto">
+                  $40.00
+                </div>
+              </div>
+
+              <div
+                className="Button Button-color--purple-1000"
+                onClick={() => setSettleModal(true)}
+              >
+                Settle Up
+              </div>
+            </div>
           </div>
         </div>
       </div>

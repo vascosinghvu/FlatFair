@@ -4,6 +4,7 @@ import Home from "./pages/Home"
 import CreateGroup from "./pages/CreateGroup"
 import Profile from "./pages/Profile"
 import Group from "./pages/Group"
+import Logout from "./pages/Logout"
 
 function App(): ReactElement {
   return (
@@ -15,6 +16,7 @@ function App(): ReactElement {
           <Route path="/create-group" element={<CreateGroup />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/group" element={<Group />} />
+          <Route path="/logout" element={<Logout />} />
         </Routes>
       </Router>
     </div>
