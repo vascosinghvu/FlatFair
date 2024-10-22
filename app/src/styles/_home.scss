@@ -46,21 +46,18 @@
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
-    padding: 0 10px;
     
     &-item {
         font-size: var(--fare-font-size-16);
         font-weight: 400;
-        color: var(--fare-color-dark-700);
         display: flex;
         flex-direction: column;
-        align-items: center;
         justify-content: center;
 
         &-subtitle {
             font-size: var(--fare-font-size-14);
             font-weight: 400;
-            color: var(--fare-color-dark-500);
+            color: var(--fare-color-dark-700);
         }
 
         &-icon {
@@ -74,12 +71,52 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* Ensure content doesn't overflow */
-        }
+            overflow: hidden; /* Ensure content doesn't overflow */      }
     }
 
     // if not last child, add 20px of space underneath
     &:not(:last-child) {
         margin-bottom: 10px;
+    }
+}
+
+.Account {
+    &-icon {
+        display: flex; // Ensure the icon is centered
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%; // Makes it a circle
+        background-color: var(--fare-color-blue-1000);
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: var(--fare-border-width-2) solid var(--fare-color-blue-100);
+
+        .Icon {
+            font-size: var(--fare-font-size-50);
+            color: var(--fare-color-light-1000);
+        }
+    }
+
+    &-details-item {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: var(--fare-border-width-1) solid var(--fare-color-dark-100);
+
+        &-title {
+            font-size: var(--fare-font-size-16);
+            font-weight: 700;
+            color: var(--fare-color-dark-700);
+        }
+
+        &-body {
+            font-size: var(--fare-font-size-16);
+            font-weight: 400;
+            color: var(--fare-color-dark-500);
+        }
     }
 }

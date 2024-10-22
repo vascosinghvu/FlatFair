@@ -141,8 +141,27 @@ const Home = () => {
         <div className="row d-flex Justify-content--spaceBetween">
           <div className="col-lg-3">
             <div className="Block">
-              <div className="Block-header">Account Details</div>
+              <div className="Home-subtitle">Account Details</div>
               <div className="Block-subtitle"> Manage your account.</div>
+              <div className="Flex Flex-column Flex--center">
+                <div className="Account-icon">
+                  <Icon glyph="user" />
+                </div>
+              </div>
+              <div className="Account-details">
+                <div className="Account-details-item">Charlotte Conze</div>
+                <div className="Account-details-item">
+                  charlotte.j.conze@vanderbilt.edu
+                </div>
+                <div className="Account-details-item">111-111-1111</div>
+              </div>
+
+              <div
+                className="Button Button--hollow Button-color--dark-1000"
+                onClick={() => navigate("/profile")}
+              >
+                Edit Profile
+              </div>
             </div>
           </div>
           <div className="col-lg-6 Flex Flex-column Padding-x--20">
@@ -154,7 +173,7 @@ const Home = () => {
                   <div className="Purchase-item " style={{ width: 75 }}>
                     {formatTime(transaction.timestamp)}
                   </div>
-                  <div className="Purchase-item Padding--20">
+                  <div className="Purchase-item Padding-x--20">
                     <div className="Purchase-item-icon">
                       {transaction.name.charAt(0).toUpperCase()}
                     </div>
@@ -199,7 +218,7 @@ const Home = () => {
                     }).join(", ")}
                   </div>
                   <div
-                    className="Button Button--hollow Button-color--purple-1000"
+                    className="Button Button--hollow Button-color--maroon-1000"
                     onClick={() => {
                       navigate(`/group/${group._id}`)
                     }}
