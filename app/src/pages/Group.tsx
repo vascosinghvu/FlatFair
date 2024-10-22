@@ -223,6 +223,7 @@ const Group = () => {
   }
 
   function formatTime(date: Date): string {
+    date = new Date(date)
     const hours = date.getHours()
     const minutes = date.getMinutes()
     const period = hours >= 12 ? "PM" : "AM"
@@ -466,7 +467,7 @@ const Group = () => {
         <div className="row d-flex">
           <div className="col-lg-3">
             <div className="Group-header">Members</div>
-            {groupInfo.members.map((member: any, index: number) => (
+            {groupInfo && groupInfo.members.map((member: any, index: number) => (
               <div className="Card Flex Flex-row Margin-bottom--20 Flex-row--verticallyCentered">
                 <div className="Purchase-item">
                   <div
@@ -474,7 +475,7 @@ const Group = () => {
                       member.role === "Admin" ? "purple" : "maroon"
                     }-1000`}
                   >
-                    {groupInfo.members[0].name.charAt(0).toUpperCase()}
+                    {member.name.charAt(0).toUpperCase()}
                   </div>
                 </div>
                 <div key={index}>
@@ -491,7 +492,7 @@ const Group = () => {
           </div>
           <div className="col-lg-6">
             <div className="Group-header">Group Purchase History</div>
-            {groupInfo.expenses.map((transaction: any, index: number) => (
+            {groupInfo && groupInfo.expenses.map((transaction: any, index: number) => (
               <div key={index} className="Card Purchase">
                 <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
                   <div className="Purchase-item " style={{ width: 75 }}>
@@ -499,13 +500,14 @@ const Group = () => {
                   </div>
                   <div className="Purchase-item Padding-x--20">
                     <div className="Purchase-item-icon">
-                      {transaction.name.charAt(0).toUpperCase()}
+                      {console.log("TRANSACTION:", transaction.createdBy.name)}
+                      {transaction.createdBy.name.charAt(0).toUpperCase()}
                     </div>
                   </div>
                   <div className="Purchase-item">
-                    {transaction.name}
+                    {transaction.createdBy.name}
                     <div className="Purchase-item-subtitle">
-                      {transaction.description}
+                      {transaction && transaction.description}
                     </div>
                   </div>
                 </div>

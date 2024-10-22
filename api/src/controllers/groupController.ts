@@ -16,7 +16,14 @@ const getGroup = async (req: Request, res: Response) => {
     }
 
     // Find the group with the provided groupID
-    const group = await Group.findById(groupID).populate("members").populate("expenses");
+    const group = await Group.findById(groupID)
+        .populate("members")
+        .populate({
+            path: 'expenses', // First, populate the 'expenses' field
+            populate: {
+                path: 'createdBy', // Then, populate the 'createdBy' field inside 'expenses'
+            },
+        });
 
     if (!group) {
         return res.status(404).json({
