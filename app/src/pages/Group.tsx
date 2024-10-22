@@ -468,7 +468,7 @@ const Group = () => {
           <div className="col-lg-3">
             <div className="Group-header">Members</div>
             {groupInfo && groupInfo.members.map((member: any, index: number) => (
-              <div className="Card Flex Flex-row Margin-bottom--20 Flex-row--verticallyCentered">
+              <div key={member._id} className="Card Flex Flex-row Margin-bottom--20 Flex-row--verticallyCentered">
                 <div className="Purchase-item">
                   <div
                     className={`Group-letter Margin-right--10 Background-color--${
