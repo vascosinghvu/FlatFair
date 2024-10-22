@@ -29,6 +29,10 @@ FlatFair allows users to:
 1. Clone the repository.
 2. Install dependencies using `npm install`.
 3. Set up your environment variables for MongoDB, Auth0, and API keys.
-4. Run the application using `npm start`.
+4. cd into /app
+5. Run the front-end of the application using `npm start`.
+6. Create a new terminal.
+7. cd into /api
+8. run `npm run dev`.
 
 FlatFair aims to provide a seamless, user-friendly experience for managing group expenses, with integrations that streamline financial settlements and provide helpful insights.
