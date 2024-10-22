@@ -1,11 +1,66 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import Navbar from "../components/Navbar"
 import * as yup from "yup"
 import { Formik, Form, Field, FieldArray } from "formik"
 import Modal from "../components/Modal"
 import AsyncSubmit from "../components/AsyncSubmit"
+import { api } from "../api"
+import { useParams } from "react-router-dom"
+import { IGroup } from "../../../api/src/model/Group"
+import { IExpense } from "../../../api/src/model/Expense"
+import { set } from "mongoose"
+import { IUser } from "../../../api/src/model/User"
 
 const Group = () => {
+  const { groupid } = useParams()
+  
+  // Get group data from the backend
+  // Get user info from backend
+  const [groupInfo, setGroupInfo] = useState<any>(null);
+  const [memberMap, setMemberMap] = useState<any>({})
+  const [memberInitialValues, setMemberInitialValues] = useState<any>([])
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/group/get-group/${groupid}`, {
+                method: 'GET', // GET request to retrieve data
+                credentials: 'include', // Include credentials (cookies, etc.)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            const data = await response.json(); // Parse the JSON response
+            console.log("Group Info:", data);
+            // Store the response in a variable or state
+            setGroupInfo(data.group); // Assuming you're using state to store the info
+            setMemberInitialValues(data.group.members.map((member: any) => ({
+              name: member.name,
+              selected: false,
+              splitValue: undefined,
+              id: member._id,
+            })))
+
+            setMemberMap(() => {
+              const groupMembers: IUser[] = data.group.members
+              return groupMembers.reduce<{ [name: string]: string }>((map, user) => {
+                const username = user.name as string;
+                const userID = user._id as string;
+                map[username] = userID;
+                return map;
+              }, {});
+          });
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+        }
+    };
+
+    fetchUserInfo(); // Call the fetch function inside useEffect
+  }, []); // Empty dependency array to run once on component mount
+
+  console.log("CURRENT GROUP: ", groupInfo);
+  
   const [isModal, setIsModal] = useState(false)
 
   const [isLoading, setIsLoading] = useState(false)
@@ -13,15 +68,17 @@ const Group = () => {
   const [selection, setSelection] = useState("Equally") // Default to "Equally"
   const [errorMessage, setErrorMessage] = useState("")
 
+  // console.log("Members:", groupInfo?.members)
   const initialValues = {
     item: "",
     cost: 0,
     date: "",
-    members: [
-      { name: "John", selected: false, splitValue: undefined },
-      { name: "Jane", selected: false, splitValue: undefined },
-      { name: "Doe", selected: false, splitValue: undefined },
-    ],
+    members: memberInitialValues
+      
+      // { name: "John", selected: false, splitValue: undefined },
+      // { name: "Jane", selected: false, splitValue: undefined },
+      // { name: "Doe", selected: false, splitValue: undefined },
+    ,
   }
 
   const validationSchema = yup.object().shape({
@@ -39,7 +96,7 @@ const Group = () => {
 
     try {
       // Initialize a variable to hold the breakdown for each member
-      let memberBreakdown: { name: string; amountDue: any }[] = []
+      let memberBreakdown: { memberID: string; amountDue: any }[] = []
 
       // Calculate total amount owed based on the selection method
       const totalCost = values.cost
@@ -52,7 +109,7 @@ const Group = () => {
         const amountPerMember = totalCost / selectedMembers.length
         selectedMembers.forEach((member: { name: any }) => {
           memberBreakdown.push({
-            name: member.name,
+            memberID: memberMap[member.name],
             amountDue: amountPerMember,
           })
         })
@@ -62,7 +119,7 @@ const Group = () => {
           const percentage = member.splitValue || 0 // default to 0 if no percentage provided
           const amountDue = (percentage / 100) * totalCost
           memberBreakdown.push({
-            name: member.name,
+            memberID: memberMap[member.name],
             amountDue: amountDue,
           })
         })
@@ -71,7 +128,7 @@ const Group = () => {
         selectedMembers.forEach((member: { splitValue: number; name: any }) => {
           const amountDue = member.splitValue || 0 // default to 0 if no amount provided
           memberBreakdown.push({
-            name: member.name,
+            memberID: memberMap[member.name],
             amountDue: amountDue,
           })
         })
@@ -83,9 +140,23 @@ const Group = () => {
         totalCost: totalCost,
         date: values.date,
         memberBreakdown: memberBreakdown,
+        groupID: groupid,
       }
 
       console.log("Submitting data:", finalData)
+
+      // Send POST request to the /group/add-expense endpoint
+      // const response = await api.post("/group/add-expense", finalData)
+      const response = await fetch('http://localhost:8000/group/add-expense', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(finalData),
+      })
+      console.log("Expense logged successfully:", response)
+
       setSuccess(true)
       setErrorMessage("") // Ensure error message is cleared on success
       resetForm()
@@ -243,7 +314,7 @@ const Group = () => {
                       name="members"
                       render={() => (
                         <div className="Flex Flex-column">
-                          {values.members.map((member, index) => (
+                          {values.members.map((member: IUser, index: number) => (
                             <div key={index} className="Flex Flex-column">
                               <div className="Flex-row Margin-y--10">
                                 <Field
@@ -317,9 +388,27 @@ const Group = () => {
         <div className="row d-flex">
           <div className="col-lg-3">
             <div className="Group-header">Members</div>
+            <div className="Group-body">
+              {groupInfo &&
+                groupInfo.members.map((member: any, index: number) => (
+                  <div key={index} className="Group-member">
+                    {member.name}
+                  </div>
+                ))}
+            </div>
           </div>
           <div className="col-lg-6">
             <div className="Group-header">Group Purchase History</div>
+            <div className="Group-body">
+              {groupInfo &&
+                groupInfo.expenses.map((expense: any, index: number) => (
+                  <div key={index} className="Group-purchase">
+                    <div className="Group-purchase-item">{expense.description}</div>
+                    <div className="Group-purchase-cost">${expense.amount}</div>
+                    <div className="Group-purchase-date">{expense.date}</div>
+                  </div>
+                ))}
+            </div>
             <div
               onClick={() => {
                 setIsModal(true)

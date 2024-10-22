@@ -14,7 +14,7 @@ function App(): ReactElement {
           <Route path="/home" element={<Home />} />
           <Route path="/create-group" element={<CreateGroup />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/group" element={<Group />} />
+          <Route path="/group/:groupid" element={<Group />} />
         </Routes>
       </Router>
     </div>

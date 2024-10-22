@@ -77,4 +77,5 @@ groupSchema.methods.notifyNewExpense = async function (expense: IExpense): Promi
 // Mongoose Group Model
 const Group = mongoose.model<IGroup>('Group', groupSchema);
 
-export { Group, IGroup };
+export { Group };
+export type { IGroup };

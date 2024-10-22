@@ -11,6 +11,8 @@ import { auth, requiresAuth, Session } from 'express-openid-connect'
 import session from "express-session"
 
 import routes from "./routes/allRoutes"
+import groupRoutes from "./routes/groupPageRoutes"
+import curUserRoutes from "./routes/curUserRoutes"
 // import { auth } from "express-openid-connect";
 
 
@@ -25,6 +27,12 @@ const corsOptions = {
   credentials: true, // Allow credentials (cookies, etc.)
 };
 app.use(cors(corsOptions))
+
+app.options('*', cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+}));
+
 app.use(express.json()) // To parse JSON bodies
 // const port = process.env.PORT || 8000
 const port = 8000
@@ -58,6 +66,13 @@ const config = {
 
 // Auth0 middleware for handling authentication
 app.use(auth(config));
+
+
+// Use the routes from groupPage.ts, prefixed with /group
+app.use('/group', groupRoutes)
+
+// Use the routes from curUserInfo.ts, prefixed with /curUserInfo
+app.use('/curUserInfo', curUserRoutes)
 
 // Use the routes from allRoutes.ts
 app.use(routes)
