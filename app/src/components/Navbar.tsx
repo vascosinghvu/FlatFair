@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom"
 
 const Navbar = (): ReactElement => {
   const navigate = useNavigate()
+
+  const handleLogout = () => {
+    window.location.href = 'http://localhost:8000/logout';
+};
   return (
     <>
       <div className="Navbar">
@@ -23,6 +27,7 @@ const Navbar = (): ReactElement => {
             <div
               className="Navbar-body-link Margin-right--20"
               onClick={() => {
+                // handleLogout()
                 navigate("/logout")
               }}
             >

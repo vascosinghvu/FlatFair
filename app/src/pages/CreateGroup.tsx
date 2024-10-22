@@ -5,6 +5,7 @@ import { api } from "../api"
 import { useNavigate } from "react-router-dom"
 import * as yup from "yup"
 import { Formik, Form, Field } from "formik"
+import navigate from "react-router-dom"
 
 interface GroupFormValues {
   groupName: string
@@ -87,6 +88,7 @@ const CreateGroup = (): ReactElement => {
       )
     } finally {
       setIsLoading(false) // Reset loading state
+      navigate("/home") // Redirect to the groups page
     }
   }
 

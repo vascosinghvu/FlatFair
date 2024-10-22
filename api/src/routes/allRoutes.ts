@@ -7,6 +7,7 @@ import { requiresAuth } from 'express-openid-connect'
 
 router.route('/test').get(allController.test)
 
+// router.route('/create-group').post(allController.createGroup)
 router.route('/create-group').post(requiresAuth(), allController.createGroup)
 
 // Route for login status

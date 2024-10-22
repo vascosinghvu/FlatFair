@@ -21,6 +21,7 @@ const test = async (req: Request, res: Response) => {
 
 // Function to create a group
 const createGroup = async (req: any, res: Response) => {
+    console.log("Creating group")
     const { groupName, groupDescription, members } = req.body //members are emails
 
     // Validate request body
@@ -67,6 +68,17 @@ const createGroup = async (req: any, res: Response) => {
         members: [curUserId, memberIds],  // Add the ObjectIds of the found users
         leader: curUserId,  // Assuming the first user is the leader
     });
+
+    console.log("New Group: ", newGroup)
+    // // Create the new group document
+    // console.log("MemberIds", memberIds)
+    // const newGroup = new Group({
+    //     groupName,
+    //     groupDescription,
+    //     members: [memberIds],  // Add the ObjectIds of the found users
+    //     expenses: [],
+    //     leader: memberIds[0],  // Assuming the first user is the leader
+    // });
 
     await newGroup.save();
     console.log('Group created successfully:', newGroup);
@@ -116,7 +128,7 @@ const createGroup = async (req: any, res: Response) => {
             }
 
         }
-        res.redirect('http://localhost:3000/profile');
+        res.redirect('http://localhost:3000');
     };
 
     // Controller for getting user profile
