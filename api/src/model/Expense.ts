@@ -5,14 +5,14 @@ import { IGroup } from './Group';  // Import Group interface
 // Interface for the Expense document
 interface IExpense extends Document {
     _id: Schema.Types.ObjectId;
+    group: (Schema.Types.ObjectId | IGroup);
+    createdBy: (Schema.Types.ObjectId | IUser);
     amount: number;
     description: string;
     category: string;
-    group: (Schema.Types.ObjectId | IGroup);
     status: string;
     receipt: File;
     date: Date;
-    createdBy: (Schema.Types.ObjectId | IUser);
     allocatedTo: Map<(Schema.Types.ObjectId | IUser), number>;
 
     addReceipt(receipt: File): Promise<void>;
@@ -24,14 +24,14 @@ interface IExpense extends Document {
 // Mongoose Expense Schema
 const expenseSchema: Schema<IExpense> = new Schema({
     // expenseID: { type: String, required: true },
-    amount: { type: Number, required: true },
-    description: { type: String, required: true },
-    category: { type: String, required: true },
     group: { type: Schema.Types.ObjectId, ref: 'Group', required: true },  // Reference to Group
-    status: { type: String, required: true },  // e.g., 'pending', 'settled'
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },  // Reference to User
+    amount: { type: Number, required: true },
+    description: { type: String, default: "" },
+    category: { type: String, default: "General" },
+    status: { type: String, default: 'Pending' },  // e.g., 'pending', 'approved', 'rejected'
     receipt: { type: Buffer },  // File storage for the receipt (you can handle file uploads in your app)
     date: { type: Date, default: Date.now },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },  // Reference to User
     allocatedTo: {
         type: Map,
         of: Number,  // A map of User ObjectId and allocation amount
@@ -66,4 +66,5 @@ expenseSchema.methods.allocateExpense = async function (portions: Map<IUser, num
 // Mongoose Expense Model
 const Expense = mongoose.model<IExpense>('Expense', expenseSchema);
 
-export { Expense, IExpense };
+export { Expense };
+export type { IExpense };

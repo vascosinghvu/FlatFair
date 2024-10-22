@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Formik, Form, Field, FieldArray } from "formik"
 import * as yup from "yup"
 import Navbar from "../components/Navbar"
@@ -8,9 +8,41 @@ import Modal from "../components/Modal"
 import LoginButton from "../components/LoginButton"
 import Icon from "../components/Icon"
 
+import { IGroup } from "../../../api/src/model/Group"
+import { IExpense } from "../../../api/src/model/Expense"
+import { IUser } from "../../../api/src/model/User"
+
 const Home = () => {
   const [isModal, setIsModal] = useState(false)
   const navigate = useNavigate()
+
+  // Get user info from backend
+  const [userInfo, setUserInfo] = useState<any>(null);
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/curUserInfo/get-user', {
+                method: 'GET', // GET request to retrieve data
+                credentials: 'include', // Include credentials (cookies, etc.)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            const data = await response.json(); // Parse the JSON response
+            console.log("User Info:", data);
+            // Store the response in a variable or state
+            setUserInfo(data.currentUser); // Assuming you're using state to store the info
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+        }
+    };
+
+    fetchUserInfo(); // Call the fetch function inside useEffect
+  }, []); // Empty dependency array to run once on component mount
+
+  console.log("CURRENT USER: ", userInfo);
 
   interface UserTransaction {
     timestamp: Date
@@ -72,24 +104,24 @@ const Home = () => {
     },
   ]
 
-  interface Group {
-    name: string
-    members: string[]
-    canManage: boolean
-  }
+  // interface Group {
+  //   name: string
+  //   members: string[]
+  //   canManage: boolean
+  // }
 
-  const groups: Group[] = [
-    {
-      name: "Class Group 7",
-      members: ["Charlotte Conze", "Vasco Singh"],
-      canManage: true,
-    },
-    {
-      name: "Hiking Group",
-      members: ["Charlotte Conze", "Ryan Sullivan"],
-      canManage: true,
-    },
-  ]
+  // const groups: Group[] = [
+  //   {
+  //     name: "Class Group 7",
+  //     members: ["Charlotte Conze", "Vasco Singh"],
+  //     canManage: true,
+  //   },
+  //   {
+  //     name: "Hiking Group",
+  //     members: ["Charlotte Conze", "Ryan Sullivan"],
+  //     canManage: true,
+  //   },
+  // ]
 
   function formatTime(date: Date): string {
     const hours = date.getHours()
@@ -174,16 +206,21 @@ const Home = () => {
             <div className="Block">
               <div className="Block-header">Groups</div>
               <div className="Block-subtitle"> Manage your groups.</div>
-              {groups.map((group, index) => (
+              {console.log("CURRENT USER INFO:", userInfo)}
+              {console.log("CURRENT USER GROUPS:", userInfo?.groups)}
+              {userInfo && userInfo.groups && userInfo.groups.map((group: IGroup, index: number) => (
                 <div key={index} className="Home-group">
-                  <div className="Home-group-title">{group.name}</div>
+                  <div className="Home-group-title">{group.groupName}</div>
                   <div className="Home-group-body">
-                    {group.members.join(", ")}
+                    {group.members.map((member) => {
+                      const user = member as IUser
+                      return user.name;
+                    }).join(", ")}
                   </div>
                   <div
                     className="Button Button--hollow Button-color--maroon-1000"
                     onClick={() => {
-                      navigate("/group")
+                      navigate(`/group/${group._id}`)
                     }}
                   >
                     Manage Group

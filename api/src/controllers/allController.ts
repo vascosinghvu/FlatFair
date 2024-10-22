@@ -8,19 +8,19 @@ import { Group, IGroup } from "../model/Group"
 const test = async (req: Request, res: Response) => {
     console.log(req.body) // Log the request body to check what you are receiving
     
-    const { key } = req.body // Extract "key" from the request body
-    if (!key) {
-        return res.status(400).json({ message: "No key provided" })
-    }
+    // const { key } = req.body // Extract "key" from the request body
+    // if (!key) {
+    //     return res.status(400).json({ message: "No key provided" })
+    // }
     
     return res.status(200).json({
         message: "Data received successfully",
-        receivedKey: key,
+        // receivedKey: key,
     })
 }
 
 // Function to create a group
-const createGroup = async (req: Request, res: Response) => {
+const createGroup = async (req: any, res: Response) => {
     const { groupName, groupDescription, members } = req.body //members are emails
 
     // Validate request body
@@ -54,12 +54,18 @@ const createGroup = async (req: Request, res: Response) => {
     // Extract the ObjectIds of the found users
     const memberIds = users.map((user) => user._id);
 
+    // Get the current user
+    console.log("CURRENT USER: ", req.oidc.user)
+    const curUserAuth0Id = req.oidc.user.sub;
+    const currentUser = await User.findOne({ auth0id: curUserAuth0Id });
+    const curUserId = currentUser?._id;
+
     // Create the new group document
     const newGroup = new Group({
         groupName,
         groupDescription,
-        members: memberIds,  // Add the ObjectIds of the found users
-        leader: memberIds[0],  // Assuming the first user is the leader
+        members: [curUserId, memberIds],  // Add the ObjectIds of the found users
+        leader: curUserId,  // Assuming the first user is the leader
     });
 
     await newGroup.save();
@@ -125,5 +131,11 @@ const createGroup = async (req: Request, res: Response) => {
         res.oidc.login();  // Initiates Auth0 login
     };
 
-export default { test, createGroup, createUser, getProfile, login }
+    const getUser = async (req: any, res: Response) => {
+        const { auth0id } = req.oidc.user.sub;
+        const user = await User.findOne({ auth0id });
+        res.status(200).json(user);
+    }
+
+export default { test, createGroup, createUser, getProfile, login, getUser }
 // export default { test, createGroup, }
