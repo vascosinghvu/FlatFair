@@ -122,7 +122,8 @@ const createGroup = async (req: any, res: Response) => {
                     name: req.oidc.user.nickname,
                     email: req.oidc.user.email,
                     groups: [],
-                    friends: []
+                    friends: [],
+                    expenses: [],
                 });
                 newUser.save();
             }
