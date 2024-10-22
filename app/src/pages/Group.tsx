@@ -466,7 +466,7 @@ const Group = () => {
         <div className="row d-flex">
           <div className="col-lg-3">
             <div className="Group-header">Members</div>
-            {groupInfo.members.map((member, index) => (
+            {groupInfo.members.map((member: any, index: number) => (
               <div className="Card Flex Flex-row Margin-bottom--20 Flex-row--verticallyCentered">
                 <div className="Purchase-item">
                   <div
@@ -491,7 +491,7 @@ const Group = () => {
           </div>
           <div className="col-lg-6">
             <div className="Group-header">Group Purchase History</div>
-            {groupInfo.expenses.map((transaction, index) => (
+            {groupInfo.expenses.map((transaction: any, index: number) => (
               <div key={index} className="Card Purchase">
                 <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
                   <div className="Purchase-item " style={{ width: 75 }}>
