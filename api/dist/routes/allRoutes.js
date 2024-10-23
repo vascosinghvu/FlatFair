@@ -8,5 +8,5 @@ const express = require('express');
 const router = express.Router();
 const allController_1 = __importDefault(require("../controllers/allController"));
 router.route('/test').post(allController_1.default.test);
-router.route('/create-group').post(allController_1.default.createGroup);
+// router.route('/create-group').post(allController_1.default.createGroup);
 exports.default = router;

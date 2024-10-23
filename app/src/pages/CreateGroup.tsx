@@ -43,53 +43,39 @@ const CreateGroup = (): ReactElement => {
 
   const handleSubmit = async (values: GroupFormValues, { resetForm }: any) => {
     setIsLoading(true)
-    
+
     // Construct the group data to send to the backend
-    const groupData = {
+    const body = {
       groupName: values.groupName,
       groupDescription: values.groupDescription,
       members: members, // Use the members state array
     }
 
-    console.log("Sending group data:", groupData) // Optional: Log the data being sent
+    console.log("Sending group data:", body) // Optional: Log the data being sent
 
     try {
-        // Send POST request to the /create-group endpoint using fetch
-        const response = fetch('http://localhost:8000/create-group', {
-            method: 'POST', // Specify POST method
-            credentials: 'include', // Ensures cookies (like auth cookies) are included
-            headers: {
-                'Content-Type': 'application/json', // Define the content type
-            },
-            body: JSON.stringify(groupData), // Send group data as JSON
-        })
-        .then((res) => {
-            if (!res.ok) {
-                throw new Error(`Error: ${res.status}`);
-            }
-            return res.json();
-        })
-        .then((data) => {
-            console.log("Group created successfully", data);
-            // Handle success (e.g., update UI or state)
-        })
-        .catch((error) => {
-            console.error('Error creating group:', error);
-        });
+      // Use the api.post method from your API utility
+      const response = await api.post(
+        `/group/create-group`,
+        JSON.stringify(body)
+      )
 
-      console.log("Group created successfully", response) // Optional: Log the response
-      setSuccess(true) // Set success state to true
-      resetForm() // Reset the form after successful submission
-      setMembers([]) // Clear the members array as well
+      if (response.status === 201) {
+        console.log("Group created successfully", response.data)
+        setSuccess(true) // Set success state to true
+        resetForm() // Reset the form after successful submission
+        setMembers([]) // Clear the members array as well
+        navigate("/home") // Redirect to the groups page
+      } else {
+        throw new Error(`Failed to create group: ${response.status}`)
+      }
     } catch (error) {
       console.error(
         "Error creating group:",
         (error as any).response?.data || (error as any).message
       )
-    } finally {
-      setIsLoading(false) // Reset loading state
-      navigate("/home") // Redirect to the groups page
     }
+    setIsLoading(false) // Reset loading state
   }
 
   const addMember = (email: string, resetField: () => void) => {

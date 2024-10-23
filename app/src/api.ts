@@ -27,22 +27,24 @@ export const api: any = {
   post: async (route: string, payload: any): Promise<any> => {
     const url = `${process.env.REACT_APP_API_URL as string}${route}`
 
+    // console.log(process.env.REACT_APP_API_URL as string)
+
     return await fetch(url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json", // Proper header for JSON
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        mode: "no-cors",
       },
-      body: JSON.stringify(payload), // Stringify the payload
+      body: payload,
     })
       .then(async (res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok")
-        }
         const json = await res.json()
-        return {
+        const response = {
           data: json,
           status: res.status,
         }
+        return response
       })
       .catch((err) => {
         console.error("Error posting data: ", err)
