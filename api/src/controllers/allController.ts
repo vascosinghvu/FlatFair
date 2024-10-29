@@ -1,8 +1,9 @@
 // Description: This file contains the functions that will be called when the API receives a request to the specified endpoints.
 
-import express, { Request, Response, Application } from "express"
+import express, { Request, Response } from "express"
 import { User, IUser } from "../model/User"
 import { Group, IGroup } from "../model/Group"
+import sendEmailInvite from '../config/sendgridInvite';
 
 // Testing function to test endpoints
 const test = async (req: Request, res: Response) => {
@@ -24,42 +25,42 @@ const createGroup = async (req: any, res: Response) => {
     console.log("Creating group")
     const { groupName, groupDescription, members } = req.body //members are emails
 
-    // Validate request body
-    if (
-        !groupName ||
-        !groupDescription ||
-        !Array.isArray(members) ||
-        members.length === 0
-    ) {
-        return res.status(400).json({
-        message:
-            "Invalid data. Please provide group name, description, and at least one member.",
-        })
-    }
+        // Validate request body
+        if (
+            !groupName ||
+            !groupDescription ||
+            !Array.isArray(members) ||
+            members.length === 0
+        ) {
+            return res.status(400).json({
+            message:
+                "Invalid data. Please provide group name, description, and at least one member.",
+            })
+        }
 
-    // Log the received data for debugging
-    console.log("Received group data:", { groupName, groupDescription, members })
+        // Log the received data for debugging
+        console.log("Received group data:", { groupName, groupDescription, members })
 
 
-    // Use $in to find all users whose email is in the members array
-    const users = await User.find({ email: { $in: members } });
-    console.log("Users found:", users);
+        // Use $in to find all users whose email is in the members array
+        const users = await User.find({ email: { $in: members } });
+        console.log("Users found:", users);
 
-    // If no valid users, return 404
-    if (users.length === 0) {
-        return res.status(404).json({
-        message: "No valid users found with the provided emails"
-        });
-    }
+        // If no valid users, return 404
+        if (users.length === 0) {
+            return res.status(404).json({
+            message: "No valid users found with the provided emails"
+            });
+        }
 
-    // Extract the ObjectIds of the found users
-    const memberIds = users.map((user) => user._id);
+        // Extract the ObjectIds of the found users
+        const memberIds = users.map((user) => user._id);
 
-    // Get the current user
-    console.log("CURRENT USER: ", req.oidc.user)
-    const curUserAuth0Id = req.oidc.user.sub;
-    const currentUser = await User.findOne({ auth0id: curUserAuth0Id });
-    const curUserId = currentUser?._id;
+        // Get the current user
+        console.log("CURRENT USER: ", req.oidc.user)
+        const curUserAuth0Id = req.oidc.user.sub;
+        const currentUser = await User.findOne({ auth0id: curUserAuth0Id });
+        const curUserId = currentUser?._id;
 
     // Create the new group document
     const newGroup = new Group({
@@ -80,28 +81,28 @@ const createGroup = async (req: any, res: Response) => {
     //     leader: memberIds[0],  // Assuming the first user is the leader
     // });
 
-    await newGroup.save();
-    console.log('Group created successfully:', newGroup);
+        await newGroup.save();
+        console.log('Group created successfully:', newGroup);
 
-    // Add group to the user's groups using populate
-    console.log("Pre-populate", newGroup)
-    const groupMembers = await newGroup.populate("members");
-    console.log("Post-populate", groupMembers)
-    for (const member of groupMembers.members as IUser[]) {
-        console.log("Member", member)
-        console.log("Member groups", member.groups)
-        member.groups.push(newGroup._id);
-        member.save();
-    }
+        // Add group to the user's groups using populate
+        console.log("Pre-populate", newGroup)
+        const groupMembers = await newGroup.populate("members");
+        console.log("Post-populate", groupMembers)
+        for (const member of groupMembers.members as IUser[]) {
+            console.log("Member", member)
+            member.groups.push(newGroup._id);
+            member.save();
+        }
 
-    return res.status(200).json({
-        message: "Group created successfully",
-        group: {
-        groupName,
-        groupDescription,
-        members,
-        },
-    })
+        return res.status(200).json({
+          message: "Group created successfully",
+          group: {
+            groupName,
+            groupDescription,
+            members,
+          },
+          groupId: newGroup._id,
+        });
     }
 
     // Controller for creating user if necessary
@@ -144,11 +145,40 @@ const createGroup = async (req: any, res: Response) => {
         res.oidc.login();  // Initiates Auth0 login
     };
 
-    const getUser = async (req: any, res: Response) => {
-        const { auth0id } = req.oidc.user.sub;
-        const user = await User.findOne({ auth0id });
-        res.status(200).json(user);
-    }
+    // Controller for sending invites
+    const sendInvite = async (req: Request, res: Response) => {
+      console.log("sendInvite called");
+      const { email, inviteLink, groupName, groupId } = req.body;
 
-export default { test, createGroup, createUser, getProfile, login, getUser }
-// export default { test, createGroup, }
+      // Validate request body
+      if (!email || !inviteLink || !groupName || !groupId) {
+        console.error("Invalid request body:", req.body);
+        return res.status(400).json({ message: "Invalid request body", email, inviteLink, groupName, groupId });
+      }
+
+      await sendEmailInvite(email, inviteLink, groupName, groupId);
+
+      try {
+        await sendEmailInvite(email, inviteLink, groupName, groupId);
+        res.status(200).json({ message: "Invite sent successfully" });
+      } catch (error) {
+        console.error("Error sending invite:", error);
+        res.status(500).json({ message: "Failed to send invite" });
+      }
+    };
+
+    const getUser = async (req: any, res: Response) => {
+      const { auth0id } = req.oidc.user.sub;
+      const user = await User.findOne({ auth0id });
+      res.status(200).json(user);
+    };
+
+export default {
+  test,
+  createGroup,
+  createUser,
+  getProfile,
+  login,
+  sendInvite,
+  getUser,
+};
