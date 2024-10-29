@@ -22,4 +22,7 @@ router.route('/login').get(allController.login);
 // Route for getting user information
 router.route('/current-user').get(requiresAuth(), allController.getUser);
 
+// Route for sending invites
+router.route("/send-invite").post(allController.sendInvite);
+
 export default router
