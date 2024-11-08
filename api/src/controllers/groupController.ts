@@ -3,7 +3,6 @@ import { User, IUser } from "../model/User"
 import { Group, IGroup } from "../model/Group"
 import { Expense, IExpense } from "../model/Expense"
 import mongoose from "mongoose"
-import { defaultIconPrefixCls } from "antd/es/config-provider"
 
 const getGroup = async (req: Request, res: Response) => {
     const { groupID } = req.params
