@@ -8,9 +8,7 @@ import Modal from "../components/Modal"
 import LoginButton from "../components/LoginButton"
 import Icon from "../components/Icon"
 
-import { IGroup } from "../../../api/src/model/Group"
-import { IExpense } from "../../../api/src/model/Expense"
-import { IUser } from "../../../api/src/model/User"
+import { IGroup, IExpense, IUser } from "../types"
 
 const Home = () => {
   const [isModal, setIsModal] = useState(false)
