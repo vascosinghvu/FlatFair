@@ -41,10 +41,8 @@ export const getGroup = async (req: Request, res: Response) => {
 export const getGroups = async (req: any, res: Response) => {
   // Get the current user
   // console.log("CURRENT USER: ", req.oidc.user)
-  const curUserAuth0Id = req.oidc.user.sub
-  const currentUser = await User.findOne({ auth0id: curUserAuth0Id }).populate(
-    "groups"
-  )
+  const { id } = req.params // Extract user ID from URL
+  const currentUser = await User.findOne({ auth0id: id }).populate("groups")
 
   // Find all groups where the current user is a member using populate on groups array
 
@@ -57,6 +55,7 @@ export const getGroups = async (req: any, res: Response) => {
 // Function to create a group
 export const createGroup = async (req: any, res: Response) => {
   console.log("Creating group")
+  const { id } = req.params // Extract user ID from URL
   const { groupName, groupDescription, members } = req.body //members are emails
 
   // Validate request body
@@ -90,9 +89,7 @@ export const createGroup = async (req: any, res: Response) => {
   const memberIds = users.map((user) => user._id)
 
   // Get the current user
-  console.log("CURRENT USER: ", req.oidc.user)
-  const curUserAuth0Id = req.oidc.user.sub
-  const currentUser = await User.findOne({ auth0id: curUserAuth0Id })
+  const currentUser = await User.findOne({ auth0id: id })
   const curUserId = currentUser?._id
 
   // Create the new group document

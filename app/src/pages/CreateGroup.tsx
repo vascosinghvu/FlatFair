@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom"
 import * as yup from "yup"
 import { Formik, Form, Field } from "formik"
 import navigate from "react-router-dom"
+import { User, useAuth0 } from "@auth0/auth0-react"
+import { IUser } from "../types"
 
 interface GroupFormValues {
   groupName: string
@@ -41,6 +43,8 @@ const CreateGroup = (): ReactElement => {
       ),
   })
 
+  const { user } = useAuth0() // Get current user details
+
   const handleSubmit = async (values: GroupFormValues, { resetForm }: any) => {
     setIsLoading(true)
 
@@ -53,7 +57,10 @@ const CreateGroup = (): ReactElement => {
 
     try {
       // Send POST request to the /create-group endpoint
-      const response = await api.post("/group/create-group", groupData);
+      const response = await api.post(
+        `/group/create-group/${(user as User).sub}`,
+        groupData
+      )
 
       console.log("Group created successfully:", response.data)
       const groupId = response.data.groupId
@@ -62,8 +69,8 @@ const CreateGroup = (): ReactElement => {
 
       // Send invite emails to members after successful group creation
       members.forEach(async (memberEmail) => {
-        const inviteLink = `https://flatfair.com/invite/${groupId}`;
-        console.log("here");
+        const inviteLink = `https://flatfair.com/invite/${groupId}`
+        console.log("here")
         const inviteResponse = await api.post("/user/send-invite", {
           email: memberEmail,
           inviteLink: inviteLink,
@@ -85,6 +92,7 @@ const CreateGroup = (): ReactElement => {
       )
     } finally {
       setIsLoading(false) // Reset loading state
+      console.log("here")
       navigate("/dashboard") // Redirect to the groups page
     }
   }
