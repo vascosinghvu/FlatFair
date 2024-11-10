@@ -25,6 +25,8 @@ const app: Application = express()
 const corsOptions = {
   origin: ['https://flat-fair-csac.vercel.app', 'http://localhost:3000'],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 app.use(cors(corsOptions))
 
@@ -67,6 +69,11 @@ const config = {
 // Auth0 middleware for handling authentication
 app.use(auth(config));
 
+// Add this before your routes
+app.use((req, res, next) => {
+    res.header('Content-Type', 'application/json');
+    next();
+});
 
 // Use the routes from groupPage.ts, prefixed with /group
 app.use('/group', groupRoutes)

@@ -168,9 +168,40 @@ const createGroup = async (req: any, res: Response) => {
     };
 
     const getUser = async (req: any, res: Response) => {
-      const { auth0id } = req.oidc.user.sub;
-      const user = await User.findOne({ auth0id });
-      res.status(200).json(user);
+        try {
+            if (!req.oidc.isAuthenticated()) {
+                return res.status(401).json({ 
+                    error: 'Not authenticated',
+                    isAuthenticated: false 
+                });
+            }
+
+            const auth0id = req.oidc.user.sub;
+            const user = await User.findOne({ auth0id });
+            
+            if (!user) {
+                return res.status(404).json({ 
+                    error: 'User not found',
+                    isAuthenticated: true 
+                });
+            }
+
+            res.status(200).json({
+                isAuthenticated: true,
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    groups: user.groups
+                }
+            });
+        } catch (error) {
+            console.error('Error in getUser:', error);
+            res.status(500).json({ 
+                error: 'Internal server error',
+                isAuthenticated: false 
+            });
+        }
     };
 
 export default {

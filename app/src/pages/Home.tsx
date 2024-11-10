@@ -17,29 +17,34 @@ const Home = () => {
 
   // Get user info from backend
   const [userInfo, setUserInfo] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchUserInfo = async () => {
         try {
-            const response = await fetch(`${API_URL}/curUserInfo/get-user`, {
-                method: 'GET', // GET request to retrieve data
-                credentials: 'include', // Include credentials (cookies, etc.)
+            const response = await fetch(`${API_URL}/curUserInfo`, {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
             });
 
             if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json(); // Parse the JSON response
-            console.log("User Info:", data);
-            // Store the response in a variable or state
-            setUserInfo(data.currentUser); // Assuming you're using state to store the info
-        } catch (error) {
-            console.error('Error fetching user info:', error);
+            const data = await response.json();
+            console.log("User info response:", data);
+            setUserInfo(data);
+        } catch (err) {
+            console.error("Error fetching user info:", err);
+            setError(err instanceof Error ? err.message : 'An error occurred');
         }
     };
 
-    fetchUserInfo(); // Call the fetch function inside useEffect
-  }, []); // Empty dependency array to run once on component mount
+    fetchUserInfo();
+  }, []);
 
   console.log("CURRENT USER: ", userInfo);
 
