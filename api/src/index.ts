@@ -1,91 +1,82 @@
-import express, { Request, Response, Application } from "express"
+import express, { Request, Response, NextFunction } from "express"
 import './definitionFile'
 import cors from "cors"
 import dbConnect from "./config/dbConnect"
-
-import { IGetUserAuthInfoRequest } from "./definitionFile.js"
-
-// import { setupAuth, ensureAuthenticated } from './auth'; // Import your auth setup
-import { NextFunction } from "express";
-import { auth, requiresAuth, Session } from 'express-openid-connect'
+import { auth, requiresAuth } from 'express-openid-connect'
 import session from "express-session"
-
 import routes from "./routes/allRoutes"
 import groupRoutes from "./routes/groupPageRoutes"
 import curUserRoutes from "./routes/curUserRoutes"
-// import { auth } from "express-openid-connect";
 
+// Define custom interface for request with oidc
+interface AuthRequest extends Request {
+    oidc?: {
+        isAuthenticated(): boolean;
+        user?: any;
+    };
+}
 
 dbConnect()
 
-const app: Application = express()
-
+const app = express()
 
 // CORS options
 const corsOptions = {
-  origin: ['https://flat-fair-csac.vercel.app', 'http://localhost:3000'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: ['https://flat-fair-csac.vercel.app', 'http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 };
+
 app.use(cors(corsOptions))
 
-app.options('*', cors({
-  origin: ['https://flat-fair-csac.vercel.app', 'http://localhost:3000'],
-  credentials: true,
-}));
+app.options('*', cors(corsOptions));
 
-app.use(express.json()) // To parse JSON bodies
-// const port = process.env.PORT || 8000
+app.use(express.json())
 const port = 8000
 
 // Setup express-session middleware
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-      secure: false, // Set true if using HTTPS
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-  }
+    secret: process.env.SESSION_SECRET || 'your-secret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+    }
 }));
 
 // Auth0 configuration
 const config = {
-  authRequired: false,
-  auth0Logout: true,
-  secret: process.env.SESSION_SECRET || 'your-secret',
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
-  clientID: process.env.AUTH0_CLIENT_ID || 'your-client-id',
-  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}` || 'your-auth0-domain',
-  clientSecret: process.env.AUTH0_CLIENT_SECRET || 'your-client-secret',
-  routes: {
-      callback: '/callback',
-      postLogoutRedirect: process.env.REACT_APP_API_URL || 'http://localhost:3000',
-  },
+    authRequired: false,
+    auth0Logout: true,
+    secret: process.env.SESSION_SECRET || 'your-secret',
+    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
+    clientID: process.env.AUTH0_CLIENT_ID || 'your-client-id',
+    issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}` || 'your-auth0-domain',
+    clientSecret: process.env.AUTH0_CLIENT_SECRET || 'your-client-secret',
+    routes: {
+        callback: '/callback',
+        postLogoutRedirect: process.env.REACT_APP_API_URL || 'http://localhost:3000',
+    },
 };
 
-// Auth0 middleware for handling authentication
 app.use(auth(config));
 
-// Add this before your routes
-app.use((req, res, next) => {
+// Content-Type middleware
+app.use((_req: Request, res: Response, next: NextFunction) => {
     res.header('Content-Type', 'application/json');
     next();
 });
 
-// Use the routes from groupPage.ts, prefixed with /group
+// Routes
 app.use('/group', groupRoutes)
-
-// Use the routes from curUserInfo.ts, prefixed with /curUserInfo
 app.use('/curUserInfo', curUserRoutes)
-
-// Use the routes from allRoutes.ts
 app.use(routes)
 
 // Auth0 login route
-app.get('/login', (req, res) => {
+app.get('/login', (_req: Request, res: Response) => {
     console.log('Login route hit');
     try {
         const returnTo = encodeURIComponent(process.env.REACT_APP_API_URL || 'http://localhost:3000');
@@ -104,7 +95,15 @@ app.get('/login', (req, res) => {
     }
 });
 
-// Start the server
+// Error handling middleware
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    console.error(err);
+    res.status(500).json({
+        error: 'Internal Server Error',
+        message: err.message
+    });
+});
+
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`)
+    console.log(`Server running at http://localhost:${port}`)
 })

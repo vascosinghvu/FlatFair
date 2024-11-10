@@ -22,7 +22,10 @@ const Home = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
         try {
+            console.log('Attempting to fetch from:', `${API_URL}/curUserInfo`);
+            
             const response = await fetch(`${API_URL}/curUserInfo`, {
+                method: 'GET',
                 credentials: 'include',
                 headers: {
                     'Accept': 'application/json',
@@ -30,13 +33,19 @@ const Home = () => {
                 },
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            // Log the raw response
+            const responseText = await response.text();
+            console.log('Raw API Response:', responseText);
 
-            const data = await response.json();
-            console.log("User info response:", data);
-            setUserInfo(data);
+            // Try to parse as JSON only if it's not HTML
+            if (!responseText.trim().startsWith('<!DOCTYPE')) {
+                const data = JSON.parse(responseText);
+                console.log("Parsed user info:", data);
+                setUserInfo(data);
+            } else {
+                console.error('Received HTML instead of JSON');
+                throw new Error('Received HTML instead of JSON');
+            }
         } catch (err) {
             console.error("Error fetching user info:", err);
             setError(err instanceof Error ? err.message : 'An error occurred');
@@ -46,7 +55,7 @@ const Home = () => {
     fetchUserInfo();
   }, []);
 
-  console.log("CURRENT USER: ", userInfo);
+  console.log('Current render state:', { userInfo, error });
 
   interface UserTransaction {
     timestamp: Date
