@@ -1,7 +1,8 @@
-import { Request } from "express"
-import { IUser } from "./model/User";
-export interface IGetUserAuthInfoRequest extends Request {
+import { Request } from 'express';
+
+export interface AuthRequest extends Request {
     oidc?: {
-        user?: IUser; // Using the appropriate UserInfo type from the library
+        isAuthenticated(): boolean;
+        user?: any;
     };
 }

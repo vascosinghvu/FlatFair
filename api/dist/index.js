@@ -37,7 +37,7 @@ app.get('/logout', (req, res) => {
         if (err) {
             return res.status(500).json({ message: 'Error logging out' });
         }
-        res.redirect(`https://${process.env.AUTH0_DOMAIN}/v2/logout?returnTo=http://localhost:3000/`);
+        res.redirect(`https://${process.env.AUTH0_DOMAIN}/v2/logout?returnTo=${process.env.REACT_APP_API_URL || 'http://localhost:3000'}`);
     });
 });
 // Start the server

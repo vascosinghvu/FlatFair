@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react"
 
 const Profile: React.FC = () => {
-    const [profile, setProfile] = useState<any>(null);
-    console.log(profile);
+  const [profile, setProfile] = useState<any>(null)
+  console.log(profile)
 
     useEffect(() => {
         fetch('http://localhost:8000/user/profile', {
@@ -18,16 +18,10 @@ const Profile: React.FC = () => {
     //
     return (
         <div>
-            {profile ? (
-                <div>
-                    <h1>Profile</h1>
-                    <pre>{JSON.stringify(profile, null, 2)}</pre>
-                </div>
-            ) : (
-                <p>Not logged in</p>
-            )}
+          <h1>Profile</h1>
+          <pre>{JSON.stringify(profile, null, 2)}</pre>
         </div>
-    );
-};
+      );
+    }
 
-export default Profile;
+export default Profile
