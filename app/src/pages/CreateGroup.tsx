@@ -53,7 +53,7 @@ const CreateGroup = (): ReactElement => {
 
     try {
       // Send POST request to the /create-group endpoint
-      const response = await api.post("/create-group", groupData);
+      const response = await api.post("/group/create-group", groupData);
 
       console.log("Group created successfully:", response.data);
       const groupId = response.data.groupId;
@@ -64,7 +64,7 @@ const CreateGroup = (): ReactElement => {
       members.forEach(async (memberEmail) => {
         const inviteLink = `https://flatfair.com/invite/${groupId}`;
         console.log("here");
-        const inviteResponse = await api.post("/send-invite", {
+        const inviteResponse = await api.post("/user/send-invite", {
           email: memberEmail,
           inviteLink: inviteLink,
           groupName: values.groupName,

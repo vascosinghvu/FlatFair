@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 // import dotenv from "dotenv"
 // import path from "path"
-import { connect } from "http2"
+// import { connect } from "http2"
 
 require("dotenv").config()
 

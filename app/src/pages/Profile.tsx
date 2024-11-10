@@ -5,7 +5,7 @@ const Profile: React.FC = () => {
     console.log(profile);
 
     useEffect(() => {
-        fetch('http://localhost:8000/profile', {
+        fetch('http://localhost:8000/user/profile', {
             credentials: 'include', // Ensures cookies are included
         })
             .then((res) => {

@@ -144,32 +144,32 @@ const test = async (req: Request, res: Response) => {
 // }
 
 // Controller for sending invites
-const sendInvite = async (req: Request, res: Response) => {
-  console.log("sendInvite called")
-  const { email, inviteLink, groupName, groupId } = req.body
+// const sendInvite = async (req: Request, res: Response) => {
+//   console.log("sendInvite called")
+//   const { email, inviteLink, groupName, groupId } = req.body
 
-  // Validate request body
-  if (!email || !inviteLink || !groupName || !groupId) {
-    console.error("Invalid request body:", req.body)
-    return res.status(400).json({
-      message: "Invalid request body",
-      email,
-      inviteLink,
-      groupName,
-      groupId,
-    })
-  }
+//   // Validate request body
+//   if (!email || !inviteLink || !groupName || !groupId) {
+//     console.error("Invalid request body:", req.body)
+//     return res.status(400).json({
+//       message: "Invalid request body",
+//       email,
+//       inviteLink,
+//       groupName,
+//       groupId,
+//     })
+//   }
 
-  await sendEmailInvite(email, inviteLink, groupName, groupId)
+//   await sendEmailInvite(email, inviteLink, groupName, groupId)
 
-  try {
-    await sendEmailInvite(email, inviteLink, groupName, groupId)
-    res.status(200).json({ message: "Invite sent successfully" })
-  } catch (error) {
-    console.error("Error sending invite:", error)
-    res.status(500).json({ message: "Failed to send invite" })
-  }
-}
+//   try {
+//     await sendEmailInvite(email, inviteLink, groupName, groupId)
+//     res.status(200).json({ message: "Invite sent successfully" })
+//   } catch (error) {
+//     console.error("Error sending invite:", error)
+//     res.status(500).json({ message: "Failed to send invite" })
+//   }
+// }
 
 // const getUser = async (req: any, res: Response) => {
 //   const { auth0id } = req.oidc.user.sub
@@ -183,6 +183,6 @@ export default {
   //   createUser,
   //   getProfile,
   //   login,
-  sendInvite,
+//   sendInvite,
   //   getUser,
 }

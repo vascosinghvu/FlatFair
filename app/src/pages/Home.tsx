@@ -19,7 +19,7 @@ const Home = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
         try {
-            const response = await fetch('http://localhost:8000/curUserInfo/get-user', {
+            const response = await fetch('http://localhost:8000/user/get-user', {
                 method: 'GET', // GET request to retrieve data
                 credentials: 'include', // Include credentials (cookies, etc.)
             });

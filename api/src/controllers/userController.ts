@@ -3,6 +3,8 @@ import { User, IUser } from "../model/User"
 import { Group, IGroup } from "../model/Group"
 import { Expense, IExpense } from "../model/Expense"
 import mongoose from "mongoose"
+import sendEmailInvite from "../config/sendgridInvite"
+
 
 // Get the current user, with populated groups and expenses
 const getUser = async (req: any, res: Response) => {
@@ -65,6 +67,34 @@ const login = (req: Request, res: any) => {
   res.oidc.login() // Initiates Auth0 login
 }
 
+// Controller for inviting a new user to a group
+const sendInvite = async (req: Request, res: Response) => {
+    console.log("sendInvite called")
+    const { email, inviteLink, groupName, groupId } = req.body
+  
+    // Validate request body
+    if (!email || !inviteLink || !groupName || !groupId) {
+      console.error("Invalid request body:", req.body)
+      return res.status(400).json({
+        message: "Invalid request body",
+        email,
+        inviteLink,
+        groupName,
+        groupId,
+      })
+    }
+  
+    await sendEmailInvite(email, inviteLink, groupName, groupId)
+  
+    try {
+      await sendEmailInvite(email, inviteLink, groupName, groupId)
+      res.status(200).json({ message: "Invite sent successfully" })
+    } catch (error) {
+      console.error("Error sending invite:", error)
+      res.status(500).json({ message: "Failed to send invite" })
+    }
+  }
+
 // const getUser = async (req: any, res: Response) => {
 //   const { auth0id } = req.oidc.user.sub
 //   const user = await User.findOne({ auth0id })
@@ -77,4 +107,5 @@ export default {
   createUser,
   getProfile,
   login,
+  sendInvite,
 }

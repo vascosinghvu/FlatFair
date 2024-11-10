@@ -9,7 +9,10 @@ router
   .route("/get-group/:groupID")
   .get(requiresAuth(), groupController.getGroup)
 
+// router.route("/add-expense").post(requiresAuth(), groupController.createExpense)
+
 // router.route('/create-group').post(allController.createGroup)
-router.route("/create-group").post(requiresAuth(), groupController.createGroup)
+router.route('/create-group').post(requiresAuth(), groupController.createGroup)
+
 
 export default router
