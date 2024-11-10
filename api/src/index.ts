@@ -77,6 +77,26 @@ app.use('/curUserInfo', curUserRoutes)
 // Use the routes from allRoutes.ts
 app.use(routes)
 
+// Auth0 login route
+app.get('/login', (req, res) => {
+    console.log('Login route hit');
+    try {
+        const returnTo = encodeURIComponent(process.env.REACT_APP_API_URL || 'http://localhost:3000');
+        const loginUrl = `https://${process.env.AUTH0_DOMAIN}/authorize?` +
+            `response_type=code&` +
+            `client_id=${process.env.AUTH0_CLIENT_ID || 'your-client-id'}&` +
+            `redirect_uri=${encodeURIComponent(process.env.AUTH0_CALLBACK_URL || 'http://localhost:8000/callback')}&` +
+            `scope=openid%20profile%20email&` +
+            `returnTo=${returnTo}`;
+        
+        console.log('Redirecting to:', loginUrl);
+        res.redirect(loginUrl);
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Authentication failed' });
+    }
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`)
