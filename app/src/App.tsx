@@ -6,6 +6,7 @@ import Profile from "./pages/Profile"
 import Group from "./pages/Group"
 import Logout from "./pages/Logout"
 import Landing from "./pages/Landing"
+import Middle from "./pages/Middle"
 
 function App(): ReactElement {
   return (
@@ -17,6 +18,7 @@ function App(): ReactElement {
         <Route path="/profile" element={<Profile />} />
         <Route path="/group/:groupid" element={<Group />} />
         <Route path="/logout" element={<Logout />} />
+        <Route path="/middle" element={<Middle />} />
       </Routes>
     </div>
   )

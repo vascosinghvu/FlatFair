@@ -12,9 +12,8 @@ const test = async (req: Request, res: Response) => {
 // Get the current user, with populated groups and expenses
 const getUser = async (req: any, res: Response) => {
   // Get the current user
-  // console.log("CURRENT USER: ", req.oidc.user)
-  const curUserAuth0Id = req.oidc.user.sub
-  const currentUser = await User.findOne({ auth0id: curUserAuth0Id })
+  const { id } = req.params
+  const currentUser = await User.findOne({ auth0id: id })
     .populate({
       path: "groups", // First, populate the 'groups' field
       populate: {
@@ -66,11 +65,11 @@ const createUser = async (req: Request, res: Response) => {
   }
 }
 
-// Controller for getting user profile
-const getProfile = (req: any, res: Response) => {
-  console.log("Getting profile")
-  res.json(req.oidc.user) // Returns user information if logged in
-}
+// // Controller for getting user profile
+// const getProfile = (req: any, res: Response) => {
+//   console.log("Getting profile")
+//   res.json(req.oidc.user) // Returns user information if logged in
+// }
 
 // Controller for initiating Auth0 login
 const login = (req: Request, res: any) => {
@@ -116,7 +115,7 @@ const sendInvite = async (req: Request, res: Response) => {
 export default {
   getUser,
   createUser,
-  getProfile,
+  // getProfile,
   login,
   sendInvite,
   test,

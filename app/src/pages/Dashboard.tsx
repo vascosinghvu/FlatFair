@@ -6,6 +6,8 @@ import AsyncSubmit from "../components/AsyncSubmit"
 import { useNavigate } from "react-router-dom"
 import Modal from "../components/Modal"
 import Icon from "../components/Icon"
+import { api } from "../api"
+import { User, useAuth0 } from "@auth0/auth0-react"
 
 import { IGroup, IExpense, IUser } from "../types"
 // import { API_URL } from "../config"
@@ -13,16 +15,14 @@ import { IGroup, IExpense, IUser } from "../types"
 const Dashboard = () => {
   const [isModal, setIsModal] = useState(false)
   const navigate = useNavigate()
+  const { user } = useAuth0() // Get current user details
 
   // Get user info from backend
   const [userInfo, setUserInfo] = useState<any>(null)
   useEffect(() => {
     const fetchUserInfo = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/user/get-user', {
-                method: 'GET', // GET request to retrieve data
-                credentials: 'include', // Include credentials (cookies, etc.)
-            });
+      try {
+        const response = await api.get(`/user/get-user/:${(user as User).sub}`)
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`)
