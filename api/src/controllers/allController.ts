@@ -130,7 +130,7 @@ const createGroup = async (req: any, res: Response) => {
             }
 
         }
-        res.redirect('http://localhost:3000');
+        res.redirect(process.env.REACT_APP_API_URL || 'http://localhost:3000');
     };
 
     // Controller for getting user profile

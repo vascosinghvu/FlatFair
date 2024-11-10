@@ -54,13 +54,13 @@ const config = {
   authRequired: false,
   auth0Logout: true,
   secret: process.env.SESSION_SECRET || 'your-secret',
-  baseURL: 'http://localhost:8000', // Redirect to React app on login
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
   clientID: process.env.AUTH0_CLIENT_ID || 'your-client-id',
   issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}` || 'your-auth0-domain',
   clientSecret: process.env.AUTH0_CLIENT_SECRET || 'your-client-secret',
   routes: {
       callback: '/callback',
-      postLogoutRedirect: 'http://localhost:3000', // Redirect to React app on logout
+      postLogoutRedirect: process.env.REACT_APP_API_URL || 'http://localhost:3000',
   },
 };
 
