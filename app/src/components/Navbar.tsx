@@ -1,8 +1,10 @@
-import react, { type ReactElement } from "react"
+import React, { type ReactElement } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAuth0 } from "@auth0/auth0-react"
 
 const Navbar = (): ReactElement => {
   const navigate = useNavigate()
+  const { logout } = useAuth0() // Get logout from useAuth0
 
   return (
     <>
@@ -24,20 +26,12 @@ const Navbar = (): ReactElement => {
             <div
               className="Navbar-body-link Margin-right--20"
               onClick={() => {
-                // handleLogout()
-                navigate("/logout")
+                logout() // Log out of Auth0
+                navigate("/login") // Redirect after logout
               }}
             >
               Logout
             </div>
-            {/* <div
-              className="Navbar-body-link"
-              onClick={() => {
-                navigate("/game")
-              }}
-            >
-              Game
-            </div> */}
           </div>
         </div>
       </div>
