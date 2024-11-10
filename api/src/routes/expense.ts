@@ -12,6 +12,8 @@ router.post("/expense/add-expense", async (req, res) => {
 }),
   requiresAuth()
 
-// router.route('/add-expense').post(requiresAuth(), groupPageController.createExpense)
+router
+  .route("/add-expense")
+  .post(requiresAuth(), expenseController.createExpense)
 
 export default router
