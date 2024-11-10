@@ -1,13 +1,9 @@
 import react, { type ReactElement } from "react"
 import { useNavigate } from "react-router-dom"
-import { API_URL } from '../config';
 
 const Navbar = (): ReactElement => {
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    window.location.href = `${API_URL}/logout`;
-};
   return (
     <>
       <div className="Navbar">
@@ -20,7 +16,7 @@ const Navbar = (): ReactElement => {
             <div
               className="Navbar-body-link Margin-right--20"
               onClick={() => {
-                navigate("/home")
+                navigate("/dashboard")
               }}
             >
               Home

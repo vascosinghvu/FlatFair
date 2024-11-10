@@ -9,58 +9,65 @@ import { useParams } from "react-router-dom"
 import { IGroup, IExpense, IUser } from "../types"
 import Icon from "../components/Icon"
 import { Button } from "react-bootstrap"
-import { API_URL } from '../config';
 
 const Group = () => {
   const { groupid } = useParams()
-  
+
   // Get group data from the backend
   // Get user info from backend
-  const [groupInfo, setGroupInfo] = useState<any>(null);
+  const [groupInfo, setGroupInfo] = useState<any>(null)
   const [memberMap, setMemberMap] = useState<any>({})
   const [memberInitialValues, setMemberInitialValues] = useState<any>([])
   useEffect(() => {
     const fetchUserInfo = async () => {
-        try {
-            const response = await fetch(`${API_URL}/group/get-group/${groupid}`, {
-                method: 'GET', // GET request to retrieve data
-                credentials: 'include', // Include credentials (cookies, etc.)
-            });
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/group/get-group/${groupid}`,
+          {
+            method: "GET", // GET request to retrieve data
+            credentials: "include", // Include credentials (cookies, etc.)
+          }
+        )
 
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-
-            const data = await response.json(); // Parse the JSON response
-            console.log("Group Info:", data);
-            // Store the response in a variable or state
-            setGroupInfo(data.group); // Assuming you're using state to store the info
-            setMemberInitialValues(data.group.members.map((member: any) => ({
-              name: member.name,
-              selected: false,
-              splitValue: undefined,
-              id: member._id,
-            })))
-
-            setMemberMap(() => {
-              const groupMembers: IUser[] = data.group.members
-              return groupMembers.reduce<{ [name: string]: string }>((map, user) => {
-                const username = user.name as string;
-                const userID = user._id as string;
-                map[username] = userID;
-                return map;
-              }, {});
-          });
-        } catch (error) {
-            console.error('Error fetching user info:', error);
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`)
         }
-    };
 
-    fetchUserInfo(); // Call the fetch function inside useEffect
-  }, []); // Empty dependency array to run once on component mount
+        const data = await response.json() // Parse the JSON response
+        console.log("Group Info:", data)
+        // Store the response in a variable or state
+        setGroupInfo(data.group) // Assuming you're using state to store the info
+        setMemberInitialValues(
+          data.group.members.map((member: any) => ({
+            name: member.name,
+            selected: false,
+            splitValue: undefined,
+            id: member._id,
+          }))
+        )
 
-  console.log("CURRENT GROUP: ", groupInfo);
-  
+        setMemberMap(() => {
+          const groupMembers: IUser[] = data.group.members
+          return groupMembers.reduce<{ [name: string]: string }>(
+            (map, user) => {
+              const username = user.name as string
+              const userID = user._id as string
+              map[username] = userID
+              return map
+            },
+            {}
+          )
+        })
+      } catch (error) {
+        console.error("Error fetching user info:", error)
+      }
+    }
+
+    fetchUserInfo() // Call the fetch function inside useEffect
+  }, []) // Empty dependency array to run once on component mount
+
+  console.log("CURRENT GROUP: ", groupInfo)
+
   const [isModal, setIsModal] = useState(false)
   const [isEditModal, setEditModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -74,12 +81,11 @@ const Group = () => {
     item: "",
     cost: 0,
     date: "",
-    members: memberInitialValues
-      
-      // { name: "John", selected: false, splitValue: undefined },
-      // { name: "Jane", selected: false, splitValue: undefined },
-      // { name: "Doe", selected: false, splitValue: undefined },
-    ,
+    members: memberInitialValues,
+
+    // { name: "John", selected: false, splitValue: undefined },
+    // { name: "Jane", selected: false, splitValue: undefined },
+    // { name: "Doe", selected: false, splitValue: undefined },
   }
 
   const validationSchema = yup.object().shape({
@@ -148,14 +154,17 @@ const Group = () => {
 
       // Send POST request to the /group/add-expense endpoint
       // const response = await api.post("/group/add-expense", finalData)
-      const response = await fetch(`${API_URL}/group/add-expense`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(finalData),
-      })
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/group/add-expense`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(finalData),
+        }
+      )
       console.log("Expense logged successfully:", response)
 
       setSuccess(true)
@@ -374,33 +383,35 @@ const Group = () => {
                       name="members"
                       render={() => (
                         <div className="Flex Flex-column">
-                          {values.members.map((member: IUser, index: number) => (
-                            <div key={index} className="Flex Flex-column">
-                              <div className="Flex-row Margin-y--10">
-                                <Field
-                                  type="checkbox"
-                                  name={`members[${index}].selected`}
-                                  checked={values.members[index].selected}
-                                />
-                                {member.name}
-                              </div>
-
-                              {/* Conditionally show inputs based on selection */}
-                              {values.members[index].selected &&
-                                selection !== "Equally" && (
+                          {values.members.map(
+                            (member: IUser, index: number) => (
+                              <div key={index} className="Flex Flex-column">
+                                <div className="Flex-row Margin-y--10">
                                   <Field
-                                    className="Form-input-box"
-                                    type="number"
-                                    name={`members[${index}].splitValue`}
-                                    placeholder={
-                                      selection === "By Percent"
-                                        ? "Enter %"
-                                        : "Enter amount"
-                                    }
+                                    type="checkbox"
+                                    name={`members[${index}].selected`}
+                                    checked={values.members[index].selected}
                                   />
-                                )}
-                            </div>
-                          ))}
+                                  {member.name}
+                                </div>
+
+                                {/* Conditionally show inputs based on selection */}
+                                {values.members[index].selected &&
+                                  selection !== "Equally" && (
+                                    <Field
+                                      className="Form-input-box"
+                                      type="number"
+                                      name={`members[${index}].splitValue`}
+                                      placeholder={
+                                        selection === "By Percent"
+                                          ? "Enter %"
+                                          : "Enter amount"
+                                      }
+                                    />
+                                  )}
+                              </div>
+                            )
+                          )}
                         </div>
                       )}
                     />
@@ -465,62 +476,73 @@ const Group = () => {
         <div className="row d-flex">
           <div className="col-lg-3">
             <div className="Group-header">Members</div>
-            {groupInfo && groupInfo.members.map((member: any, index: number) => (
-              <div key={member._id} className="Card Flex Flex-row Margin-bottom--20 Flex-row--verticallyCentered">
-                <div className="Purchase-item">
+            {groupInfo &&
+              groupInfo.members.map((member: any, index: number) => (
+                <div
+                  key={member._id}
+                  className="Card Flex Flex-row Margin-bottom--20 Flex-row--verticallyCentered"
+                >
+                  <div className="Purchase-item">
+                    <div
+                      className={`Group-letter Margin-right--10 Background-color--${
+                        member.role === "Admin" ? "purple" : "maroon"
+                      }-1000`}
+                    >
+                      {member.name.charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+                  <div key={index}>
+                    {member.name}
+                    <div className="Text-color--dark-700 Text-fontSize--14">
+                      {member.role}
+                    </div>
+                  </div>
                   <div
-                    className={`Group-letter Margin-right--10 Background-color--${
-                      member.role === "Admin" ? "purple" : "maroon"
-                    }-1000`}
+                    className="Group-icon"
+                    onClick={() => setEditModal(true)}
                   >
-                    {member.name.charAt(0).toUpperCase()}
+                    <Icon glyph="ellipsis-v" />
                   </div>
                 </div>
-                <div key={index}>
-                  {member.name}
-                  <div className="Text-color--dark-700 Text-fontSize--14">
-                    {member.role}
-                  </div>
-                </div>
-                <div className="Group-icon" onClick={() => setEditModal(true)}>
-                  <Icon glyph="ellipsis-v" />
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
           <div className="col-lg-6">
             <div className="Group-header">Group Purchase History</div>
-            {groupInfo && groupInfo.expenses.map((transaction: any, index: number) => (
-              <div key={index} className="Card Purchase">
-                <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
-                  <div className="Purchase-item " style={{ width: 75 }}>
-                    {formatTime(transaction.date)}
-                  </div>
-                  <div className="Purchase-item Padding-x--20">
-                    <div className="Purchase-item-icon">
-                      {console.log("TRANSACTION:", transaction.createdBy.name)}
-                      {transaction.createdBy.name.charAt(0).toUpperCase()}
+            {groupInfo &&
+              groupInfo.expenses.map((transaction: any, index: number) => (
+                <div key={index} className="Card Purchase">
+                  <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
+                    <div className="Purchase-item " style={{ width: 75 }}>
+                      {formatTime(transaction.date)}
+                    </div>
+                    <div className="Purchase-item Padding-x--20">
+                      <div className="Purchase-item-icon">
+                        {console.log(
+                          "TRANSACTION:",
+                          transaction.createdBy.name
+                        )}
+                        {transaction.createdBy.name.charAt(0).toUpperCase()}
+                      </div>
+                    </div>
+                    <div className="Purchase-item">
+                      {transaction.createdBy.name}
+                      <div className="Purchase-item-subtitle">
+                        {transaction && transaction.description}
+                      </div>
                     </div>
                   </div>
-                  <div className="Purchase-item">
-                    {transaction.createdBy.name}
-                    <div className="Purchase-item-subtitle">
-                      {transaction && transaction.description}
-                    </div>
-                  </div>
-                </div>
 
-                <div className="Purchase-item">${transaction.amount}</div>
-                <div
-                  className={`Badge Badge-color--${
-                    transaction.status === "Pending" ? "yellow" : "purple"
-                  }-1000 Margin-left--20`}
-                  style={{ width: 100 }}
-                >
-                  {transaction.status}
+                  <div className="Purchase-item">${transaction.amount}</div>
+                  <div
+                    className={`Badge Badge-color--${
+                      transaction.status === "Pending" ? "yellow" : "purple"
+                    }-1000 Margin-left--20`}
+                    style={{ width: 100 }}
+                  >
+                    {transaction.status}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
             <div
               onClick={() => {
                 setIsModal(true)

@@ -5,57 +5,45 @@ import Navbar from "../components/Navbar"
 import AsyncSubmit from "../components/AsyncSubmit"
 import { useNavigate } from "react-router-dom"
 import Modal from "../components/Modal"
-import LoginButton from "../components/LoginButton"
 import Icon from "../components/Icon"
 
 import { IGroup, IExpense, IUser } from "../types"
-import { API_URL } from '../config';
+// import { API_URL } from "../config"
 
-const Home = () => {
+const Dashboard = () => {
   const [isModal, setIsModal] = useState(false)
   const navigate = useNavigate()
 
   // Get user info from backend
-  const [userInfo, setUserInfo] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-
+  const [userInfo, setUserInfo] = useState<any>(null)
   useEffect(() => {
     const fetchUserInfo = async () => {
-        try {
-            console.log('Attempting to fetch from:', `${API_URL}/curUserInfo`);
-            
-            const response = await fetch(`${API_URL}/curUserInfo`, {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
-            });
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/user/get-user`,
+          {
+            method: "GET", // GET request to retrieve data
+            credentials: "include", // Include credentials (cookies, etc.)
+          }
+        )
 
-            // Log the raw response
-            const responseText = await response.text();
-            console.log('Raw API Response:', responseText);
-
-            // Try to parse as JSON only if it's not HTML
-            if (!responseText.trim().startsWith('<!DOCTYPE')) {
-                const data = JSON.parse(responseText);
-                console.log("Parsed user info:", data);
-                setUserInfo(data);
-            } else {
-                console.error('Received HTML instead of JSON');
-                throw new Error('Received HTML instead of JSON');
-            }
-        } catch (err) {
-            console.error("Error fetching user info:", err);
-            setError(err instanceof Error ? err.message : 'An error occurred');
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`)
         }
-    };
 
-    fetchUserInfo();
-  }, []);
+        const data = await response.json() // Parse the JSON response
+        console.log("User Info:", data)
+        // Store the response in a variable or state
+        setUserInfo(data.currentUser) // Assuming you're using state to store the info
+      } catch (error) {
+        console.error("Error fetching user info:", error)
+      }
+    }
 
-  console.log('Current render state:', { userInfo, error });
+    fetchUserInfo() // Call the fetch function inside useEffect
+  }, []) // Empty dependency array to run once on component mount
+
+  console.log("CURRENT USER: ", userInfo)
 
   interface UserTransaction {
     timestamp: Date
@@ -221,25 +209,29 @@ const Home = () => {
               <div className="Block-subtitle"> Manage your groups.</div>
               {console.log("CURRENT USER INFO:", userInfo)}
               {console.log("CURRENT USER GROUPS:", userInfo?.groups)}
-              {userInfo && userInfo.groups && userInfo.groups.map((group: IGroup, index: number) => (
-                <div key={index} className="Home-group">
-                  <div className="Home-group-title">{group.groupName}</div>
-                  <div className="Home-group-body">
-                    {group.members.map((member) => {
-                      const user = member as IUser
-                      return user.name;
-                    }).join(", ")}
+              {userInfo &&
+                userInfo.groups &&
+                userInfo.groups.map((group: IGroup, index: number) => (
+                  <div key={index} className="Home-group">
+                    <div className="Home-group-title">{group.groupName}</div>
+                    <div className="Home-group-body">
+                      {group.members
+                        .map((member) => {
+                          const user = member as IUser
+                          return user.name
+                        })
+                        .join(", ")}
+                    </div>
+                    <div
+                      className="Button Button--hollow Button-color--maroon-1000"
+                      onClick={() => {
+                        navigate(`/group/${group._id}`)
+                      }}
+                    >
+                      Manage Group
+                    </div>
                   </div>
-                  <div
-                    className="Button Button--hollow Button-color--maroon-1000"
-                    onClick={() => {
-                      navigate(`/group/${group._id}`)
-                    }}
-                  >
-                    Manage Group
-                  </div>
-                </div>
-              ))}
+                ))}
 
               <div
                 onClick={() => {
@@ -253,9 +245,8 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <LoginButton />
     </>
   )
 }
 
-export default Home
+export default Dashboard
