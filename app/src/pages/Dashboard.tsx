@@ -9,39 +9,42 @@ import LoginButton from "../components/LoginButton"
 import Icon from "../components/Icon"
 
 import { IGroup, IExpense, IUser } from "../types"
-import { API_URL } from '../config';
+// import { API_URL } from "../config"
 
-const Home = () => {
+const Dashboard = () => {
   const [isModal, setIsModal] = useState(false)
   const navigate = useNavigate()
 
   // Get user info from backend
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<any>(null)
   useEffect(() => {
     const fetchUserInfo = async () => {
-        try {
-            const response = await fetch(`${API_URL}/curUserInfo/get-user`, {
-                method: 'GET', // GET request to retrieve data
-                credentials: 'include', // Include credentials (cookies, etc.)
-            });
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/user/get-user`,
+          {
+            method: "GET", // GET request to retrieve data
+            credentials: "include", // Include credentials (cookies, etc.)
+          }
+        )
 
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-
-            const data = await response.json(); // Parse the JSON response
-            console.log("User Info:", data);
-            // Store the response in a variable or state
-            setUserInfo(data.currentUser); // Assuming you're using state to store the info
-        } catch (error) {
-            console.error('Error fetching user info:', error);
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`)
         }
-    };
 
-    fetchUserInfo(); // Call the fetch function inside useEffect
-  }, []); // Empty dependency array to run once on component mount
+        const data = await response.json() // Parse the JSON response
+        console.log("User Info:", data)
+        // Store the response in a variable or state
+        setUserInfo(data.currentUser) // Assuming you're using state to store the info
+      } catch (error) {
+        console.error("Error fetching user info:", error)
+      }
+    }
 
-  console.log("CURRENT USER: ", userInfo);
+    fetchUserInfo() // Call the fetch function inside useEffect
+  }, []) // Empty dependency array to run once on component mount
+
+  console.log("CURRENT USER: ", userInfo)
 
   interface UserTransaction {
     timestamp: Date
@@ -207,25 +210,29 @@ const Home = () => {
               <div className="Block-subtitle"> Manage your groups.</div>
               {console.log("CURRENT USER INFO:", userInfo)}
               {console.log("CURRENT USER GROUPS:", userInfo?.groups)}
-              {userInfo && userInfo.groups && userInfo.groups.map((group: IGroup, index: number) => (
-                <div key={index} className="Home-group">
-                  <div className="Home-group-title">{group.groupName}</div>
-                  <div className="Home-group-body">
-                    {group.members.map((member) => {
-                      const user = member as IUser
-                      return user.name;
-                    }).join(", ")}
+              {userInfo &&
+                userInfo.groups &&
+                userInfo.groups.map((group: IGroup, index: number) => (
+                  <div key={index} className="Home-group">
+                    <div className="Home-group-title">{group.groupName}</div>
+                    <div className="Home-group-body">
+                      {group.members
+                        .map((member) => {
+                          const user = member as IUser
+                          return user.name
+                        })
+                        .join(", ")}
+                    </div>
+                    <div
+                      className="Button Button--hollow Button-color--maroon-1000"
+                      onClick={() => {
+                        navigate(`/group/${group._id}`)
+                      }}
+                    >
+                      Manage Group
+                    </div>
                   </div>
-                  <div
-                    className="Button Button--hollow Button-color--maroon-1000"
-                    onClick={() => {
-                      navigate(`/group/${group._id}`)
-                    }}
-                  >
-                    Manage Group
-                  </div>
-                </div>
-              ))}
+                ))}
 
               <div
                 onClick={() => {
@@ -244,4 +251,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Dashboard
