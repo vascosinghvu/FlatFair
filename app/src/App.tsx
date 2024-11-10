@@ -15,6 +15,7 @@ function App(): ReactElement {
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<LoginButton />} />
+          <Route path="/callback" element={<Home />} />
           <Route path="/create-group" element={<CreateGroup />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/group/:groupid" element={<Group />} />

@@ -1,19 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { API_URL } from '../config';
+import React, { useState } from 'react';
 
 const LoginButton: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = () => {
         setIsLoading(true);
-        console.log('Redirecting to:', `${API_URL}/login`);
-        window.location.href = `${API_URL}/login`;
-    };
+        const auth0Domain = 'dev-ye2pqjx7tc2od0kv.us.auth0.com';
+        const clientId = 'l3ctHCmborIvDkJbXMghAe54sLL0WjGq';
+        const redirectUri = 'https://flat-fair-csac.vercel.app/callback';
+        
+        const loginUrl = `https://${auth0Domain}/authorize?` +
+            `response_type=code&` +
+            `client_id=${clientId}&` +
+            `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+            `scope=openid%20profile%20email`;
 
-    useEffect(() => {
-        // Log the API URL when component mounts
-        console.log('Current API_URL:', API_URL);
-    }, []);
+        console.log('Redirecting to:', loginUrl);
+        window.location.href = loginUrl;
+    };
 
     if (isLoading) {
         return <div>Redirecting to login...</div>;
