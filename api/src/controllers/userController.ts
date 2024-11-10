@@ -5,6 +5,9 @@ import { Expense, IExpense } from "../model/Expense"
 import mongoose from "mongoose"
 import sendEmailInvite from "../config/sendgridInvite"
 
+const test = async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Test route" })
+}
 
 // Get the current user, with populated groups and expenses
 const getUser = async (req: any, res: Response) => {
@@ -29,30 +32,38 @@ const getUser = async (req: any, res: Response) => {
 }
 
 // Controller for creating user if necessary
-const createUser = async (req: any, res: Response) => {
-  console.log("Checking login status")
-  console.log(req.oidc.isAuthenticated() ? "Logged in" : "Logged out")
+const createUser = async (req: Request, res: Response) => {
+  console.log("here")
+  try {
+    const { id, email, name } = req.body // Expect email and name in the request body
 
-  //check if authenticated user has User in the database
-  console.log(req.oidc.isAuthenticated())
-  if (req.oidc.isAuthenticated()) {
-    console.log("Authenticated")
-    const user = await User.findOne({ auth0id: req.oidc.user.sub })
-    console.log(user)
-    console.log(!user)
-    if (!user) {
-      const newUser = new User({
-        auth0id: req.oidc.user.sub,
-        name: req.oidc.user.nickname,
-        email: req.oidc.user.email,
-        groups: [],
-        friends: [],
-        expenses: [],
-      })
-      newUser.save()
+    // Check if the user already exists in the database
+    const existingUser = await User.findOne({ auth0id: id })
+    if (existingUser) {
+      return res
+        .status(200)
+        .json({ message: "User already exists", user: existingUser })
     }
+
+    // Create a new user if not found
+    const newUser = new User({
+      auth0id: id,
+      name: name || "Anonymous", // Default name if none provided
+      email: email,
+      groups: [],
+      friends: [],
+      expenses: [],
+    })
+
+    await newUser.save()
+
+    return res
+      .status(201)
+      .json({ message: "User created successfully", user: newUser })
+  } catch (error) {
+    console.error("Error creating user:", error)
+    return res.status(500).json({ message: "Internal server error", error })
   }
-  res.redirect("http://localhost:3000")
 }
 
 // Controller for getting user profile
@@ -69,31 +80,31 @@ const login = (req: Request, res: any) => {
 
 // Controller for inviting a new user to a group
 const sendInvite = async (req: Request, res: Response) => {
-    console.log("sendInvite called")
-    const { email, inviteLink, groupName, groupId } = req.body
-  
-    // Validate request body
-    if (!email || !inviteLink || !groupName || !groupId) {
-      console.error("Invalid request body:", req.body)
-      return res.status(400).json({
-        message: "Invalid request body",
-        email,
-        inviteLink,
-        groupName,
-        groupId,
-      })
-    }
-  
-    await sendEmailInvite(email, inviteLink, groupName, groupId)
-  
-    try {
-      await sendEmailInvite(email, inviteLink, groupName, groupId)
-      res.status(200).json({ message: "Invite sent successfully" })
-    } catch (error) {
-      console.error("Error sending invite:", error)
-      res.status(500).json({ message: "Failed to send invite" })
-    }
+  console.log("sendInvite called")
+  const { email, inviteLink, groupName, groupId } = req.body
+
+  // Validate request body
+  if (!email || !inviteLink || !groupName || !groupId) {
+    console.error("Invalid request body:", req.body)
+    return res.status(400).json({
+      message: "Invalid request body",
+      email,
+      inviteLink,
+      groupName,
+      groupId,
+    })
   }
+
+  await sendEmailInvite(email, inviteLink, groupName, groupId)
+
+  try {
+    await sendEmailInvite(email, inviteLink, groupName, groupId)
+    res.status(200).json({ message: "Invite sent successfully" })
+  } catch (error) {
+    console.error("Error sending invite:", error)
+    res.status(500).json({ message: "Failed to send invite" })
+  }
+}
 
 // const getUser = async (req: any, res: Response) => {
 //   const { auth0id } = req.oidc.user.sub
@@ -108,4 +119,5 @@ export default {
   getProfile,
   login,
   sendInvite,
+  test,
 }

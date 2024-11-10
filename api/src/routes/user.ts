@@ -15,6 +15,8 @@ router.route("/get-user").get(userController.getUser)
 router.route("/login").get(userController.login)
 
 router.route("/send-invite").post(userController.sendInvite)
-router.route("/").get(userController.createUser)
+router.route("/create-user").get(userController.createUser)
+
+router.route("/test").post(userController.test)
 
 export default router
