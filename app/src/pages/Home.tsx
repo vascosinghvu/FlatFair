@@ -9,6 +9,7 @@ import LoginButton from "../components/LoginButton"
 import Icon from "../components/Icon"
 
 import { IGroup, IExpense, IUser } from "../types"
+import { API_URL } from '../config';
 
 const Home = () => {
   const [isModal, setIsModal] = useState(false)
@@ -19,7 +20,7 @@ const Home = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
         try {
-            const response = await fetch('http://localhost:8000/curUserInfo/get-user', {
+            const response = await fetch(`${API_URL}/curUserInfo/get-user`, {
                 method: 'GET', // GET request to retrieve data
                 credentials: 'include', // Include credentials (cookies, etc.)
             });

@@ -23,13 +23,13 @@ const app: Application = express()
 
 // CORS options
 const corsOptions = {
-  origin: 'http://localhost:3000', // Allow only your React frontend
-  credentials: true, // Allow credentials (cookies, etc.)
+  origin: ['https://flat-fair-csac.vercel.app', 'http://localhost:3000'],
+  credentials: true,
 };
 app.use(cors(corsOptions))
 
 app.options('*', cors({
-  origin: 'http://localhost:3000',
+  origin: ['https://flat-fair-csac.vercel.app', 'http://localhost:3000'],
   credentials: true,
 }));
 

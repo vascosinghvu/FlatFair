@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom"
 import { IGroup, IExpense, IUser } from "../types"
 import Icon from "../components/Icon"
 import { Button } from "react-bootstrap"
+import { API_URL } from '../config';
 
 const Group = () => {
   const { groupid } = useParams()
@@ -21,7 +22,7 @@ const Group = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/group/get-group/${groupid}`, {
+            const response = await fetch(`${API_URL}/group/get-group/${groupid}`, {
                 method: 'GET', // GET request to retrieve data
                 credentials: 'include', // Include credentials (cookies, etc.)
             });
@@ -147,7 +148,7 @@ const Group = () => {
 
       // Send POST request to the /group/add-expense endpoint
       // const response = await api.post("/group/add-expense", finalData)
-      const response = await fetch('http://localhost:8000/group/add-expense', {
+      const response = await fetch(`${API_URL}/group/add-expense`, {
         method: 'POST',
         credentials: 'include',
         headers: {

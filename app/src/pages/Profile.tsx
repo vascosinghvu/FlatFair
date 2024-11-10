@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 
 const Profile: React.FC = () => {
     const [profile, setProfile] = useState<any>(null);
     console.log(profile);
 
     useEffect(() => {
-        fetch('http://localhost:8000/profile', {
-            credentials: 'include', // Ensures cookies are included
+        fetch(`${API_URL}/profile`, {
+            credentials: 'include',
         })
             .then((res) => {
                 console.log("res", res);
