@@ -12,8 +12,10 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 connectDB()
+console.log("Connected to the database...")
 
 app.use("/group", routes.group)
 app.use("/expense", routes.expense)
 
-app.listen(process.env.PORT || 8000, () => console.log("Server running..."))
+const PORT = process.env.PORT || 8000
+app.listen(PORT, () => console.log(`Server running on port ${PORT}...`))
