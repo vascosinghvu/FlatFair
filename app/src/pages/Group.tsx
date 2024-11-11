@@ -18,6 +18,7 @@ const Group = () => {
   const [groupInfo, setGroupInfo] = useState<any>(null)
   const [memberMap, setMemberMap] = useState<any>({})
   const [memberInitialValues, setMemberInitialValues] = useState<any>([])
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -162,10 +163,10 @@ const Group = () => {
     role: string
   }
 
-  const members: Member[] = [
-    { name: "Charlotte Conze", role: "Admin" },
-    { name: "Vasco Singh", role: "Member" },
-  ]
+  // const members: Member[] = [
+  //   { name: "Charlotte Conze", role: "Admin" },
+  //   { name: "Vasco Singh", role: "Member" },
+  // ]
 
   // Custom validation logic to check split values
   const validateForm = (values: { members: any[]; cost: number }) => {
@@ -227,36 +228,36 @@ const Group = () => {
     status: string
   }
 
-  const transactions: GroupPurchase[] = [
-    {
-      timestamp: new Date("2024-10-21T22:54:00"), // 10:54 PM
-      name: "Charlotte Conze",
-      description: "Chipotle",
-      amount: 75.32,
-      status: "Pending",
-    },
-    {
-      timestamp: new Date("2024-10-21T09:15:00"), // 9:15 AM
-      name: "Vasco Singh",
-      description: "Starbucks",
-      amount: 15.67,
-      status: "Completed",
-    },
-    {
-      timestamp: new Date("2024-10-21T14:30:00"), // 2:30 PM
-      name: "Ryan Sullivan",
-      description: "Uber",
-      amount: 23.45,
-      status: "Pending",
-    },
-    {
-      timestamp: new Date("2024-10-21T17:45:00"), // 5:45 PM
-      name: "Brandon Chandler",
-      description: "Grocery Store",
-      amount: 48.12,
-      status: "Completed",
-    },
-  ]
+  // const transactions: GroupPurchase[] = [
+  //   {
+  //     timestamp: new Date("2024-10-21T22:54:00"), // 10:54 PM
+  //     name: "Charlotte Conze",
+  //     description: "Chipotle",
+  //     amount: 75.32,
+  //     status: "Pending",
+  //   },
+  //   {
+  //     timestamp: new Date("2024-10-21T09:15:00"), // 9:15 AM
+  //     name: "Vasco Singh",
+  //     description: "Starbucks",
+  //     amount: 15.67,
+  //     status: "Completed",
+  //   },
+  //   {
+  //     timestamp: new Date("2024-10-21T14:30:00"), // 2:30 PM
+  //     name: "Ryan Sullivan",
+  //     description: "Uber",
+  //     amount: 23.45,
+  //     status: "Pending",
+  //   },
+  //   {
+  //     timestamp: new Date("2024-10-21T17:45:00"), // 5:45 PM
+  //     name: "Brandon Chandler",
+  //     description: "Grocery Store",
+  //     amount: 48.12,
+  //     status: "Completed",
+  //   },
+  // ]
 
   return (
     <>

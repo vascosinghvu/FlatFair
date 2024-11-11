@@ -4,6 +4,7 @@ import * as yup from "yup"
 import Navbar from "../components/Navbar"
 import AsyncSubmit from "../components/AsyncSubmit"
 import { api } from "../api"
+import { useNavigate } from "react-router-dom"
 
 interface CreateAccountFormValues {
   email: string
@@ -21,6 +22,7 @@ const initialValues: CreateAccountFormValues = {
 
 const CreateAccount = (): ReactElement => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const navigate = useNavigate()
 
   const validationSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -55,6 +57,7 @@ const CreateAccount = (): ReactElement => {
       )
     } finally {
       setIsLoading(false)
+      navigate("/dashboard") // Redirect to the dashboard
     }
   }
 

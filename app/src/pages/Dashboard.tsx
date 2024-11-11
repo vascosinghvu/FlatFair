@@ -18,6 +18,7 @@ const Dashboard = () => {
 
   // Get user info from backend
   const [userInfo, setUserInfo] = useState<any>(null)
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -98,25 +99,6 @@ const Dashboard = () => {
     },
   ]
 
-  // interface Group {
-  //   name: string
-  //   members: string[]
-  //   canManage: boolean
-  // }
-
-  // const groups: Group[] = [
-  //   {
-  //     name: "Class Group 7",
-  //     members: ["Charlotte Conze", "Vasco Singh"],
-  //     canManage: true,
-  //   },
-  //   {
-  //     name: "Hiking Group",
-  //     members: ["Charlotte Conze", "Ryan Sullivan"],
-  //     canManage: true,
-  //   },
-  // ]
-
   function formatTime(date: Date): string {
     const hours = date.getHours()
     const minutes = date.getMinutes()
@@ -143,11 +125,8 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="Account-details">
-                <div className="Account-details-item">Charlotte Conze</div>
-                <div className="Account-details-item">
-                  charlotte.j.conze@vanderbilt.edu
-                </div>
-                <div className="Account-details-item">111-111-1111</div>
+                <div className="Account-details-item">{userInfo.name}</div>
+                <div className="Account-details-item">{userInfo.email}</div>
               </div>
 
               <div
