@@ -34,7 +34,10 @@ const createExpense = async (req: any, res: Response) => {
     })
   }
 
-  const currentUser = await User.findOne({ _id: (req as any).user })
+  console.log("USER OBJECT?:")
+  console.log((req as any).user.userId)
+
+  const currentUser = await User.findOne({ _id: (req as any).user.userId })
 
   // Create the allocatedTo Map object
   const allocatedTo = new Map()
