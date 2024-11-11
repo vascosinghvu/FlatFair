@@ -20,9 +20,14 @@ export const getGroup = async (req: Request, res: Response) => {
     .populate("members")
     .populate({
       path: "expenses", // First, populate the 'expenses' field
-      populate: {
-        path: "createdBy", // Then, populate the 'createdBy' field inside 'expenses'
-      },
+      populate: [
+        {
+            path: "createdBy", // Populate the 'createdBy' field inside 'expenses'
+        },
+        {
+            path: "allocatedTo", // Populate the 'allocatedTo' field inside 'expenses'
+        },
+      ],
     })
 
   if (!group) {
