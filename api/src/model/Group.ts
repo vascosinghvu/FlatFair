@@ -1,32 +1,32 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { User, IUser } from './User';  // Import User interface
-import { IExpense } from './Expense';  // Import Expense interface
+import mongoose, { Schema, Document } from "mongoose"
+import { User, IUser } from "./User" // Import User interface
+import { IExpense } from "./Expense" // Import Expense interface
 
 // Interface for the Group document
 interface IGroup extends Document {
-    _id: Schema.Types.ObjectId;
-    groupName: string;
-    groupDescription: string;
-    members: (Schema.Types.ObjectId | IUser)[];
-    expenses: (Schema.Types.ObjectId | IExpense)[];
-    leader: (Schema.Types.ObjectId | IUser);
+  _id: Schema.Types.ObjectId
+  groupName: string
+  groupDescription: string
+  members: (Schema.Types.ObjectId | IUser)[]
+  expenses: (Schema.Types.ObjectId | IExpense)[]
+  leader: Schema.Types.ObjectId | IUser
 
-    // addMember(user: IUser): Promise<void>;
-    // removeMember(userID: string): Promise<void>;
-    // notifyNewExpense(expense: IExpense): Promise<void>;
-    // viewGroupBalance(): Promise<number>;
-    // viewSettledAndUnsettledExpenses(): Promise<{ settled: IExpense[]; unsettled: IExpense[] }>;
+  // addMember(user: IUser): Promise<void>;
+  // removeMember(userID: string): Promise<void>;
+  // notifyNewExpense(expense: IExpense): Promise<void>;
+  // viewGroupBalance(): Promise<number>;
+  // viewSettledAndUnsettledExpenses(): Promise<{ settled: IExpense[]; unsettled: IExpense[] }>;
 }
 
 // Mongoose Group Schema
 const groupSchema: Schema<IGroup> = new Schema({
-    // groupID: { type: String, default: uuid.v4 },
-    groupName: { type: String, required: true },
-    groupDescription: { type: String },
-    members: [{ type: Schema.Types.ObjectId, ref: User.modelName }],  // List of User references
-    expenses: [{ type: Schema.Types.ObjectId, ref: 'Expense' }],  // List of Expense references
-    leader: { type: Schema.Types.ObjectId, ref: User.modelName, required: true }  // Leader of the group
-});
+  // groupID: { type: String, default: uuid.v4 },
+  groupName: { type: String, required: true },
+  groupDescription: { type: String },
+  members: [{ type: Schema.Types.ObjectId, ref: User.modelName }], // List of User references
+  expenses: [{ type: Schema.Types.ObjectId, ref: "Expense" }], // List of Expense references
+  leader: { type: Schema.Types.ObjectId, ref: User.modelName, required: true }, // Leader of the group
+})
 
 // // Method to add a member to the group
 // groupSchema.methods.addMember = async function (user: IUser): Promise<void> {
@@ -75,7 +75,7 @@ const groupSchema: Schema<IGroup> = new Schema({
 // };
 
 // Mongoose Group Model
-const Group = mongoose.model<IGroup>('Group', groupSchema);
+const Group = mongoose.model<IGroup>("Group", groupSchema)
 
-export { Group };
-export type { IGroup };
+export { Group }
+export type { IGroup }
