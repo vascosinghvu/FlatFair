@@ -4,9 +4,6 @@ import { useAuth0 } from "@auth0/auth0-react"
 
 const Navbar = (): ReactElement => {
   const navigate = useNavigate()
-  const logout = () => {
-    localStorage.removeItem("token") // Remove token from local storage
-  }
 
   return (
     <>
@@ -28,7 +25,6 @@ const Navbar = (): ReactElement => {
             <div
               className="Navbar-body-link Margin-right--20"
               onClick={() => {
-                logout() // Log out of application
                 navigate("/login") // Redirect after logout
               }}
             >

@@ -1,9 +1,15 @@
-import React, { type ReactElement } from "react"
+import React, { useEffect, type ReactElement } from "react"
 import { useNavigate } from "react-router-dom"
 // import { useAuth0 } from "@auth0/auth0-react"
 
 const Logout = (): ReactElement => {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    // Logout user
+    localStorage.removeItem("token")
+    console.log("User logged out")
+  }, []) // Correct placement of dependency array
 
   return (
     <>

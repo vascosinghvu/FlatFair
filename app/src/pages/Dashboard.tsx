@@ -125,8 +125,8 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="Account-details">
-                <div className="Account-details-item">{userInfo.name}</div>
-                <div className="Account-details-item">{userInfo.email}</div>
+                <div className="Account-details-item">{userInfo?.name}</div>
+                <div className="Account-details-item">{userInfo?.email}</div>
               </div>
 
               <div
