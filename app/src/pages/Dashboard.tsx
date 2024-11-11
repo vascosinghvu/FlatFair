@@ -15,20 +15,16 @@ import { IGroup, IExpense, IUser } from "../types"
 const Dashboard = () => {
   const [isModal, setIsModal] = useState(false)
   const navigate = useNavigate()
-  const { user } = useAuth0() // Get current user details
 
   // Get user info from backend
   const [userInfo, setUserInfo] = useState<any>(null)
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await api.get(`/user/get-user/:${(user as User).sub}`)
+        const response = await api.get(`/user/get-user`)
+        console.log("Response:", response)
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`)
-        }
-
-        const data = await response.json() // Parse the JSON response
+        const data = await response.data // Parse the JSON response
         console.log("User Info:", data)
         // Store the response in a variable or state
         setUserInfo(data.currentUser) // Assuming you're using state to store the info

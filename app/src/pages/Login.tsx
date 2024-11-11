@@ -5,7 +5,7 @@ import { useAuth0 } from "@auth0/auth0-react"
 import Navbar from "../components/Navbar"
 import AsyncSubmit from "../components/AsyncSubmit"
 import { api } from "../api"
-import { useNavigate } from "react-router-dom"
+import React from "react"
 
 interface LoginFormValues {
   email: string
@@ -19,9 +19,6 @@ const initialValues: LoginFormValues = {
 
 const Login = (): ReactElement => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const { loginWithRedirect } = useAuth0()
-  const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate()
 
   const validationSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -33,20 +30,11 @@ const Login = (): ReactElement => {
   const handleSubmit = async (values: LoginFormValues) => {
     setIsLoading(true)
     try {
-      // Make a POST request to your backend login endpoint
-      const response = await api.get("/user/login", {
-        email: values.email,
-        password: values.password,
-      })
-
-      const { token, userId } = response.data
-
-      // Store the token and user ID in localStorage
-      localStorage.setItem("token", token)
-      localStorage.setItem("userId", userId)
-
-      // Redirect the user to the dashboard or another authenticated page
-      navigate("/dashboard")
+      // Trigger login with Auth0
+      const response = await api.post(`/user/login`, values)
+      console.log("Login successful:", response)
+      localStorage.setItem("token", response.token)
+      return response
     } catch (error) {
       console.error("Login failed:", error)
       setError("Invalid email or password") // Set error state to show a message
@@ -118,3 +106,6 @@ const Login = (): ReactElement => {
 }
 
 export default Login
+function setError(arg0: string) {
+  throw new Error("Function not implemented.")
+}

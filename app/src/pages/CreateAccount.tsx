@@ -47,7 +47,7 @@ const CreateAccount = (): ReactElement => {
         password: values.password, // Ensure this is hashed on the backend
       })
 
-      console.log("Account created successfully:", response.data)
+      console.log("Account created successfully:")
     } catch (error) {
       console.error(
         "Account creation failed:",

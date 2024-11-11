@@ -55,7 +55,7 @@ export const getGroups = async (req: any, res: Response) => {
 // Function to create a group
 export const createGroup = async (req: any, res: Response) => {
   console.log("Creating group")
-  const { id } = req.params // Extract user ID from URL
+  const { userId } = (req as any).user
   const { groupName, groupDescription, members } = req.body //members are emails
 
   // Validate request body
@@ -89,7 +89,7 @@ export const createGroup = async (req: any, res: Response) => {
   const memberIds = users.map((user) => user._id)
 
   // Get the current user
-  const currentUser = await User.findOne({ auth0id: id })
+  const currentUser = await User.findOne({ _id: userId })
   const curUserId = currentUser?._id
 
   // Create the new group document

@@ -1,7 +1,6 @@
 import express from "express"
 import bodyParser from "body-parser"
 import connectDB from "./config/db"
-import { auth } from "express-openid-connect"
 
 import * as routes from "./routes/index"
 

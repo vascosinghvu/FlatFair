@@ -21,19 +21,9 @@ const Group = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/group/get-group/${groupid}`,
-          {
-            method: "GET", // GET request to retrieve data
-            credentials: "include", // Include credentials (cookies, etc.)
-          }
-        )
+        const response = await api.get(`/group/get-group/${groupid}`)
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`)
-        }
-
-        const data = await response.json() // Parse the JSON response
+        const data = response.data // Parse the JSON response
         console.log("Group Info:", data)
         // Store the response in a variable or state
         setGroupInfo(data.group) // Assuming you're using state to store the info
@@ -154,17 +144,7 @@ const Group = () => {
 
       // Send POST request to the /group/add-expense endpoint
       // const response = await api.post("/group/add-expense", finalData)
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/group/add-expense`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(finalData),
-        }
-      )
+      const response = await api.post(`/expense/add-expense`, finalData)
       console.log("Expense logged successfully:", response)
 
       setSuccess(true)

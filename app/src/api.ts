@@ -5,7 +5,7 @@ export const api: any = {
     return await fetch(url, {
       method: "GET",
       credentials: "include",
-      headers: { "Access-Control-Allow-Origin": "*", mode: "no-cors" },
+      headers: { "Access-Control-Allow-Origin": "*", mode: "no-cors", authorization: `Bearer ${localStorage.getItem("token")}` },
     })
       .then(async (res) => {
         if (!res.ok) {
@@ -33,6 +33,7 @@ export const api: any = {
       credentials: "include",
       headers: {
         "Content-Type": "application/json", // Proper header for JSON
+        authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify(payload), // Stringify the payload
     })
@@ -41,9 +42,6 @@ export const api: any = {
           throw new Error("Network response was not ok")
         }
         return res.json()
-      })
-      .then((data) => {
-        console.log("Data:", data)
       })
       .catch((err) => {
         console.error("Error posting data: ", err)
@@ -61,6 +59,7 @@ export const api: any = {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         mode: "no-cors",
+        authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: data,
     })
@@ -87,6 +86,7 @@ export const api: any = {
       headers: {
         "Access-Control-Allow-Origin": "*",
         mode: "no-cors",
+        authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: data,
     })
