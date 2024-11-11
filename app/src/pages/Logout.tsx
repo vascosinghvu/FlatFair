@@ -1,15 +1,13 @@
 import React, { useEffect, type ReactElement } from "react"
 import { useNavigate } from "react-router-dom"
-// import { useAuth0 } from "@auth0/auth0-react"
 
 const Logout = (): ReactElement => {
   const navigate = useNavigate()
-
   useEffect(() => {
-    // Logout user
+    // Remove token from localStorage
     localStorage.removeItem("token")
     console.log("User logged out")
-  }, []) // Correct placement of dependency array
+  }, []) // Ensure navigate is included in the dependency array
 
   return (
     <>
@@ -19,14 +17,15 @@ const Logout = (): ReactElement => {
           <div className="FormWidget-body-logo"></div>
           <div className="Block">
             <div className="Block-header">Logout Success!</div>
-            You have been successfully logged out. See you soon.
-            <div
-              onClick={() => {
-                navigate("/login")
-              }}
-              className="Button Button-color--yellow-1000 Margin-top--30"
-            >
-              Login
+            You have been successfully logged out.
+            <div className="Button Button-color--yellow-1000 Margin-top--20">
+              <div
+                onClick={() => {
+                  navigate("/login")
+                }}
+              >
+                Login
+              </div>
             </div>
           </div>
         </div>

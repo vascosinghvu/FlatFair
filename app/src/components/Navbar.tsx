@@ -4,6 +4,11 @@ import { useAuth0 } from "@auth0/auth0-react"
 
 const Navbar = (): ReactElement => {
   const navigate = useNavigate()
+  const isLoggedIn = !!localStorage.getItem("token") // Simple check for a token
+
+  console.log("Is logged in:", isLoggedIn)
+
+  // check if user is logged in with the jwt token
 
   return (
     <>
@@ -13,24 +18,26 @@ const Navbar = (): ReactElement => {
             <span className="Text-color--purple-1000">Flat</span>
             <span className="Text-color--yellow-1000">Fare</span>
           </div>
-          <div className="Flex-row Margin-left--auto">
-            <div
-              className="Navbar-body-link Margin-right--20"
-              onClick={() => {
-                navigate("/dashboard")
-              }}
-            >
-              Home
+          {isLoggedIn && (
+            <div className="Flex-row Margin-left--auto">
+              <div
+                className="Navbar-body-link Margin-right--20"
+                onClick={() => {
+                  navigate("/dashboard")
+                }}
+              >
+                Home
+              </div>
+              <div
+                className="Navbar-body-link Margin-right--20"
+                onClick={() => {
+                  navigate("/logout") // Redirect after logout
+                }}
+              >
+                Logout
+              </div>
             </div>
-            <div
-              className="Navbar-body-link Margin-right--20"
-              onClick={() => {
-                navigate("/login") // Redirect after logout
-              }}
-            >
-              Logout
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </>

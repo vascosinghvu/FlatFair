@@ -18,9 +18,34 @@ const Group = () => {
   const [groupInfo, setGroupInfo] = useState<any>(null)
   const [memberMap, setMemberMap] = useState<any>({})
   const [memberInitialValues, setMemberInitialValues] = useState<any>([])
+  const [userInfo, setUserInfo] = useState<any>(null)
+  const [balances, setBalances] = useState<any>(null)
+
+  const [isModal, setIsModal] = useState(false)
+  const [isEditModal, setEditModal] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [selection, setSelection] = useState("Equally") // Default to "Equally"
+  const [errorMessage, setErrorMessage] = useState("")
+  const [settleModal, setSettleModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchUserInfo = async () => {
+      try {
+        const response = await api.get(`/user/get-user`)
+        console.log("Response:", response)
+
+        const data = await response.data // Parse the JSON response
+        console.log("User Info:", data)
+        // Store the response in a variable or state
+        setUserInfo(data.currentUser) // Assuming you're using state to store the info
+      } catch (error) {
+        console.error("Error fetching user info:", error)
+      }
+    }
+
+    const fetchGroupInfo = async () => {
       try {
         const response = await api.get(`/group/get-group/${groupid}`)
 
@@ -54,18 +79,12 @@ const Group = () => {
       }
     }
 
+    fetchGroupInfo() // Call the fetch function inside useEffect
     fetchUserInfo() // Call the fetch function inside useEffect
   }, []) // Empty dependency array to run once on component mount
 
   console.log("CURRENT GROUP: ", groupInfo)
-
-  const [isModal, setIsModal] = useState(false)
-  const [isEditModal, setEditModal] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [selection, setSelection] = useState("Equally") // Default to "Equally"
-  const [errorMessage, setErrorMessage] = useState("")
-  const [settleModal, setSettleModal] = useState(false)
+  console.log("user info: ", userInfo)
 
   // console.log("Members:", groupInfo?.members)
   const initialValues = {
@@ -73,10 +92,6 @@ const Group = () => {
     cost: 0,
     date: "",
     members: memberInitialValues,
-
-    // { name: "John", selected: false, splitValue: undefined },
-    // { name: "Jane", selected: false, splitValue: undefined },
-    // { name: "Doe", selected: false, splitValue: undefined },
   }
 
   const validationSchema = yup.object().shape({
@@ -163,11 +178,6 @@ const Group = () => {
     role: string
   }
 
-  // const members: Member[] = [
-  //   { name: "Charlotte Conze", role: "Admin" },
-  //   { name: "Vasco Singh", role: "Member" },
-  // ]
-
   // Custom validation logic to check split values
   const validateForm = (values: { members: any[]; cost: number }) => {
     let errors = {}
@@ -220,44 +230,15 @@ const Group = () => {
     return `${formattedHours}:${formattedMinutes} ${period}`
   }
 
-  interface GroupPurchase {
-    timestamp: Date
-    name: string
-    description: string
-    amount: number
-    status: string
-  }
+  const handleSettleUp = (user: string | null) => {
+    if (!user) return
+    // Logic to settle up with the selected user
+    console.log(`Settling up with ${user}`)
 
-  // const transactions: GroupPurchase[] = [
-  //   {
-  //     timestamp: new Date("2024-10-21T22:54:00"), // 10:54 PM
-  //     name: "Charlotte Conze",
-  //     description: "Chipotle",
-  //     amount: 75.32,
-  //     status: "Pending",
-  //   },
-  //   {
-  //     timestamp: new Date("2024-10-21T09:15:00"), // 9:15 AM
-  //     name: "Vasco Singh",
-  //     description: "Starbucks",
-  //     amount: 15.67,
-  //     status: "Completed",
-  //   },
-  //   {
-  //     timestamp: new Date("2024-10-21T14:30:00"), // 2:30 PM
-  //     name: "Ryan Sullivan",
-  //     description: "Uber",
-  //     amount: 23.45,
-  //     status: "Pending",
-  //   },
-  //   {
-  //     timestamp: new Date("2024-10-21T17:45:00"), // 5:45 PM
-  //     name: "Brandon Chandler",
-  //     description: "Grocery Store",
-  //     amount: 48.12,
-  //     status: "Completed",
-  //   },
-  // ]
+    // Optionally call an API to update the balances and reflect changes
+
+    setSettleModal(false) // Close the modal
+  }
 
   return (
     <>
@@ -364,8 +345,9 @@ const Group = () => {
                       name="members"
                       render={() => (
                         <div className="Flex Flex-column">
-                          {values.members.map(
-                            (member: IUser, index: number) => (
+                          {values.members
+                            .filter()
+                            .map((member: IUser, index: number) => (
                               <div key={index} className="Flex Flex-column">
                                 <div className="Flex-row Margin-y--10">
                                   <Field
@@ -391,8 +373,7 @@ const Group = () => {
                                     />
                                   )}
                               </div>
-                            )
-                          )}
+                            ))}
                         </div>
                       )}
                     />
@@ -436,7 +417,45 @@ const Group = () => {
           header="Settle Up"
           subheader="Settle up your group expenses"
           action={() => setSettleModal(false)}
-          body={<div className="Form-group"></div>}
+          body={
+            <>
+              <div>Select a user to settle up with:</div>
+              <div className="Form-group">
+                <select
+                  className="Form-input-box"
+                  onChange={(e) => setSelectedUser(e.target.value)} // Handle selection
+                  value={selectedUser || ""}
+                >
+                  <option value="" disabled>
+                    Select a member
+                  </option>
+                  {groupInfo.members
+                    .filter((member: IUser) => member._id !== userInfo._id) // Filter out the current user
+                    .map((member: IUser) => (
+                      <option key={member._id} value={member.name}>
+                        {member.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="Flex Flex-row Margin-top--20">
+                <button
+                  className="Button Button-color--purple-1000 Margin-right--10"
+                  onClick={() => handleSettleUp(selectedUser)}
+                  disabled={!selectedUser} // Disable button if no user is selected
+                >
+                  Settle Up
+                </button>
+                <button
+                  className="Button Button-color--gray-1000"
+                  onClick={() => setSettleModal(false)} // Cancel and close modal
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          }
         />
       )}
 
@@ -494,14 +513,10 @@ const Group = () => {
                 <div key={index} className="Card Purchase">
                   <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
                     <div className="Purchase-item " style={{ width: 75 }}>
-                      {formatTime(transaction.date)}
+                      {new Date(transaction.date).toLocaleDateString("en-US")}
                     </div>
                     <div className="Purchase-item Padding-x--20">
                       <div className="Purchase-item-icon">
-                        {console.log(
-                          "TRANSACTION:",
-                          transaction.createdBy.name
-                        )}
                         {transaction.createdBy.name.charAt(0).toUpperCase()}
                       </div>
                     </div>

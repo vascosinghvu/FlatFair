@@ -87,7 +87,7 @@ const Dashboard = () => {
               <div key={index} className="Card Purchase">
                 <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
                   <div className="Purchase-item" style={{ width: 75 }}>
-                    {transaction.date.toLocaleString()}
+                    {new Date(transaction.date).toLocaleDateString("en-US")}
                   </div>
                   <div className="Purchase-item Padding-x--20">
                     <div className="Purchase-item-icon">
