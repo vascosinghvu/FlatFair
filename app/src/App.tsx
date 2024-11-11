@@ -1,5 +1,5 @@
 import React, { type ReactElement } from "react"
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { Routes, Route } from "react-router-dom"
 import Dashboard from "./pages/Dashboard"
 import CreateGroup from "./pages/CreateGroup"
 import Group from "./pages/Group"

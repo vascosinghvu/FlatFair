@@ -1,4 +1,4 @@
-import React, { useEffect, type ReactElement } from "react"
+import { type ReactElement } from "react"
 import { useNavigate } from "react-router-dom"
 
 const Landing = (): ReactElement => {

@@ -1,7 +1,6 @@
 import { type ReactElement, useState } from "react"
 import { Formik, Form, Field } from "formik"
 import * as yup from "yup"
-import { useAuth0 } from "@auth0/auth0-react"
 import Navbar from "../components/Navbar"
 import AsyncSubmit from "../components/AsyncSubmit"
 import { api } from "../api"
