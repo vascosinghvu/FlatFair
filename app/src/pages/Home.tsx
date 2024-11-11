@@ -8,6 +8,7 @@ import Modal from "../components/Modal"
 import Icon from "../components/Icon"
 
 import { IGroup, IExpense, IUser } from "../types"
+import { api } from "../api"
 
 const Home = () => {
   const [isModal, setIsModal] = useState(false)
@@ -17,23 +18,13 @@ const Home = () => {
   const [userInfo, setUserInfo] = useState<any>(null);
   useEffect(() => {
     const fetchUserInfo = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/user/get-user', {
-                method: 'GET', // GET request to retrieve data
-                credentials: 'include', // Include credentials (cookies, etc.)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
-
-            const data = await response.json(); // Parse the JSON response
-            console.log("User Info:", data);
-            // Store the response in a variable or state
-            setUserInfo(data.currentUser); // Assuming you're using state to store the info
-        } catch (error) {
-            console.error('Error fetching user info:', error);
-        }
+      try {
+        const response = await api.get('/user/get-user');
+        const data = response.data;
+        setUserInfo(data.currentUser);
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+      }
     };
 
     fetchUserInfo(); // Call the fetch function inside useEffect

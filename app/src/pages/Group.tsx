@@ -33,17 +33,14 @@ const Group = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await api.get(`/user/get-user`)
-        console.log("Response:", response)
-
-        const data = await response.data // Parse the JSON response
-        console.log("User Info:", data)
-        // Store the response in a variable or state
-        setUserInfo(data.currentUser) // Assuming you're using state to store the info
+        const response = await api.get('/user/get-user');
+        if (response.data && response.data.currentUser) {
+          setUserInfo(response.data.currentUser);
+        }
       } catch (error) {
-        console.error("Error fetching user info:", error)
+        console.error('Error fetching user info:', error);
       }
-    }
+    };
 
     const fetchGroupInfo = async () => {
       try {
