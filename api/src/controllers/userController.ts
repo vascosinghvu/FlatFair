@@ -16,9 +16,11 @@ const test = async (req: Request, res: Response) => {
 
 // Get the current user, with populated groups and expenses
 const getUser = async (req: Request, res: Response) => {
-  const { id } = req.params
+  console.log("GET USER INFO")
+  console.log((req as any).user)
+  const { userId } = (req as any).user
 
-  const currentUser = await User.findById(id)
+  const currentUser = await User.findById(userId)
     .populate({
       path: "groups",
       populate: {

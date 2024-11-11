@@ -1,6 +1,7 @@
 import express from "express"
 import * as expenseController from "../controllers/expenseController"
 import { requiresAuth } from "express-openid-connect"
+import { verifyToken } from "../config/authMiddleware"
 
 const router = express.Router()
 const axios = require("axios").default
@@ -14,6 +15,6 @@ const axios = require("axios").default
 
 router
   .route("/add-expense")
-  .post(requiresAuth(), expenseController.createExpense)
+  .post(verifyToken, expenseController.createExpense)
 
 export default router

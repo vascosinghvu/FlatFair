@@ -4,6 +4,8 @@ import * as yup from "yup"
 import { useAuth0 } from "@auth0/auth0-react"
 import Navbar from "../components/Navbar"
 import AsyncSubmit from "../components/AsyncSubmit"
+import {api} from "../api"
+import React from "react"
 
 interface LoginFormValues {
   email: string
@@ -17,7 +19,6 @@ const initialValues: LoginFormValues = {
 
 const Login = (): ReactElement => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const { loginWithRedirect } = useAuth0()
 
   const validationSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -31,12 +32,10 @@ const Login = (): ReactElement => {
     setIsLoading(true)
     try {
       // Trigger login with Auth0
-      await loginWithRedirect({
-        authorizationParams: {
-          email: values.email,
-          password: values.password, // Auth0 doesn't accept password directly here; handled by Auth0 UI
-        },
-      })
+      const response = await api.post(`/user/login`, values);
+      console.log("Login successful:", response);
+      localStorage.setItem('token', response.token);
+      return response;
     } catch (error) {
       console.error("Login failed:", error)
     } finally {
