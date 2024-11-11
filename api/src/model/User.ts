@@ -22,6 +22,7 @@ const userSchema: Schema<IUser> = new Schema({
   groups: [{ type: Schema.Types.ObjectId, ref: "Group" }],
   friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
   expenses: [{ type: Schema.Types.ObjectId, ref: "Expense" }],
+  password: { type: String, required: true },
 })
 
 // Instance method to add a friend

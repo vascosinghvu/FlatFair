@@ -5,6 +5,9 @@ import { Expense, IExpense } from "../model/Expense"
 import mongoose from "mongoose"
 import sendEmailInvite from "../config/sendgridInvite"
 import bcrypt from "bcrypt" // For hashing passwords
+import jwt from "jsonwebtoken" // For generating JWT
+
+const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret"
 
 // Test route
 const test = async (req: Request, res: Response) => {
@@ -15,7 +18,6 @@ const test = async (req: Request, res: Response) => {
 const getUser = async (req: Request, res: Response) => {
   const { id } = req.params
 
-  // Find user by ID and populate related fields
   const currentUser = await User.findById(id)
     .populate({
       path: "groups",
@@ -37,6 +39,46 @@ const getUser = async (req: Request, res: Response) => {
   return res.status(200).json({ currentUser })
 }
 
+const login = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" })
+    }
+
+    // Find the user by email
+    const user = await User.findOne({ email })
+
+    console.log(user)
+    if (!user) {
+      return res.status(404).json({ message: "User not found" })
+    }
+
+    // Compare the provided password with the stored hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" })
+    }
+
+    // Generate a JWT token with the user ID
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+      expiresIn: "1h", // Token validity
+    })
+
+    return res.status(200).json({
+      message: "Login successful",
+      userId: user._id,
+      token,
+    })
+  } catch (error) {
+    console.error("Login error:", error)
+    return res.status(500).json({ message: "Internal server error", error })
+  }
+}
+
 // Create a new user
 const createUser = async (req: Request, res: Response) => {
   try {
@@ -46,6 +88,7 @@ const createUser = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "All fields are required" })
     }
 
+    // Check if the user already exists
     const existingUser = await User.findOne({ email })
     if (existingUser) {
       return res
@@ -53,16 +96,21 @@ const createUser = async (req: Request, res: Response) => {
         .json({ message: "User already exists", userId: existingUser._id })
     }
 
+    // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10)
+
+    console.log(hashedPassword)
 
     const newUser = new User({
       name,
       email,
-      password: hashedPassword,
+      password: hashedPassword, // Store hashed password
       groups: [],
       friends: [],
       expenses: [],
     })
+
+    console.log(newUser)
 
     await newUser.save()
 
@@ -76,26 +124,29 @@ const createUser = async (req: Request, res: Response) => {
   }
 }
 
-// Login logic placeholder (to be implemented with session or JWT)
-const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body
+// Delete a user by email
+const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required" })
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" })
+    }
+
+    const deletedUser = await User.findOneAndDelete({ email })
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" })
+    }
+
+    return res.status(200).json({
+      message: "User deleted successfully",
+      userId: deletedUser._id,
+    })
+  } catch (error) {
+    console.error("Error deleting user:", error)
+    return res.status(500).json({ message: "Internal server error", error })
   }
-
-  const user = await User.findOne({ email })
-  if (!user) {
-    return res.status(404).json({ message: "User not found" })
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password)
-  if (!isPasswordValid) {
-    return res.status(401).json({ message: "Invalid credentials" })
-  }
-
-  // Placeholder for session or JWT handling
-  return res.status(200).json({ message: "Login successful", userId: user._id })
 }
 
 // Send an invite to a new user for a group
@@ -116,9 +167,10 @@ const sendInvite = async (req: Request, res: Response) => {
 }
 
 export default {
-  getUser,
-  createUser,
-  login,
-  sendInvite,
   test,
+  getUser,
+  login,
+  createUser,
+  deleteUser,
+  sendInvite,
 }

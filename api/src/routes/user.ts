@@ -16,6 +16,7 @@ router.route("/login").get(userController.login)
 
 router.route("/send-invite").post(userController.sendInvite)
 router.route("/create-user").post(userController.createUser)
+router.route("/delete-user").delete(userController.deleteUser)
 
 router.route("/test").post(userController.test)
 
