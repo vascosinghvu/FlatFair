@@ -18,6 +18,7 @@ const Dashboard = () => {
 
   // Get user info from backend
   const [userInfo, setUserInfo] = useState<any>(null)
+  const [transactions, setTransactions] = useState<IExpense[]>([])
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -29,6 +30,7 @@ const Dashboard = () => {
         console.log("User Info:", data)
         // Store the response in a variable or state
         setUserInfo(data.currentUser) // Assuming you're using state to store the info
+        setTransactions(data.currentUser.expenses)
       } catch (error) {
         console.error("Error fetching user info:", error)
       }
@@ -38,66 +40,7 @@ const Dashboard = () => {
   }, []) // Empty dependency array to run once on component mount
 
   console.log("CURRENT USER: ", userInfo)
-
-  interface UserTransaction {
-    timestamp: Date
-    name: string
-    group: string
-    amount: number
-    status: string
-  }
-
-  const transactions: UserTransaction[] = [
-    {
-      timestamp: new Date("2024-10-20T22:54:00"), // 10:54 PM
-      name: "Alex Johnson",
-      group: "Class Group 3",
-      amount: 120.45,
-      status: "Pending",
-    },
-    {
-      timestamp: new Date("2024-10-20T21:30:00"), // 9:30 PM
-      name: "Maria Lopez",
-      group: "Class Group 2",
-      amount: 89.67,
-      status: "Completed",
-    },
-    {
-      timestamp: new Date("2024-10-20T20:15:00"), // 8:15 PM
-      name: "John Smith",
-      group: "Class Group 5",
-      amount: 55.23,
-      status: "Pending",
-    },
-    {
-      timestamp: new Date("2024-10-20T19:00:00"), // 7:00 PM
-      name: "Emily Chen",
-      group: "Class Group 1",
-      amount: 32.89,
-      status: "Completed",
-    },
-    {
-      timestamp: new Date("2024-10-20T18:45:00"), // 6:45 PM
-      name: "Michael Scott",
-      group: "Class Group 4",
-      amount: 76.5,
-      status: "Pending",
-    },
-    {
-      timestamp: new Date("2024-10-20T17:20:00"), // 5:20 PM
-      name: "Sarah Lee",
-      group: "Class Group 6",
-      amount: 47.18,
-      status: "Completed",
-    },
-    {
-      timestamp: new Date("2024-10-20T16:10:00"), // 4:10 PM
-      name: "Robert King",
-      group: "Class Group 7",
-      amount: 98.33,
-      status: "Pending",
-    },
-  ]
+  console.log(transactions)
 
   function formatTime(date: Date): string {
     const hours = date.getHours()
@@ -143,18 +86,18 @@ const Dashboard = () => {
             {transactions.map((transaction, index) => (
               <div key={index} className="Card Purchase">
                 <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
-                  <div className="Purchase-item " style={{ width: 75 }}>
-                    {formatTime(transaction.timestamp)}
+                  <div className="Purchase-item" style={{ width: 75 }}>
+                    {transaction.date.toLocaleString()}
                   </div>
                   <div className="Purchase-item Padding-x--20">
                     <div className="Purchase-item-icon">
-                      {transaction.name.charAt(0).toUpperCase()}
+                      {userInfo.name.charAt(0).toUpperCase()}
                     </div>
                   </div>
                   <div className="Purchase-item">
-                    {transaction.name}
+                    {transaction.description}
                     <div className="Purchase-item-subtitle">
-                      {transaction.group}
+                      {/* {transaction.group} */}
                     </div>
                   </div>
                 </div>
