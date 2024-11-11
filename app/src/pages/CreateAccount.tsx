@@ -3,7 +3,7 @@ import { Formik, Form, Field } from "formik"
 import * as yup from "yup"
 import Navbar from "../components/Navbar"
 import AsyncSubmit from "../components/AsyncSubmit"
-import { api } from "../api"
+import api from "../api"
 
 interface CreateAccountFormValues {
   email: string
@@ -41,7 +41,7 @@ const CreateAccount = (): ReactElement => {
       console.log("Account creation submitted:", values)
 
       // Send POST request to your backend
-      const response = await api.post("/user/create-user", {
+      const response = await api.postData("/user/create-user", {
         email: values.email,
         name: values.name,
         password: values.password, // Ensure this is hashed on the backend

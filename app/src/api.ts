@@ -39,3 +39,9 @@ export const postData = async (endpoint: string, data: any) => {
     throw error;
   }
 };
+
+// If you need a default export, add this:
+export default {
+  fetchData,
+  postData
+};
