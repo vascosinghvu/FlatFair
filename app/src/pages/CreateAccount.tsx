@@ -1,25 +1,26 @@
 import { type ReactElement, useState } from "react"
 import { Formik, Form, Field } from "formik"
 import * as yup from "yup"
-import { useAuth0 } from "@auth0/auth0-react"
 import Navbar from "../components/Navbar"
 import AsyncSubmit from "../components/AsyncSubmit"
+import { api } from "../api"
 
 interface CreateAccountFormValues {
   email: string
   name: string
   password: string
+  confirmPassword: string
 }
 
 const initialValues: CreateAccountFormValues = {
   email: "",
   name: "",
   password: "",
+  confirmPassword: "",
 }
 
 const CreateAccount = (): ReactElement => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const { loginWithRedirect } = useAuth0()
 
   const validationSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -28,22 +29,30 @@ const CreateAccount = (): ReactElement => {
       .string()
       .min(6, "Password must be at least 6 characters")
       .required("Password is required"),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref("password")], "Passwords must match")
+      .required("Confirm password is required"),
   })
 
   const handleSubmit = async (values: CreateAccountFormValues) => {
     setIsLoading(true)
     try {
-      // Typically, you'd call your backend to create the user account.
-      // For Auth0, simulate account creation with redirect:
-      await loginWithRedirect({
-        authorizationParams: {
-          screen_hint: "signup", // Trigger Auth0's signup page
-        },
+      console.log("Account creation submitted:", values)
+
+      // Send POST request to your backend
+      const response = await api.post("/users/create-user", {
+        email: values.email,
+        name: values.name,
+        password: values.password, // Ensure this is hashed on the backend
       })
 
-      console.log("Account creation submitted:", values)
+      console.log("Account created successfully:", response.data)
     } catch (error) {
-      console.error("Account creation failed:", error)
+      console.error(
+        "Account creation failed:",
+        (error as any).response?.data || (error as any).message
+      )
     } finally {
       setIsLoading(false)
     }
@@ -102,6 +111,19 @@ const CreateAccount = (): ReactElement => {
                       <div className="Form-error">{errors.password}</div>
                     )}
                   </div>
+                  <div className="Form-group">
+                    <label htmlFor="confirmPassword">Confirm Password</label>
+                    <Field
+                      className="Form-input-box"
+                      type="password"
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      placeholder="Confirm your password"
+                    />
+                    {errors.confirmPassword && touched.confirmPassword && (
+                      <div className="Form-error">{errors.confirmPassword}</div>
+                    )}
+                  </div>
                   <button
                     className="Button Button-color--dark-1000 Width--100 Margin-top--10"
                     type="submit"
@@ -113,6 +135,12 @@ const CreateAccount = (): ReactElement => {
                       "Create Account"
                     )}
                   </button>
+                  <div className="Margin-top--20 Text-center">
+                    Already have an account?{" "}
+                    <a href="/login" className="Link">
+                      Log in
+                    </a>
+                  </div>
                 </Form>
               )}
             </Formik>

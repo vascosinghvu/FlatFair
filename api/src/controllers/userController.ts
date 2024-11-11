@@ -4,6 +4,7 @@ import { Group, IGroup } from "../model/Group"
 import { Expense, IExpense } from "../model/Expense"
 import mongoose from "mongoose"
 import sendEmailInvite from "../config/sendgridInvite"
+import bcrypt from "bcrypt" // For hashing passwords
 
 const test = async (req: Request, res: Response) => {
   res.status(200).json({ message: "Test route" })
@@ -30,25 +31,31 @@ const getUser = async (req: any, res: Response) => {
   return res.status(200).json({ currentUser })
 }
 
-// Controller for creating user if necessary
 const createUser = async (req: Request, res: Response) => {
-  console.log("here")
   try {
-    const { id, email, name } = req.body // Expect email and name in the request body
+    const { password, email, name } = req.body
 
-    // Check if the user already exists in the database
-    const existingUser = await User.findOne({ auth0id: id })
+    // Validate input fields
+    if (!email || !password || !name) {
+      return res.status(400).json({ message: "All fields are required" })
+    }
+
+    // Check if the user already exists
+    const existingUser = await User.findOne({ email })
     if (existingUser) {
       return res
         .status(200)
-        .json({ message: "User already exists", user: existingUser })
+        .json({ message: "User already exists", userId: existingUser._id })
     }
 
-    // Create a new user if not found
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Create the new user
     const newUser = new User({
-      auth0id: id,
-      name: name || "Anonymous", // Default name if none provided
-      email: email,
+      name,
+      email,
+      password: hashedPassword, // Save hashed password
       groups: [],
       friends: [],
       expenses: [],
@@ -56,9 +63,11 @@ const createUser = async (req: Request, res: Response) => {
 
     await newUser.save()
 
-    return res
-      .status(201)
-      .json({ message: "User created successfully", user: newUser })
+    // Send user ID to the frontend
+    return res.status(201).json({
+      message: "User created successfully",
+      userId: newUser._id, // Include the new user's ID
+    })
   } catch (error) {
     console.error("Error creating user:", error)
     return res.status(500).json({ message: "Internal server error", error })

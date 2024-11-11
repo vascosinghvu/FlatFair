@@ -91,6 +91,12 @@ const Login = (): ReactElement => {
                   >
                     {isLoading ? <AsyncSubmit loading={isLoading} /> : "Log In"}
                   </button>
+                  <div className="Margin-top--20 Text-center">
+                    Don't have an account?{" "}
+                    <a href="/create-account" className="Link">
+                      Create One
+                    </a>
+                  </div>
                 </Form>
               )}
             </Formik>
