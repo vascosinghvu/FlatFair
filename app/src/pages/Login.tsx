@@ -4,6 +4,8 @@ import * as yup from "yup"
 import { useAuth0 } from "@auth0/auth0-react"
 import Navbar from "../components/Navbar"
 import AsyncSubmit from "../components/AsyncSubmit"
+import { api } from "../api"
+import { useNavigate } from "react-router-dom"
 
 interface LoginFormValues {
   email: string
@@ -18,6 +20,8 @@ const initialValues: LoginFormValues = {
 const Login = (): ReactElement => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const { loginWithRedirect } = useAuth0()
+  const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   const validationSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -26,24 +30,30 @@ const Login = (): ReactElement => {
       .min(6, "Password must be at least 6 characters")
       .required("Password is required"),
   })
-
   const handleSubmit = async (values: LoginFormValues) => {
     setIsLoading(true)
     try {
-      // Trigger login with Auth0
-      await loginWithRedirect({
-        authorizationParams: {
-          email: values.email,
-          password: values.password, // Auth0 doesn't accept password directly here; handled by Auth0 UI
-        },
+      // Make a POST request to your backend login endpoint
+      const response = await api.get("/user/login", {
+        email: values.email,
+        password: values.password,
       })
+
+      const { token, userId } = response.data
+
+      // Store the token and user ID in localStorage
+      localStorage.setItem("token", token)
+      localStorage.setItem("userId", userId)
+
+      // Redirect the user to the dashboard or another authenticated page
+      navigate("/dashboard")
     } catch (error) {
       console.error("Login failed:", error)
+      setError("Invalid email or password") // Set error state to show a message
     } finally {
       setIsLoading(false)
     }
   }
-
   return (
     <>
       <Navbar />
