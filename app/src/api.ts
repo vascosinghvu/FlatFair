@@ -5,19 +5,20 @@ export const api: any = {
     return await fetch(url, {
       method: "GET",
       credentials: "include",
-      headers: { "Access-Control-Allow-Origin": "*", mode: "no-cors", authorization: `Bearer ${localStorage.getItem("token")}` },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      }
     })
       .then(async (res) => {
         if (!res.ok) {
           throw new Error("Network response was not ok")
         }
         const json = await res.json()
-        const response = {
+        return {
           data: json,
           status: res.status,
         }
-
-        return response
       })
       .catch((err) => {
         console.error("Error fetching data: ", err)
@@ -32,10 +33,10 @@ export const api: any = {
       method: "POST",
       credentials: "include",
       headers: {
-        "Content-Type": "application/json", // Proper header for JSON
-        authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
       },
-      body: JSON.stringify(payload), // Stringify the payload
+      body: JSON.stringify(payload)
     })
       .then((res) => {
         if (!res.ok) {
@@ -57,22 +58,22 @@ export const api: any = {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        mode: "no-cors",
-        authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
       },
-      body: data,
+      body: JSON.stringify(data)
     })
       .then(async (res) => {
+        if (!res.ok) {
+          throw new Error("Network response was not ok")
+        }
         const json = await res.json()
-        const response = {
+        return {
           data: json,
           status: res.status,
         }
-        return response
       })
       .catch((err) => {
-        console.error("Error posting data: ", err)
+        console.error("Error updating data: ", err)
         throw err
       })
   },
@@ -84,23 +85,20 @@ export const api: any = {
       method: "DELETE",
       credentials: "include",
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        mode: "no-cors",
-        authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
       },
-      body: data,
+      body: JSON.stringify(data)
     })
       .then(async (res) => {
         if (!res.ok) {
           throw new Error("Network response was not ok")
         }
         const json = await res.json()
-        const response = {
+        return {
           data: json,
           status: res.status,
         }
-
-        return response
       })
       .catch((err) => {
         console.error("Error deleting data: ", err)

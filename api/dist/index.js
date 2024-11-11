@@ -11,18 +11,15 @@ const allRoutes_1 = __importDefault(require("./routes/allRoutes"));
 const app = (0, express_1.default)();
 
 // CORS configuration
-const corsOptions = {
-    origin: [
-        'https://flat-fair-app-git-main-vasco-singhs-projects.vercel.app',
-        'http://localhost:3000'
-    ],
+app.use((0, cors_1.default)({
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
-};
+}));
 
-// Apply CORS middleware with options
-app.use((0, cors_1.default)(corsOptions));
+// Add preflight handler
+app.options('*', (0, cors_1.default)());
 
 app.use(express_1.default.json()); // To parse JSON bodies
 const port = process.env.PORT || 8000;
