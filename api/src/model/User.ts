@@ -4,7 +4,6 @@ import { Expense, IExpense } from "./Expense"
 
 // Define the IUser interface
 interface IUser extends Document {
-  auth0id: string
   name: string
   email: string
   groups: (Schema.Types.ObjectId | IGroup)[]
@@ -17,7 +16,6 @@ interface IUser extends Document {
 
 // Mongoose User Schema
 const userSchema: Schema<IUser> = new Schema({
-  auth0id: { type: String, required: true },
   name: { type: String, required: true },
   email: { type: String, required: true },
   balances: { type: Map<String, Number>, default: {} },

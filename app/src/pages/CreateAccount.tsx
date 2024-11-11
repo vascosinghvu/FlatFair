@@ -41,7 +41,7 @@ const CreateAccount = (): ReactElement => {
       console.log("Account creation submitted:", values)
 
       // Send POST request to your backend
-      const response = await api.post("/users/create-user", {
+      const response = await api.post("/user/create-user", {
         email: values.email,
         name: values.name,
         password: values.password, // Ensure this is hashed on the backend
