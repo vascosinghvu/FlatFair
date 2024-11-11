@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar"
 import AsyncSubmit from "../components/AsyncSubmit"
 import { api } from "../api"
 import React from "react"
+import { useNavigate } from "react-router-dom"
 
 interface LoginFormValues {
   email: string
@@ -19,6 +20,7 @@ const initialValues: LoginFormValues = {
 
 const Login = (): ReactElement => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const navigate = useNavigate()
 
   const validationSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -39,6 +41,8 @@ const Login = (): ReactElement => {
       console.error("Login failed:", error)
       setError("Invalid email or password") // Set error state to show a message
     } finally {
+      console.log("here")
+      navigate("/dashboard") // Redirect to the dashboard
       setIsLoading(false)
     }
   }
