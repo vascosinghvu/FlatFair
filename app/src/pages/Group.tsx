@@ -505,7 +505,13 @@ const Group = () => {
                       </div>
                     </div>
                     <div className="Purchase-item">
-                      {transaction.createdBy.name}
+                      {transaction.allocatedToUsers
+                        .map((user: any) => user.name.split(" ")[0]) // Extract first name
+                        .slice(0, 3) // Limit to first 3 names
+                        .join(", ") // Join with commas
+                        .concat(
+                          transaction.allocatedToUsers.length > 3 ? ", ..." : ""
+                        )}
                       <div className="Purchase-item-subtitle">
                         {transaction && transaction.description}
                       </div>
