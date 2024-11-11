@@ -4,15 +4,12 @@ import { BrowserRouter as Router } from "react-router-dom" // Use BrowserRouter 
 import "./styles/main.scss"
 import App from "./App"
 import reportWebVitals from "./reportWebVitals"
-import { Auth0ProviderWithNavigate } from "./pages/Auth0ProviderNavigate"
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
 root.render(
   <React.StrictMode>
     <Router>
-      <Auth0ProviderWithNavigate>
-        <App />
-      </Auth0ProviderWithNavigate>
+      <App />
     </Router>
   </React.StrictMode>
 )

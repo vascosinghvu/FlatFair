@@ -1,9 +1,8 @@
 import React, { useEffect, type ReactElement } from "react"
-import { useAuth0 } from "@auth0/auth0-react"
+import { useNavigate } from "react-router-dom"
 
 const Landing = (): ReactElement => {
-  const { loginWithRedirect } = useAuth0()
-
+  const navigate = useNavigate()
   return (
     <>
       <div className="FormWidget">
@@ -14,7 +13,7 @@ const Landing = (): ReactElement => {
             Login or create an account to get started.
             <div
               onClick={() => {
-                loginWithRedirect()
+                navigate("/login")
               }}
               className="Button Button-color--yellow-1000 Margin-top--30"
             >

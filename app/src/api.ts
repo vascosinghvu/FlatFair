@@ -4,7 +4,8 @@ export const api: any = {
 
     return await fetch(url, {
       method: "GET",
-      headers: { "Access-Control-Allow-Origin": "*", mode: "no-cors" },
+      credentials: "include",
+      headers: { "Access-Control-Allow-Origin": "*", mode: "no-cors", authorization: `Bearer ${localStorage.getItem("token")}` },
     })
       .then(async (res) => {
         if (!res.ok) {
@@ -29,20 +30,18 @@ export const api: any = {
 
     return await fetch(url, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json", // Proper header for JSON
+        authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify(payload), // Stringify the payload
     })
-      .then(async (res) => {
+      .then((res) => {
         if (!res.ok) {
           throw new Error("Network response was not ok")
         }
-        const json = await res.json()
-        return {
-          data: json,
-          status: res.status,
-        }
+        return res.json()
       })
       .catch((err) => {
         console.error("Error posting data: ", err)
@@ -55,10 +54,12 @@ export const api: any = {
 
     return await fetch(url, {
       method: "PUT",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         mode: "no-cors",
+        authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: data,
     })
@@ -81,9 +82,11 @@ export const api: any = {
 
     return await fetch(url, {
       method: "DELETE",
+      credentials: "include",
       headers: {
         "Access-Control-Allow-Origin": "*",
         mode: "no-cors",
+        authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: data,
     })

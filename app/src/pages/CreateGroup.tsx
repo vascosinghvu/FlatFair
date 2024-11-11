@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom"
 import * as yup from "yup"
 import { Formik, Form, Field } from "formik"
 import navigate from "react-router-dom"
+import { IUser } from "../types"
 
 interface GroupFormValues {
   groupName: string
@@ -53,28 +54,31 @@ const CreateGroup = (): ReactElement => {
 
     try {
       // Send POST request to the /create-group endpoint
-      const response = await api.post("/create-group", groupData)
+      const response = await api.post(
+        `/group/create-group`,
+        groupData
+      )
 
-      console.log("Group created successfully:", response.data)
-      const groupId = response.data.groupId
+      console.log("Group created successfully:", response)
+      // const groupId = response.groupId
 
       setSuccess(true) // Set success state to true
 
-      // Send invite emails to members after successful group creation
-      members.forEach(async (memberEmail) => {
-        const inviteLink = `https://flatfair.com/invite/${groupId}`
-        console.log("here")
-        const inviteResponse = await api.post("/send-invite", {
-          email: memberEmail,
-          inviteLink: inviteLink,
-          groupName: values.groupName,
-          groupId: groupId,
-        })
-        console.log(
-          `Invite to ${memberEmail} sent successfully:`,
-          inviteResponse.data
-        )
-      })
+      // // Send invite emails to members after successful group creation
+      // members.forEach(async (memberEmail) => {
+      //   const inviteLink = `https://flatfair.com/invite/${groupId}`
+      //   console.log("here")
+      //   const inviteResponse = await api.post("/user/send-invite", {
+      //     email: memberEmail,
+      //     inviteLink: inviteLink,
+      //     groupName: values.groupName,
+      //     groupId: groupId,
+      //   })
+      //   console.log(
+      //     `Invite to ${memberEmail} sent successfully:`,
+      //     inviteResponse.data
+      //   )
+      // })
 
       resetForm() // Reset the form after successful submission
       setMembers([]) // Clear the members array as well
@@ -85,6 +89,7 @@ const CreateGroup = (): ReactElement => {
       )
     } finally {
       setIsLoading(false) // Reset loading state
+      console.log("here")
       navigate("/dashboard") // Redirect to the groups page
     }
   }

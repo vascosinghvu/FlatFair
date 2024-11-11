@@ -18,22 +18,13 @@ const Group = () => {
   const [groupInfo, setGroupInfo] = useState<any>(null)
   const [memberMap, setMemberMap] = useState<any>({})
   const [memberInitialValues, setMemberInitialValues] = useState<any>([])
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/group/get-group/${groupid}`,
-          {
-            method: "GET", // GET request to retrieve data
-            credentials: "include", // Include credentials (cookies, etc.)
-          }
-        )
+        const response = await api.get(`/group/get-group/${groupid}`)
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`)
-        }
-
-        const data = await response.json() // Parse the JSON response
+        const data = response.data // Parse the JSON response
         console.log("Group Info:", data)
         // Store the response in a variable or state
         setGroupInfo(data.group) // Assuming you're using state to store the info
@@ -154,17 +145,7 @@ const Group = () => {
 
       // Send POST request to the /group/add-expense endpoint
       // const response = await api.post("/group/add-expense", finalData)
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/group/add-expense`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(finalData),
-        }
-      )
+      const response = await api.post(`/expense/add-expense`, finalData)
       console.log("Expense logged successfully:", response)
 
       setSuccess(true)
@@ -182,10 +163,10 @@ const Group = () => {
     role: string
   }
 
-  const members: Member[] = [
-    { name: "Charlotte Conze", role: "Admin" },
-    { name: "Vasco Singh", role: "Member" },
-  ]
+  // const members: Member[] = [
+  //   { name: "Charlotte Conze", role: "Admin" },
+  //   { name: "Vasco Singh", role: "Member" },
+  // ]
 
   // Custom validation logic to check split values
   const validateForm = (values: { members: any[]; cost: number }) => {
@@ -247,36 +228,36 @@ const Group = () => {
     status: string
   }
 
-  const transactions: GroupPurchase[] = [
-    {
-      timestamp: new Date("2024-10-21T22:54:00"), // 10:54 PM
-      name: "Charlotte Conze",
-      description: "Chipotle",
-      amount: 75.32,
-      status: "Pending",
-    },
-    {
-      timestamp: new Date("2024-10-21T09:15:00"), // 9:15 AM
-      name: "Vasco Singh",
-      description: "Starbucks",
-      amount: 15.67,
-      status: "Completed",
-    },
-    {
-      timestamp: new Date("2024-10-21T14:30:00"), // 2:30 PM
-      name: "Ryan Sullivan",
-      description: "Uber",
-      amount: 23.45,
-      status: "Pending",
-    },
-    {
-      timestamp: new Date("2024-10-21T17:45:00"), // 5:45 PM
-      name: "Brandon Chandler",
-      description: "Grocery Store",
-      amount: 48.12,
-      status: "Completed",
-    },
-  ]
+  // const transactions: GroupPurchase[] = [
+  //   {
+  //     timestamp: new Date("2024-10-21T22:54:00"), // 10:54 PM
+  //     name: "Charlotte Conze",
+  //     description: "Chipotle",
+  //     amount: 75.32,
+  //     status: "Pending",
+  //   },
+  //   {
+  //     timestamp: new Date("2024-10-21T09:15:00"), // 9:15 AM
+  //     name: "Vasco Singh",
+  //     description: "Starbucks",
+  //     amount: 15.67,
+  //     status: "Completed",
+  //   },
+  //   {
+  //     timestamp: new Date("2024-10-21T14:30:00"), // 2:30 PM
+  //     name: "Ryan Sullivan",
+  //     description: "Uber",
+  //     amount: 23.45,
+  //     status: "Pending",
+  //   },
+  //   {
+  //     timestamp: new Date("2024-10-21T17:45:00"), // 5:45 PM
+  //     name: "Brandon Chandler",
+  //     description: "Grocery Store",
+  //     amount: 48.12,
+  //     status: "Completed",
+  //   },
+  // ]
 
   return (
     <>

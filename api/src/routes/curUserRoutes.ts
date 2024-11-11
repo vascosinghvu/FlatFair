@@ -1,11 +1,12 @@
 // Description: Contains backend endpoints for the manage group page (/group)
 
-import express from 'express';
-import { requiresAuth } from 'express-openid-connect';
-import allController from '../controllers/allController';
+const express = require("express")
+const router = express.Router()
+import curUserController from "../controllers/userController"
+import { requiresAuth } from "express-openid-connect"
 
-const router = express.Router();
+// router.route("/get-groups").get(requiresAuth(), curUserController.getGroups)
 
-router.get('/', requiresAuth(), allController.getUser);
+router.route("/get-user").get(requiresAuth(), curUserController.getUser)
 
-export default router;
+export default router

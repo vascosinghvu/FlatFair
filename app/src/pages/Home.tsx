@@ -6,38 +6,40 @@ import AsyncSubmit from "../components/AsyncSubmit"
 import { useNavigate } from "react-router-dom"
 import Modal from "../components/Modal"
 import Icon from "../components/Icon"
-import { api } from "../api"
-import { User, useAuth0 } from "@auth0/auth0-react"
 
 import { IGroup, IExpense, IUser } from "../types"
-// import { API_URL } from "../config"
 
-const Dashboard = () => {
+const Home = () => {
   const [isModal, setIsModal] = useState(false)
   const navigate = useNavigate()
 
   // Get user info from backend
-  const [userInfo, setUserInfo] = useState<any>(null)
-
+  const [userInfo, setUserInfo] = useState<any>(null);
   useEffect(() => {
     const fetchUserInfo = async () => {
-      try {
-        const response = await api.get(`/user/get-user`)
-        console.log("Response:", response)
+        try {
+            const response = await fetch('http://localhost:8000/user/get-user', {
+                method: 'GET', // GET request to retrieve data
+                credentials: 'include', // Include credentials (cookies, etc.)
+            });
 
-        const data = await response.data // Parse the JSON response
-        console.log("User Info:", data)
-        // Store the response in a variable or state
-        setUserInfo(data.currentUser) // Assuming you're using state to store the info
-      } catch (error) {
-        console.error("Error fetching user info:", error)
-      }
-    }
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
 
-    fetchUserInfo() // Call the fetch function inside useEffect
-  }, []) // Empty dependency array to run once on component mount
+            const data = await response.json(); // Parse the JSON response
+            console.log("User Info:", data);
+            // Store the response in a variable or state
+            setUserInfo(data.currentUser); // Assuming you're using state to store the info
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+        }
+    };
 
-  console.log("CURRENT USER: ", userInfo)
+    fetchUserInfo(); // Call the fetch function inside useEffect
+  }, []); // Empty dependency array to run once on component mount
+
+  console.log("CURRENT USER: ", userInfo);
 
   interface UserTransaction {
     timestamp: Date
@@ -99,6 +101,25 @@ const Dashboard = () => {
     },
   ]
 
+  // interface Group {
+  //   name: string
+  //   members: string[]
+  //   canManage: boolean
+  // }
+
+  // const groups: Group[] = [
+  //   {
+  //     name: "Class Group 7",
+  //     members: ["Charlotte Conze", "Vasco Singh"],
+  //     canManage: true,
+  //   },
+  //   {
+  //     name: "Hiking Group",
+  //     members: ["Charlotte Conze", "Ryan Sullivan"],
+  //     canManage: true,
+  //   },
+  // ]
+
   function formatTime(date: Date): string {
     const hours = date.getHours()
     const minutes = date.getMinutes()
@@ -125,8 +146,11 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="Account-details">
-                <div className="Account-details-item">{userInfo.name}</div>
-                <div className="Account-details-item">{userInfo.email}</div>
+                <div className="Account-details-item">Charlotte Conze</div>
+                <div className="Account-details-item">
+                  charlotte.j.conze@vanderbilt.edu
+                </div>
+                <div className="Account-details-item">111-111-1111</div>
               </div>
 
               <div
@@ -181,29 +205,25 @@ const Dashboard = () => {
               <div className="Block-subtitle"> Manage your groups.</div>
               {console.log("CURRENT USER INFO:", userInfo)}
               {console.log("CURRENT USER GROUPS:", userInfo?.groups)}
-              {userInfo &&
-                userInfo.groups &&
-                userInfo.groups.map((group: IGroup, index: number) => (
-                  <div key={index} className="Home-group">
-                    <div className="Home-group-title">{group.groupName}</div>
-                    <div className="Home-group-body">
-                      {group.members
-                        .map((member) => {
-                          const user = member as IUser
-                          return user.name
-                        })
-                        .join(", ")}
-                    </div>
-                    <div
-                      className="Button Button--hollow Button-color--maroon-1000"
-                      onClick={() => {
-                        navigate(`/group/${group._id}`)
-                      }}
-                    >
-                      Manage Group
-                    </div>
+              {userInfo && userInfo.groups && userInfo.groups.map((group: IGroup, index: number) => (
+                <div key={index} className="Home-group">
+                  <div className="Home-group-title">{group.groupName}</div>
+                  <div className="Home-group-body">
+                    {group.members.map((member) => {
+                      const user = member as IUser
+                      return user.name;
+                    }).join(", ")}
                   </div>
-                ))}
+                  <div
+                    className="Button Button--hollow Button-color--maroon-1000"
+                    onClick={() => {
+                      navigate(`/group/${group._id}`)
+                    }}
+                  >
+                    Manage Group
+                  </div>
+                </div>
+              ))}
 
               <div
                 onClick={() => {
@@ -221,4 +241,4 @@ const Dashboard = () => {
   )
 }
 
-export default Dashboard
+export default Home
