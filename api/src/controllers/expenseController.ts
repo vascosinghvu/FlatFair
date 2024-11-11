@@ -56,6 +56,7 @@ const createExpense = async (req: any, res: Response) => {
     createdBy: currentUser?._id,
     date: Date.parse(date),
     allocatedTo: allocatedTo,
+    allocatedToUsers: Array.from(allocatedTo.keys()),
   })
 
   // Save the new expense

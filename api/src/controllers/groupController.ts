@@ -19,16 +19,13 @@ export const getGroup = async (req: Request, res: Response) => {
   const group = await Group.findById(groupID)
     .populate("members")
     .populate({
-      path: "expenses", // First, populate the 'expenses' field
-      populate: [
-        {
-            path: "createdBy", // Populate the 'createdBy' field inside 'expenses'
-        },
-        {
-            path: "allocatedTo", // Populate the 'allocatedTo' field inside 'expenses'
-        },
-      ],
-    })
+        path: "expenses",
+        populate: [
+            { path: "createdBy" }, // Populate the 'createdBy' field
+            { path: "allocatedToUsers" }, // Populate the 'allocatedToUsers' field
+        ],
+    });
+
 
   if (!group) {
     return res.status(404).json({

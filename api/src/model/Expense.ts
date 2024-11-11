@@ -14,6 +14,7 @@ interface IExpense extends Document {
     receipt: File;
     date: Date;
     allocatedTo: Map<(Schema.Types.ObjectId | IUser), number>;
+    allocatedToUsers: (Schema.Types.ObjectId | IUser)[];
 
     addReceipt(receipt: File): Promise<void>;
     editExpense(newAmount: number, newDescription: string): Promise<void>;
@@ -34,9 +35,11 @@ const expenseSchema: Schema<IExpense> = new Schema({
     date: { type: Date, default: Date.now },
     allocatedTo: {
         type: Map,
-        of: Number,  // A map of User ObjectId and allocation amount
+        of: Number,  // A map of User ObjectId and allocation amount 
         required: true
-    }
+    },
+    allocatedToUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],  // Reference to User
+
 });
 
 // Method to add a receipt to the expense
