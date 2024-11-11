@@ -1,110 +1,41 @@
-export const api: any = {
-  get: async (route: string): Promise<any> => {
-    const url = `${process.env.REACT_APP_API_URL as string}${route}`
+// Fix the BASE_URL by ensuring no trailing slash
+const BASE_URL = 'https://flat-fair-api-git-app-3-vasco-singhs-projects.vercel.app';
 
-    return await fetch(url, {
-      method: "GET",
-      credentials: "include",
-      headers: { "Access-Control-Allow-Origin": "*", mode: "no-cors", authorization: `Bearer ${localStorage.getItem("token")}` },
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok")
-        }
-        const json = await res.json()
-        const response = {
-          data: json,
-          status: res.status,
-        }
-
-        return response
-      })
-      .catch((err) => {
-        console.error("Error fetching data: ", err)
-        throw err
-      })
-  },
-
-  post: async (route: string, payload: any): Promise<any> => {
-    const url = `${process.env.REACT_APP_API_URL as string}${route}`
-
-    return await fetch(url, {
-      method: "POST",
-      credentials: "include",
+// Update the fetch functions to properly handle endpoint paths
+export const fetchData = async (endpoint: string) => {
+  // Ensure endpoint starts with a single slash
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  
+  try {
+    const response = await fetch(`${BASE_URL}${path}`, {
       headers: {
-        "Content-Type": "application/json", // Proper header for JSON
-        authorization: `Bearer ${localStorage.getItem("token")}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload), // Stringify the payload
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok")
-        }
-        return res.json()
-      })
-      .catch((err) => {
-        console.error("Error posting data: ", err)
-        throw err
-      })
-  },
+      credentials: 'include'
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching data: ', error);
+    throw error;
+  }
+};
 
-  put: async (route: string, data: any): Promise<any> => {
-    const url = `${process.env.REACT_APP_API_URL as string}${route}`
-
-    return await fetch(url, {
-      method: "PUT",
-      credentials: "include",
+export const postData = async (endpoint: string, data: any) => {
+  // Ensure endpoint starts with a single slash
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  
+  try {
+    const response = await fetch(`${BASE_URL}${path}`, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        mode: "no-cors",
-        authorization: `Bearer ${localStorage.getItem("token")}`,
+        'Content-Type': 'application/json',
       },
-      body: data,
-    })
-      .then(async (res) => {
-        const json = await res.json()
-        const response = {
-          data: json,
-          status: res.status,
-        }
-        return response
-      })
-      .catch((err) => {
-        console.error("Error posting data: ", err)
-        throw err
-      })
-  },
-
-  delete: async (route: string, data: any): Promise<any> => {
-    const url = `${process.env.REACT_APP_API_URL as string}${route}`
-
-    return await fetch(url, {
-      method: "DELETE",
-      credentials: "include",
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        mode: "no-cors",
-        authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: data,
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok")
-        }
-        const json = await res.json()
-        const response = {
-          data: json,
-          status: res.status,
-        }
-
-        return response
-      })
-      .catch((err) => {
-        console.error("Error deleting data: ", err)
-        throw err
-      })
-  },
-}
+      credentials: 'include',
+      body: JSON.stringify(data)
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Error posting data: ', error);
+    throw error;
+  }
+};

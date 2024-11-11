@@ -1,9 +1,22 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const routes = require('./src/routes/allRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+
+app.use(cors({
+  origin: [
+    'https://flat-fair-p2ln97z62-vasco-singhs-projects.vercel.app',
+    'http://localhost:3000' // For local development
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.options('*', cors());
 
 app.use(express.json());
 app.use('/api', routes);
