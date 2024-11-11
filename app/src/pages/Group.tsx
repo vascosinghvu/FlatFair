@@ -173,11 +173,6 @@ const Group = () => {
     }
   }
 
-  interface Member {
-    name: string
-    role: string
-  }
-
   // Custom validation logic to check split values
   const validateForm = (values: { members: any[]; cost: number }) => {
     let errors = {}
@@ -220,16 +215,6 @@ const Group = () => {
     return errors
   }
 
-  function formatTime(date: Date): string {
-    date = new Date(date)
-    const hours = date.getHours()
-    const minutes = date.getMinutes()
-    const period = hours >= 12 ? "PM" : "AM"
-    const formattedHours = hours % 12 || 12 // Convert to 12-hour format
-    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes
-    return `${formattedHours}:${formattedMinutes} ${period}`
-  }
-
   const handleSettleUp = (user: string | null) => {
     if (!user) return
     // Logic to settle up with the selected user
@@ -248,166 +233,165 @@ const Group = () => {
           subheader="Log a new expense for your group"
           action={() => setIsModal(false)}
           body={
-            <Formik
-              initialValues={initialValues}
-              validationSchema={validationSchema}
-              validate={validateForm}
-              onSubmit={handleSubmit}
-            >
-              {({ values, errors, touched, isSubmitting }) => (
-                <Form>
-                  <div className="Form-group">
-                    <label htmlFor="item">Item/Activity</label>
-                    <Field
-                      className="Form-input-box"
-                      type="text"
-                      id="item"
-                      name="item"
-                    />
-                    {errors.item && touched.item && (
-                      <div className="Form-error">{errors.item}</div>
-                    )}
-                  </div>
-
-                  <div className="Form-group">
-                    <label htmlFor="cost">Amount ($)</label>
-                    <Field
-                      className="Form-input-box"
-                      type="number"
-                      id="cost"
-                      name="cost"
-                    />
-                    {errors.cost && touched.cost && (
-                      <div className="Form-error">{errors.cost}</div>
-                    )}
-                  </div>
-
-                  <div className="Form-group">
-                    <label htmlFor="date">Date</label>
-                    <Field
-                      className="Form-input-box"
-                      type="date"
-                      id="date"
-                      name="date"
-                    />
-                    {errors.date && touched.date && (
-                      <div className="Form-error">{errors.date}</div>
-                    )}
-                  </div>
-
-                  {/* Selection for Split Method */}
-                  <div className="Text-fontSize--14 Margin-bottom--4">
-                    Split Type
-                  </div>
-                  <div className="Flex Flex-row Margin-bottom--20 Justify-content--spaceBetween">
-                    <div
-                      className={
-                        selection === "Equally"
-                          ? "Button Button--hollow Button-color--green-1000"
-                          : "Button Button-color--green-1000"
-                      }
-                      onClick={() => {
-                        setSelection("Equally")
-                      }}
-                    >
-                      Equally
-                    </div>
-                    <div
-                      className={
-                        selection === "By Percent"
-                          ? "Button Button--hollow Button-color--green-1000"
-                          : "Button Button-color--green-1000"
-                      }
-                      onClick={() => {
-                        setSelection("By Percent")
-                      }}
-                    >
-                      By Percent
-                    </div>
-                    <div
-                      className={
-                        selection === "Manual"
-                          ? "Button Button--hollow Button-color--green-1000"
-                          : "Button Button-color--green-1000"
-                      }
-                      onClick={() => {
-                        setSelection("Manual")
-                      }}
-                    >
-                      Manual
-                    </div>
-                  </div>
-
-                  {/* Show different inputs based on selection */}
-                  <div className="Form-group">
-                    <label htmlFor="members">Members</label>
-                    <FieldArray
-                      name="members"
-                      render={() => (
-                        <div className="Flex Flex-column">
-                          {values.members
-                            .filter()
-                            .map((member: IUser, index: number) => (
-                              <div key={index} className="Flex Flex-column">
-                                <div className="Flex-row Margin-y--10">
-                                  <Field
-                                    type="checkbox"
-                                    name={`members[${index}].selected`}
-                                    checked={values.members[index].selected}
-                                  />
-                                  {member.name}
-                                </div>
-
-                                {/* Conditionally show inputs based on selection */}
-                                {values.members[index].selected &&
-                                  selection !== "Equally" && (
-                                    <Field
-                                      className="Form-input-box"
-                                      type="number"
-                                      name={`members[${index}].splitValue`}
-                                      placeholder={
-                                        selection === "By Percent"
-                                          ? "Enter %"
-                                          : "Enter amount"
-                                      }
-                                    />
-                                  )}
-                              </div>
-                            ))}
-                        </div>
+            <>
+              <Formik
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                validate={validateForm}
+                onSubmit={handleSubmit}
+              >
+                {({ values, errors, touched, isSubmitting }) => (
+                  <Form>
+                    <div className="Form-group">
+                      <label htmlFor="item">Item/Activity</label>
+                      <Field
+                        className="Form-input-box"
+                        type="text"
+                        id="item"
+                        name="item"
+                      />
+                      {errors.item && touched.item && (
+                        <div className="Form-error">{errors.item}</div>
                       )}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="Button Button-color--dark-1000 Width--100"
-                    disabled={
-                      Object.keys(errors).length > 0 ||
-                      !Object.keys(touched).length ||
-                      isSubmitting
-                    }
-                    // Disable button if there are errors or no fields are touched or form is submitting
-                  >
-                    {isSubmitting ? (
-                      <AsyncSubmit loading={isLoading} />
-                    ) : (
-                      "Log Expense"
-                    )}
-                  </button>
-
-                  {errorMessage && (
-                    <div className="Form-error">{errorMessage}</div>
-                  )}
-
-                  {success && (
-                    <div className="Form-success">
-                      Expense logged successfully!
                     </div>
-                  )}
-                </Form>
-              )}
-            </Formik>
+
+                    <div className="Form-group">
+                      <label htmlFor="cost">Amount ($)</label>
+                      <Field
+                        className="Form-input-box"
+                        type="number"
+                        id="cost"
+                        name="cost"
+                      />
+                      {errors.cost && touched.cost && (
+                        <div className="Form-error">{errors.cost}</div>
+                      )}
+                    </div>
+
+                    <div className="Form-group">
+                      <label htmlFor="date">Date</label>
+                      <Field
+                        className="Form-input-box"
+                        type="date"
+                        id="date"
+                        name="date"
+                      />
+                      {errors.date && touched.date && (
+                        <div className="Form-error">{errors.date}</div>
+                      )}
+                    </div>
+
+                    {/* Selection for Split Method */}
+                    <div className="Text-fontSize--14 Margin-bottom--4">
+                      Split Type
+                    </div>
+                    <div className="Flex Flex-row Margin-bottom--20 Justify-content--spaceBetween">
+                      <div
+                        className={
+                          selection === "Equally"
+                            ? "Button Button--hollow Button-color--green-1000"
+                            : "Button Button-color--green-1000"
+                        }
+                        onClick={() => {
+                          setSelection("Equally")
+                        }}
+                      >
+                        Equally
+                      </div>
+                      <div
+                        className={
+                          selection === "By Percent"
+                            ? "Button Button--hollow Button-color--green-1000"
+                            : "Button Button-color--green-1000"
+                        }
+                        onClick={() => {
+                          setSelection("By Percent")
+                        }}
+                      >
+                        By Percent
+                      </div>
+                      <div
+                        className={
+                          selection === "Manual"
+                            ? "Button Button--hollow Button-color--green-1000"
+                            : "Button Button-color--green-1000"
+                        }
+                        onClick={() => {
+                          setSelection("Manual")
+                        }}
+                      >
+                        Manual
+                      </div>
+                    </div>
+
+                    {/* Show different inputs based on selection */}
+                    <div className="Form-group">
+                      <label htmlFor="members">Members</label>
+                      <FieldArray
+                        name="members"
+                        render={() => (
+                          <div className="Flex Flex-column">
+                            {(values.members || []).map(
+                              (member: IUser, index: number) => (
+                                <div key={index} className="Flex Flex-column">
+                                  <div className="Flex-row Margin-y--10">
+                                    <Field
+                                      type="checkbox"
+                                      name={`members[${index}].selected`}
+                                    />
+                                    {member.name}
+                                  </div>
+                                  {values.members[index].selected &&
+                                    selection !== "Equally" && (
+                                      <Field
+                                        className="Form-input-box"
+                                        type="number"
+                                        name={`members[${index}].splitValue`}
+                                        placeholder={
+                                          selection === "By Percent"
+                                            ? "Enter %"
+                                            : "Enter amount"
+                                        }
+                                      />
+                                    )}
+                                </div>
+                              )
+                            )}
+                          </div>
+                        )}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="Button Button-color--dark-1000 Width--100"
+                      disabled={
+                        Object.keys(errors).length > 0 ||
+                        !Object.keys(touched).length ||
+                        isSubmitting
+                      }
+                      // Disable button if there are errors or no fields are touched or form is submitting
+                    >
+                      {isSubmitting ? (
+                        <AsyncSubmit loading={isLoading} />
+                      ) : (
+                        "Log Expense"
+                      )}
+                    </button>
+
+                    {errorMessage && (
+                      <div className="Form-error">{errorMessage}</div>
+                    )}
+
+                    {success && (
+                      <div className="Form-success">
+                        Expense logged successfully!
+                      </div>
+                    )}
+                  </Form>
+                )}
+              </Formik>
+            </>
           }
         />
       )}
