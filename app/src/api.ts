@@ -49,7 +49,8 @@ export const api: any = {
         throw err
       })
   },
-
+  
+  // async
   put: async (route: string, data: any): Promise<any> => {
     const url = `${process.env.REACT_APP_API_URL as string}${route}`
 
