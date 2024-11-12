@@ -30,7 +30,10 @@ const Group = () => {
   const [errorMessage, setErrorMessage] = useState("")
   const [settleModal, setSettleModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
+  const [selectedMember, setSelectedMember] = useState<IUser>()
   const [addMemberModal, setAddMemberModal] = useState(false)
+  const [expenseModal, setExpenseModal] = useState(false)
+  const [currExpense, setCurrExpense] = useState<IExpense>()
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -42,6 +45,7 @@ const Group = () => {
         // console.log("User Info:", data)
         // Store the response in a variable or state
         setUserInfo(data.currentUser) // Assuming you're using state to store the info
+        console.log(data.currentUser, "USER INFO")
       } catch (error) {
         console.error("Error fetching user info:", error)
       }
@@ -105,7 +109,7 @@ const Group = () => {
     date: yup.string().required("Please select a date"),
   })
 
-  const handleSubmit = async (values: any, { resetForm }: any) => {
+  const addExpense = async (values: any, { resetForm }: any) => {
     setIsLoading(true)
     setErrorMessage("") // Clear error message at the start of submission
 
@@ -172,6 +176,8 @@ const Group = () => {
       console.error("Error submitting:", error)
     } finally {
       setIsLoading(false)
+      // close modal
+      setIsModal(false)
     }
   }
 
@@ -227,6 +233,50 @@ const Group = () => {
     setSettleModal(false) // Close the modal
   }
 
+  const deleteMember = async (userID: string) => {
+    try {
+      // Call the delete-member API with the correct key
+      const response = await api.post(`/group/delete-member/${groupid}`, {
+        userID, // Ensure this matches what the backend expects
+      })
+      console.log("Member deleted successfully:", response.data)
+
+      // Update the groupInfo state to remove the deleted member
+      setGroupInfo((prev: { members: any[] }) => ({
+        ...prev,
+        members: prev.members.filter((member) => member._id !== userID),
+      }))
+
+      setEditModal(false) // Close the modal after deletion
+    } catch (error) {
+      console.error("Error deleting member:", error)
+      alert("Failed to delete member")
+    }
+  }
+
+  const deleteExpense = async (expense: IExpense | undefined) => {
+    if (!expense) return
+
+    try {
+      // Use DELETE method for consistency
+      const response = await api.delete(
+        `/expense/delete-expense/${expense._id}`
+      )
+      console.log("Expense deleted successfully:", response.data)
+
+      // Update the groupInfo state to remove the deleted expense
+      setGroupInfo((prev: { expenses: any[] }) => ({
+        ...prev,
+        expenses: prev.expenses.filter((item) => item._id !== expense._id),
+      }))
+
+      setExpenseModal(false) // Close the modal after deletion
+    } catch (error) {
+      console.error("Error deleting expense:", error)
+      alert("Failed to delete expense")
+    }
+  }
+
   return (
     <>
       {isModal && (
@@ -240,7 +290,7 @@ const Group = () => {
                 initialValues={initialValues}
                 validationSchema={validationSchema}
                 validate={validateForm}
-                onSubmit={handleSubmit}
+                onSubmit={addExpense}
               >
                 {({ values, errors, touched, isSubmitting }) => (
                   <Form>
@@ -448,6 +498,18 @@ const Group = () => {
           header="Manage Group Member"
           subheader="Edit the role of a group member"
           action={() => setEditModal(false)}
+          body={
+            <>
+              <div
+                className="Button Button-color--red-1000"
+                onClick={() => {
+                  deleteMember(selectedMember?._id ?? "")
+                }}
+              >
+                Delete Member
+              </div>
+            </>
+          }
         />
       )}
       {addMemberModal && (
@@ -479,6 +541,11 @@ const Group = () => {
                     )
 
                     console.log("Member added successfully:", response.data)
+                    // Update members state
+                    setMemberMap((prevMembers: any) => [
+                      ...prevMembers,
+                      response.data.newMember,
+                    ])
 
                     resetForm() // Reset form after success
                   } catch (error) {
@@ -532,7 +599,29 @@ const Group = () => {
             </>
           }
         />
-      )}{" "}
+      )}
+
+      {expenseModal && (
+        /* Add Expense Modal */
+        <Modal
+          header={currExpense?.description}
+          subheader="View and manage this expense"
+          action={() => setExpenseModal(false)}
+          body={
+            <>
+              <div
+                className="Button Button-color--red-1000"
+                onClick={() => {
+                  deleteExpense(currExpense)
+                }}
+              >
+                Delete Expense
+              </div>
+            </>
+          }
+        ></Modal>
+      )}
+
       <Navbar />
       <div className="Group">
         <div className="Group-top">
@@ -565,12 +654,20 @@ const Group = () => {
                       {member.role}
                     </div>
                   </div>
-                  <div
-                    className="Group-icon"
-                    onClick={() => setEditModal(true)}
-                  >
-                    <Icon glyph="ellipsis-v" />
-                  </div>
+
+                  {/* Conditionally render edit icon if member is not the current user */}
+                  {member._id !== userInfo?._id && ( // Replace currentUserId with your current user's ID
+                    <div
+                      className="Group-icon"
+                      onClick={() => {
+                        setEditModal(true)
+                        setSelectedMember(member)
+                        console.log("Selected Member:", member)
+                      }}
+                    >
+                      <Icon glyph="ellipsis-v" />
+                    </div>
+                  )}
                 </div>
               ))}
 
@@ -587,7 +684,14 @@ const Group = () => {
             <div className="Group-header">Group Purchase History</div>
             {groupInfo &&
               groupInfo.expenses.map((transaction: any, index: number) => (
-                <div key={index} className="Card Purchase">
+                <div
+                  key={index}
+                  className="Card Purchase"
+                  onClick={() => {
+                    setExpenseModal(true)
+                    setCurrExpense(transaction)
+                  }}
+                >
                   <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
                     <div className="Purchase-item " style={{ width: 75 }}>
                       {new Date(transaction.date).toLocaleDateString("en-US")}

@@ -12,7 +12,7 @@ interface IGroup extends Document {
   leader: Schema.Types.ObjectId | IUser
 
   addMember(user: IUser): Promise<void>
-  // removeMember(userID: string): Promise<void>;
+  removeMember(userID: string): Promise<void>
   // notifyNewExpense(expense: IExpense): Promise<void>;
   // viewGroupBalance(): Promise<number>;
   // viewSettledAndUnsettledExpenses(): Promise<{ settled: IExpense[]; unsettled: IExpense[] }>;
@@ -37,10 +37,15 @@ groupSchema.methods.addMember = async function (user: IUser): Promise<void> {
 }
 
 // // Method to remove a member from the group by userID
-// groupSchema.methods.removeMember = async function (userID: Schema.Types.ObjectId): Promise<void> {
-//     this.members = this.members.filter((member: IUser) => member._id !== userID);
-//     await this.save();  // Persist changes
-// };
+groupSchema.methods.removeMember = async function (
+  userID: Schema.Types.ObjectId
+): Promise<void> {
+  this.members = this.members.filter(
+    (member: { _id: { toString: () => string } }) =>
+      member._id.toString() !== userID.toString()
+  )
+  await this.save() // Persist changes
+}
 
 // // Method to notify members of a new expense
 // // NEEDS TO NOTIFY MEMBERS

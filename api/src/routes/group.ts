@@ -16,4 +16,8 @@ router
   .route("/add-member/:groupID")
   .post(verifyToken, groupController.addMember)
 
+router
+  .route("/delete-member/:groupID")
+  .post(verifyToken, groupController.deleteMember)
+
 export default router

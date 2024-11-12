@@ -78,6 +78,15 @@
     &:not(:last-child) {
         margin-bottom: 10px;
     }
+
+    &:hover {
+        cursor: pointer;
+        // add a shadow on hover
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+        // make the transformation smooth
+        transition: all 0.3s ease;
+        transform: translateY(-5px);
+    }
 }
 
 .Account {

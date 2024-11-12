@@ -173,10 +173,47 @@ export const addMember = async (req: Request, res: Response) => {
   }
 }
 
+export const deleteMember = async (req: Request, res: Response) => {
+  const { groupID } = req.params
+  const { userID } = req.body
+
+  if (!groupID || !userID) {
+    return res
+      .status(400)
+      .json({ message: "Group ID and User ID are required" })
+  }
+
+  try {
+    // Find the group by ID
+    const group = await Group.findById(groupID)
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" })
+    }
+
+    // Use the `removeMember` method to remove the user
+    await group.removeMember(userID)
+
+    // Optionally, remove the group from the user's list of groups
+    const user = await User.findById(userID)
+    if (user) {
+      user.groups = user.groups.filter((group) => group.toString() !== groupID)
+      await user.save()
+    }
+
+    return res.status(200).json({ message: "Member removed successfully" })
+  } catch (error) {
+    console.error("Error removing member:", error)
+    return res
+      .status(500)
+      .json({ message: "An error occurred while removing the member" })
+  }
+}
+
 // default export
 export default {
   getGroup,
   getGroups,
   createGroup,
   addMember,
+  deleteMember,
 }
