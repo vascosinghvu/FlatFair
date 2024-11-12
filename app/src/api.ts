@@ -1,24 +1,20 @@
 export const api: any = {
   get: async (route: string): Promise<any> => {
     const url = `${process.env.REACT_APP_API_URL as string}${route}`
+    const token = localStorage.getItem("token")
 
     return await fetch(url, {
       method: "GET",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
+        "Authorization": token ? `Bearer ${token}` : ''
       }
     })
       .then(async (res) => {
         if (!res.ok) {
           throw new Error("Network response was not ok")
         }
-        const json = await res.json()
-        return {
-          data: json,
-          status: res.status,
-        }
+        return res.json()
       })
       .catch((err) => {
         console.error("Error fetching data: ", err)
@@ -28,13 +24,13 @@ export const api: any = {
 
   post: async (route: string, payload: any): Promise<any> => {
     const url = `${process.env.REACT_APP_API_URL as string}${route}`
+    const token = localStorage.getItem("token")
 
     return await fetch(url, {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
+        "Authorization": token ? `Bearer ${token}` : ''
       },
       body: JSON.stringify(payload)
     })
@@ -56,7 +52,6 @@ export const api: any = {
 
     return await fetch(url, {
       method: "PUT",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -84,7 +79,6 @@ export const api: any = {
 
     return await fetch(url, {
       method: "DELETE",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${localStorage.getItem("token")}`
