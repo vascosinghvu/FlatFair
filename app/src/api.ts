@@ -3,6 +3,8 @@ export const api: any = {
     const url = `${process.env.REACT_APP_API_URL as string}${route}`
     const token = localStorage.getItem("token")
 
+    console.log("Token being sent:", token)
+
     return await fetch(url, {
       method: "GET",
       headers: {
@@ -12,7 +14,15 @@ export const api: any = {
     })
       .then(async (res) => {
         if (!res.ok) {
-          throw new Error("Network response was not ok")
+          console.error('Response status:', res.status)
+          const errorText = await res.text()
+          console.error('Error details:', errorText)
+          
+          if (res.status === 401) {
+            localStorage.removeItem("token")
+            // window.location.href = '/login'
+          }
+          throw new Error(`Server error: ${res.status}`)
         }
         return res.json()
       })
@@ -34,11 +44,17 @@ export const api: any = {
       },
       body: JSON.stringify(payload)
     })
-      .then((res) => {
+      .then(async (res) => {
         if (!res.ok) {
-          throw new Error("Network response was not ok")
+          const errorText = await res.text()
+          console.error('Error details:', errorText)
+          throw new Error(`Server error: ${res.status}`)
         }
-        return res.json()
+        const data = await res.json()
+        if (data.token) {
+          localStorage.setItem("token", data.token)
+        }
+        return data
       })
       .catch((err) => {
         console.error("Error posting data: ", err)

@@ -49,7 +49,15 @@ const CreateAccount = (): ReactElement => {
         password: values.password, // Ensure this is hashed on the backend
       })
 
-      console.log("Account created successfully:")
+      console.log("Account created successfully:", response)
+
+      // Save token if it's returned
+      if (response.token) {
+        localStorage.setItem("token", response.token)
+      }
+
+      // Navigate to dashboard
+      navigate("/dashboard")
     } catch (error) {
       console.error(
         "Account creation failed:",
@@ -57,7 +65,6 @@ const CreateAccount = (): ReactElement => {
       )
     } finally {
       setIsLoading(false)
-      navigate("/dashboard") // Redirect to the dashboard
     }
   }
 
