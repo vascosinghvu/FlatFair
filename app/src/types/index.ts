@@ -13,6 +13,7 @@ export interface IExpense {
   date: Date
   status: string
   createdBy: IUser
+  allocatedTo: IUser[]
 }
 
 export interface IGroup {

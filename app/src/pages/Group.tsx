@@ -601,25 +601,50 @@ const Group = () => {
         />
       )}
 
-      {expenseModal && (
-        /* Add Expense Modal */
+      {expenseModal && currExpense && (
         <Modal
-          header={currExpense?.description}
+          header={currExpense.description || "Expense Details"}
           subheader="View and manage this expense"
           action={() => setExpenseModal(false)}
           body={
-            <>
+            <div className="Expense-details">
+              <div className="Expense-info">
+                <div>
+                  <strong>Amount:</strong> ${currExpense.amount.toFixed(2)}
+                </div>
+                <div>
+                  <strong>Date:</strong>{" "}
+                  {new Date(currExpense.date).toLocaleDateString("en-US")}
+                </div>
+                <div>
+                  <strong>Status:</strong> {currExpense.status || "N/A"}
+                </div>
+              </div>
+
+              <div className="Expense-allocated">
+                <strong>Allocated To:</strong>
+                {/* <ul>
+                  {currExpense.allocatedTo.map((user: any) => (
+                    <li key={user._id}>
+                      {user.name}: ${currExpense.allocatedTo[user._id]}
+                    </li>
+                  ))}
+                </ul> */}
+              </div>
+
+              <div className="Expense-created-by">
+                <strong>Created By:</strong> {currExpense.createdBy.name}
+              </div>
+
               <div
-                className="Button Button-color--red-1000"
-                onClick={() => {
-                  deleteExpense(currExpense)
-                }}
+                className="Button Button-color--red-1000 Margin-top--20"
+                onClick={() => deleteExpense(currExpense)}
               >
                 Delete Expense
               </div>
-            </>
+            </div>
           }
-        ></Modal>
+        />
       )}
 
       <Navbar />
@@ -689,6 +714,7 @@ const Group = () => {
                   className="Card Purchase"
                   onClick={() => {
                     setExpenseModal(true)
+                    console.log("Selected Expense:", transaction)
                     setCurrExpense(transaction)
                   }}
                 >
