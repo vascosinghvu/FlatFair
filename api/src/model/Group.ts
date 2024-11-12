@@ -11,7 +11,7 @@ interface IGroup extends Document {
   expenses: (Schema.Types.ObjectId | IExpense)[]
   leader: Schema.Types.ObjectId | IUser
 
-  // addMember(user: IUser): Promise<void>;
+  addMember(user: IUser): Promise<void>
   // removeMember(userID: string): Promise<void>;
   // notifyNewExpense(expense: IExpense): Promise<void>;
   // viewGroupBalance(): Promise<number>;
@@ -28,13 +28,13 @@ const groupSchema: Schema<IGroup> = new Schema({
   leader: { type: Schema.Types.ObjectId, ref: User.modelName, required: true }, // Leader of the group
 })
 
-// // Method to add a member to the group
-// groupSchema.methods.addMember = async function (user: IUser): Promise<void> {
-//     if (!this.members.includes(user._id)) {
-//         this.members.push(user._id);  // Add user to the members array
-//         await this.save();  // Persist changes
-//     }
-// };
+// Method to add a member to the group
+groupSchema.methods.addMember = async function (user: IUser): Promise<void> {
+  if (!this.members.includes(user._id)) {
+    this.members.push(user._id) // Add user to the members array
+    await this.save() // Persist changes
+  }
+}
 
 // // Method to remove a member from the group by userID
 // groupSchema.methods.removeMember = async function (userID: Schema.Types.ObjectId): Promise<void> {

@@ -5,8 +5,6 @@ const Navbar = (): ReactElement => {
   const navigate = useNavigate()
   const isLoggedIn = !!localStorage.getItem("token") // Simple check for a token
 
-  console.log("Is logged in:", isLoggedIn)
-
   // check if user is logged in with the jwt token
 
   return (

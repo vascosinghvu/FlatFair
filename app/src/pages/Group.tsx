@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom"
 import { IGroup, IExpense, IUser } from "../types"
 import Icon from "../components/Icon"
 import { Button } from "react-bootstrap"
+import { error } from "console"
 
 const Group = () => {
   const { groupid } = useParams()
@@ -29,15 +30,16 @@ const Group = () => {
   const [errorMessage, setErrorMessage] = useState("")
   const [settleModal, setSettleModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
+  const [addMemberModal, setAddMemberModal] = useState(false)
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const response = await api.get(`/user/get-user`)
-        console.log("Response:", response)
+        // console.log("Response:", response)
 
         const data = await response.data // Parse the JSON response
-        console.log("User Info:", data)
+        // console.log("User Info:", data)
         // Store the response in a variable or state
         setUserInfo(data.currentUser) // Assuming you're using state to store the info
       } catch (error) {
@@ -83,8 +85,8 @@ const Group = () => {
     fetchUserInfo() // Call the fetch function inside useEffect
   }, []) // Empty dependency array to run once on component mount
 
-  console.log("CURRENT GROUP: ", groupInfo)
-  console.log("user info: ", userInfo)
+  // console.log("CURRENT GROUP: ", groupInfo)
+  // console.log("user info: ", userInfo)
 
   // console.log("Members:", groupInfo?.members)
   const initialValues = {
@@ -395,7 +397,6 @@ const Group = () => {
           }
         />
       )}
-
       {settleModal && (
         <Modal
           header="Settle Up"
@@ -442,7 +443,6 @@ const Group = () => {
           }
         />
       )}
-
       {isEditModal && (
         <Modal
           header="Manage Group Member"
@@ -450,12 +450,96 @@ const Group = () => {
           action={() => setEditModal(false)}
         />
       )}
+      {addMemberModal && (
+        <Modal
+          header="Add Member"
+          subheader="Add a new member to the group"
+          action={() => setAddMemberModal(false)}
+          body={
+            <>
+              <Formik
+                initialValues={{ email: "" }}
+                validationSchema={yup.object({
+                  email: yup
+                    .string()
+                    .email("Invalid email address")
+                    .required("Email is required"),
+                })}
+                onSubmit={async (
+                  values,
+                  { setSubmitting, setFieldError, resetForm }
+                ) => {
+                  console.log("Adding member:", values.email)
+                  try {
+                    setIsLoading(true) // Show loading state
 
+                    const response = await api.post(
+                      `/group/add-member/${groupid}`, // Ensure `groupid` is valid
+                      { email: values.email } // Correctly format request body
+                    )
+
+                    console.log("Member added successfully:", response.data)
+
+                    resetForm() // Reset form after success
+                  } catch (error) {
+                    console.error(
+                      "Error adding member:",
+                      error instanceof Error
+                        ? error.message
+                        : "An unknown error occurred"
+                    )
+
+                    const errorMessage =
+                      (error as any)?.response?.data?.message ||
+                      "Failed to add member"
+
+                    setFieldError("email", errorMessage) // Show error on the form field
+                  } finally {
+                    setIsLoading(false) // Reset loading state
+                    setSubmitting(false) // Form is no longer submitting
+                    setAddMemberModal(false) // Close the modal
+                  }
+                }}
+              >
+                {({ errors, touched, isSubmitting }) => (
+                  <Form>
+                    <div className="Form-group">
+                      <label htmlFor="email">Email</label>
+                      <Field
+                        className="Form-input-box"
+                        type="email"
+                        id="email"
+                        name="email"
+                      />
+                      {errors.email && touched.email && (
+                        <div className="Form-error">{errors.email}</div>
+                      )}
+                    </div>
+                    <button
+                      type="submit"
+                      className="Button Button-color--dark-1000 Width--100"
+                      disabled={isSubmitting || isLoading}
+                    >
+                      {isSubmitting || isLoading ? (
+                        <AsyncSubmit loading={isLoading} />
+                      ) : (
+                        "Add Member"
+                      )}
+                    </button>
+                  </Form>
+                )}
+              </Formik>
+            </>
+          }
+        />
+      )}{" "}
       <Navbar />
       <div className="Group">
         <div className="Group-top">
-          <div className="Group-top-title">Class Group 7</div>
-          <div className="Group-top-subtitle">Group Description</div>
+          <div className="Group-top-title">{groupInfo?.groupDescription}</div>
+          <div className="Group-top-subtitle">
+            Manage your group and add expenses.
+          </div>
         </div>
         <div className="row d-flex">
           <div className="col-lg-3">
@@ -464,7 +548,7 @@ const Group = () => {
               groupInfo.members.map((member: any, index: number) => (
                 <div
                   key={member._id}
-                  className="Card Flex Flex-row Margin-bottom--20 Flex-row--verticallyCentered"
+                  className="Card Flex Flex-row Margin-bottom--10 Flex-row--verticallyCentered"
                 >
                   <div className="Purchase-item">
                     <div
@@ -489,6 +573,15 @@ const Group = () => {
                   </div>
                 </div>
               ))}
+
+            <div
+              className="Button Button-color--dark-1000"
+              onClick={() => {
+                setAddMemberModal(true)
+              }}
+            >
+              Add Member
+            </div>
           </div>
           <div className="col-lg-6">
             <div className="Group-header">Group Purchase History</div>
