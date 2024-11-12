@@ -14,17 +14,15 @@ export const api: any = {
     })
       .then(async (res) => {
         if (!res.ok) {
-          console.error('Response status:', res.status)
           const errorText = await res.text()
           console.error('Error details:', errorText)
-          
-          if (res.status === 401) {
-            localStorage.removeItem("token")
-            // window.location.href = '/login'
-          }
           throw new Error(`Server error: ${res.status}`)
         }
-        return res.json()
+        const json = await res.json()
+        return {
+          data: json,
+          status: res.status
+        }
       })
       .catch((err) => {
         console.error("Error fetching data: ", err)
@@ -123,3 +121,4 @@ export const api: any = {
       })
   },
 }
+
