@@ -36,6 +36,9 @@ export const api: any = {
     const url = `${process.env.REACT_APP_API_URL as string}${route}`
     const token = localStorage.getItem("token")
 
+    console.log("Making POST request to:", url)
+    console.log("With payload:", payload)
+
     return await fetch(url, {
       method: "POST",
       headers: {
@@ -45,19 +48,22 @@ export const api: any = {
       body: JSON.stringify(payload)
     })
       .then(async (res) => {
-        if (!res.ok) {
-          const errorText = await res.text()
-          console.error('Error details:', errorText)
-          throw new Error(`Server error: ${res.status}`)
-        }
         const data = await res.json()
+        console.log("Response from server:", data)
+
+        if (!res.ok) {
+          console.error('Error response:', data)
+          throw new Error(data.message || `Server error: ${res.status}`)
+        }
+
         if (data.token) {
+          console.log("Saving token:", data.token)
           localStorage.setItem("token", data.token)
         }
         return data
       })
       .catch((err) => {
-        console.error("Error posting data: ", err)
+        console.error("Error in request:", err)
         throw err
       })
   },

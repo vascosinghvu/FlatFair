@@ -54,7 +54,20 @@ const CreateAccount = (): ReactElement => {
       // Save token if it's returned
       if (response.token) {
         localStorage.setItem("token", response.token)
+      } else {
+        // If no token in response, try login
+        const loginResponse = await api.post("/user/login", {
+          email: values.email,
+          password: values.password
+        })
+        console.log("Login response:", loginResponse) // Debug log
+        
+        if (loginResponse.token) {
+          localStorage.setItem("token", loginResponse.token)
+        }
       }
+
+      console.log("Current token:", localStorage.getItem("token")) // Debug log
 
       // Navigate to dashboard
       navigate("/dashboard")
