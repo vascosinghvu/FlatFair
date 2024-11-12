@@ -21,11 +21,3 @@ export interface IGroup {
   members: IUser[]
   expenses?: IExpense[]
 }
-
-export interface Auth0User {
-  sub: string // Unique user ID
-  email?: string // User's email
-  name?: string // User's name
-  picture?: string // User's profile picture
-  [key: string]: any // Allow other optional claims or custom claims
-}
