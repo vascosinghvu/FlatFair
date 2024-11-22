@@ -229,5 +229,68 @@ const getExpensesBtwUsers = async (req: any, res: Response) => {
   })
 }
 
+const settleExpenses = async (req: any, res: Response) => {
+  const { userId2 } = req.params
+
+  // Validate request body
+  if (!userId2) {
+    return res.status(400).json({
+      message: "Invalid data. Please provide both user IDs.",
+    })
+  }
+
+  // Find the user with the provided user ID
+  const userId = (req as any).user.userId
+  const currentUser = await User.findOne({ _id: userId })
+  const user2 = await User.findById(userId2)
+
+  if (!currentUser || !user2) {
+    return res.status(404).json({
+      message: "User not found",
+    })
+  }
+
+  const expenseIds = Array.from(currentUser.balances.get(userId2) || [])
+
+  // Get the expenses between the two users
+  const expenses = await Expense.find({
+      _id: { $in: expenseIds },
+      $or: [
+        { [`statusMap.${userId}`]: "Pending" }, // Check if status[userId] is "Pending"
+        { [`statusMap.${userId2}`]: "Pending" } // Check if status[userId2] is "Pending"
+      ]
+    })
+    .populate("createdBy")
+    .populate("allocatedToUsers")
+
+  // Settle the expenses
+  expenses.forEach(async (expense: IExpense) => {
+    if (String((expense.createdBy as IUser)._id) === String(currentUser._id)) {
+      expense.statusMap.set(userId2, "Settled")
+    } else {
+      expense.statusMap.set(userId, "Settled")
+    }
+    // Check if there are any pending statuses left
+    let allSettled = true
+    for (const [key, value] of expense.statusMap) {
+      if (value === "Pending") {
+        allSettled = false
+        break
+      }
+    }
+    // If all statuses are settled, set the expense status to "Settled"
+    if (allSettled) {
+      expense.status = "Settled"
+    }
+    await expense.save()
+  })
+
+  return res.status(200).json({
+    message: "Expenses settled successfully",
+    expenses,
+    totalAmountOwed: 0,
+  })
+}
+
 // Export the controller functions
-export { createExpense, deleteExpense, getExpensesBtwUsers }
+export { createExpense, deleteExpense, getExpensesBtwUsers, settleExpenses }
