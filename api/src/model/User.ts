@@ -8,7 +8,7 @@ interface IUser extends Document {
   email: string
   groups: (Schema.Types.ObjectId | IGroup)[]
   friends: (Schema.Types.ObjectId | IUser)[]
-  balances: { [friend: string]: number }
+  balances: Map<string, (Schema.Types.ObjectId | IExpense)[]> // Map of friend ID to expenses they share
   expenses: (Schema.Types.ObjectId | IExpense)[]
   addFriend: (friendId: string) => Promise<void>
   password: string
@@ -18,7 +18,10 @@ interface IUser extends Document {
 const userSchema: Schema<IUser> = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
-  balances: { type: Map<String, Number>, default: {} },
+  balances: { type: Map,
+    of: [{ type: Schema.Types.ObjectId, ref: "Expense" }],
+    default: () => new Map(), 
+  },
   groups: [{ type: Schema.Types.ObjectId, ref: "Group" }],
   friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
   expenses: [{ type: Schema.Types.ObjectId, ref: "Expense" }],
