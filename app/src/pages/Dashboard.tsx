@@ -23,22 +23,24 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await api.get('/user/get-user');
-        if (response.data && response.data.currentUser) {
-          setUserInfo(response.data.currentUser);
-          setTransactions(response.data.currentUser.expenses || []);
+        const response = await api.get(`/user/get-user`)
+        console.log("Full response:", response)
+
+        if (response && response.data && response.data.currentUser) {
+          setUserInfo(response.data.currentUser)
+          setTransactions(response.data.currentUser.expenses || [])
         } else {
-          console.error('Invalid response format:', response);
+          console.error("Invalid response structure:", response)
         }
       } catch (error) {
-        console.error('Error fetching user info:', error);
+        console.error("Error fetching user info:", error)
         // Optionally redirect to login or show error message
         // navigate('/login');
       }
-    };
+    }
 
-    fetchUserInfo();
-  }, []);
+    fetchUserInfo()
+  }, [])
 
   console.log("CURRENT USER: ", userInfo)
   console.log(transactions)
