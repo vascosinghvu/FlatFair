@@ -68,16 +68,34 @@ const createExpense = async (req: any, res: Response) => {
 
   // Add the expense to each user's expenses array
   const payingUser = await User.findById(newExpense.createdBy)
+  console.log("PAYING USER:", payingUser)
   for (const { memberID, amountDue } of memberBreakdown) {
+    console.log("MEMBER ID:", memberID)
+    console.log("AMOUNT DUE:", amountDue)
     const user = await User.findById(memberID)
+    console.log("Loop user:", user)
     if (user) {
+      console.log("User balances before:", user.balances)
       user.expenses.push(newExpense._id)
       //check if the user is the creator of the expense, otherwise update the balances
-      if (user._id !== newExpense.createdBy) {
-        user.balances[String(payingUser?._id!)] =
-          (user.balances[String(newExpense.createdBy)] || 0) + amountDue
+      console.log("User ID:", user._id)
+      console.log("Expense ID:", newExpense._id)
+      console.log("Created by:", newExpense.createdBy)
+      if (String(user._id) !== String(newExpense.createdBy)) {
+        
+        console.log("Updating balances")
+        if (!user.balances.get(String(payingUser?._id!))) {
+          console.log("Creating new balance array")
+          user.balances.set(String(payingUser?._id!), [])
+          payingUser!.balances.set(String(user._id), [])
+          console.log("User balances after:", user.balances)
+        }
+        user.balances.get(String(payingUser?._id!))!.push(newExpense._id)
+        payingUser!.balances.get(String(user._id))!.push(newExpense._id)
       }
+      console.log("User balances after:", user.balances)
       await user.save()
+      await payingUser!.save()
     }
   }
 
@@ -87,5 +105,38 @@ const createExpense = async (req: any, res: Response) => {
   })
 }
 
+const getExpensesBtwUsers = async (req: any, res: Response) => {
+  const { userId2 } = req.params
+
+  // Validate request body
+  if (!userId2) {
+    return res.status(400).json({
+      message: "Invalid data. Please provide both user IDs.",
+    })
+  }
+
+  // Find the user with the provided user ID
+  const currentUser = await User.findOne({ _id: (req as any).user.userId })
+  const user2 = await User.findById(userId2)
+
+  if (!currentUser || !user2) {
+    return res.status(404).json({
+      message: "User not found",
+    })
+  }
+
+  const expenseIds = Array.from(currentUser.balances.get(userId2) || [])
+
+  // Get the expenses between the two users
+  const expenses = await Expense.find({ _id: { $in: expenseIds } })
+    .populate("createdBy")
+    .populate("allocatedToUsers")
+
+  return res.status(200).json({
+    message: "Expenses found",
+    expenses,
+  })
+}
+
 // Export the controller functions
-export { createExpense }
+export { createExpense, getExpensesBtwUsers }

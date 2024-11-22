@@ -17,4 +17,8 @@ router
   .route("/add-expense")
   .post(verifyToken, expenseController.createExpense)
 
+router
+  .route("/get-expenses-between-users/:userId2")
+  .get(verifyToken, expenseController.getExpensesBtwUsers)
+
 export default router
