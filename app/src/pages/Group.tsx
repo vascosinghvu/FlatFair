@@ -542,10 +542,10 @@ const Group = () => {
 
                     console.log("Member added successfully:", response.data)
                     // Update members state
-                    setMemberMap((prevMembers: any) => [
-                      ...prevMembers,
-                      response.data.newMember,
-                    ])
+                    // setMemberMap((prevMembers: any) => [
+                    //   ...prevMembers,
+                    //   response.data.newMember,
+                    // ])
 
                     resetForm() // Reset form after success
                   } catch (error) {
