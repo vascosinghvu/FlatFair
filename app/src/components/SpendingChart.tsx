@@ -48,7 +48,6 @@ const SpendingChart = ({ transactions }: { transactions: IExpense[] }) => {
 
   return (
     <div style={{ width: "100%", height: 200 }}>
-      <h3>User Spending by Month</h3>
       <ResponsiveContainer>
         <LineChart data={spendingData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#415458" />
