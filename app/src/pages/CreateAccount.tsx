@@ -42,28 +42,29 @@ const CreateAccount = (): ReactElement => {
     try {
       console.log("Account creation submitted:", values)
 
-      // Send POST request to your backend
-      await api.post("/user/create-user", {
+      // Store the response from the POST request
+      const response = await api.post("/user/create-user", {
         email: values.email,
         name: values.name,
         password: values.password, // Ensure this is hashed on the backend
       })
 
-      console.log("Account created successfully:", response)
+      console.log("Account created successfully:", response.data)
 
       // Save token if it's returned
-      if (response.token) {
-        localStorage.setItem("token", response.token)
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token)
       } else {
         // If no token in response, try login
         const loginResponse = await api.post("/user/login", {
           email: values.email,
-          password: values.password
+          password: values.password,
         })
-        console.log("Login response:", loginResponse) // Debug log
-        
-        if (loginResponse.token) {
-          localStorage.setItem("token", loginResponse.token)
+
+        console.log("Login response:", loginResponse.data) // Debug log
+
+        if (loginResponse.data.token) {
+          localStorage.setItem("token", loginResponse.data.token)
         }
       }
 
