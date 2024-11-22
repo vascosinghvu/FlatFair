@@ -1,12 +1,9 @@
 import React, { type ReactElement } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAuth0 } from "@auth0/auth0-react"
 
 const Navbar = (): ReactElement => {
   const navigate = useNavigate()
   const isLoggedIn = !!localStorage.getItem("token") // Simple check for a token
-
-  console.log("Is logged in:", isLoggedIn)
 
   // check if user is logged in with the jwt token
 

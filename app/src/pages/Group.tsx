@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom"
 import { IGroup, IExpense, IUser } from "../types"
 import Icon from "../components/Icon"
 import { Button } from "react-bootstrap"
+import { error } from "console"
 
 const Group = () => {
   const { groupid } = useParams()
@@ -29,17 +30,18 @@ const Group = () => {
   const [errorMessage, setErrorMessage] = useState("")
   const [settleModal, setSettleModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
+  const [selectedMember, setSelectedMember] = useState<IUser>()
+  const [addMemberModal, setAddMemberModal] = useState(false)
+  const [expenseModal, setExpenseModal] = useState(false)
+  const [currExpense, setCurrExpense] = useState<IExpense>()
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await api.get(`/user/get-user`)
-        console.log("Response:", response)
-
-        const data = await response.data // Parse the JSON response
-        console.log("User Info:", data)
-        // Store the response in a variable or state
-        setUserInfo(data.currentUser) // Assuming you're using state to store the info
+        const response = await api.get("/user/get-user")
+        if (response.data && response.data.currentUser) {
+          setUserInfo(response.data.currentUser)
+        }
       } catch (error) {
         console.error("Error fetching user info:", error)
       }
@@ -83,8 +85,8 @@ const Group = () => {
     fetchUserInfo() // Call the fetch function inside useEffect
   }, []) // Empty dependency array to run once on component mount
 
-  console.log("CURRENT GROUP: ", groupInfo)
-  console.log("user info: ", userInfo)
+  // console.log("CURRENT GROUP: ", groupInfo)
+  // console.log("user info: ", userInfo)
 
   // console.log("Members:", groupInfo?.members)
   const initialValues = {
@@ -103,7 +105,7 @@ const Group = () => {
     date: yup.string().required("Please select a date"),
   })
 
-  const handleSubmit = async (values: any, { resetForm }: any) => {
+  const addExpense = async (values: any, { resetForm }: any) => {
     setIsLoading(true)
     setErrorMessage("") // Clear error message at the start of submission
 
@@ -170,6 +172,8 @@ const Group = () => {
       console.error("Error submitting:", error)
     } finally {
       setIsLoading(false)
+      // close modal
+      setIsModal(false)
     }
   }
 
@@ -225,6 +229,50 @@ const Group = () => {
     setSettleModal(false) // Close the modal
   }
 
+  const deleteMember = async (userID: string) => {
+    try {
+      // Call the delete-member API with the correct key
+      const response = await api.post(`/group/delete-member/${groupid}`, {
+        userID, // Ensure this matches what the backend expects
+      })
+      console.log("Member deleted successfully:", response.data)
+
+      // Update the groupInfo state to remove the deleted member
+      setGroupInfo((prev: { members: any[] }) => ({
+        ...prev,
+        members: prev.members.filter((member) => member._id !== userID),
+      }))
+
+      setEditModal(false) // Close the modal after deletion
+    } catch (error) {
+      console.error("Error deleting member:", error)
+      alert("Failed to delete member")
+    }
+  }
+
+  const deleteExpense = async (expense: IExpense | undefined) => {
+    if (!expense) return
+
+    try {
+      // Use DELETE method for consistency
+      const response = await api.delete(
+        `/expense/delete-expense/${expense._id}`
+      )
+      console.log("Expense deleted successfully:", response.data)
+
+      // Update the groupInfo state to remove the deleted expense
+      setGroupInfo((prev: { expenses: any[] }) => ({
+        ...prev,
+        expenses: prev.expenses.filter((item) => item._id !== expense._id),
+      }))
+
+      setExpenseModal(false) // Close the modal after deletion
+    } catch (error) {
+      console.error("Error deleting expense:", error)
+      alert("Failed to delete expense")
+    }
+  }
+
   return (
     <>
       {isModal && (
@@ -238,7 +286,7 @@ const Group = () => {
                 initialValues={initialValues}
                 validationSchema={validationSchema}
                 validate={validateForm}
-                onSubmit={handleSubmit}
+                onSubmit={addExpense}
               >
                 {({ values, errors, touched, isSubmitting }) => (
                   <Form>
@@ -395,7 +443,6 @@ const Group = () => {
           }
         />
       )}
-
       {settleModal && (
         <Modal
           header="Settle Up"
@@ -442,20 +489,167 @@ const Group = () => {
           }
         />
       )}
-
       {isEditModal && (
         <Modal
           header="Manage Group Member"
           subheader="Edit the role of a group member"
           action={() => setEditModal(false)}
+          body={
+            <>
+              <div
+                className="Button Button-color--red-1000"
+                onClick={() => {
+                  deleteMember(selectedMember?._id ?? "")
+                }}
+              >
+                Delete Member
+              </div>
+            </>
+          }
+        />
+      )}
+      {addMemberModal && (
+        <Modal
+          header="Add Member"
+          subheader="Add a new member to the group"
+          action={() => setAddMemberModal(false)}
+          body={
+            <>
+              <Formik
+                initialValues={{ email: "" }}
+                validationSchema={yup.object({
+                  email: yup
+                    .string()
+                    .email("Invalid email address")
+                    .required("Email is required"),
+                })}
+                onSubmit={async (
+                  values,
+                  { setSubmitting, setFieldError, resetForm }
+                ) => {
+                  console.log("Adding member:", values.email)
+                  try {
+                    setIsLoading(true) // Show loading state
+
+                    const response = await api.post(
+                      `/group/add-member/${groupid}`, // Ensure `groupid` is valid
+                      { email: values.email } // Correctly format request body
+                    )
+
+                    console.log("Member added successfully:", response.data)
+                    // Update members state
+                    // setMemberMap((prevMembers: any) => [
+                    //   ...prevMembers,
+                    //   response.data.newMember,
+                    // ])
+
+                    resetForm() // Reset form after success
+                  } catch (error) {
+                    console.error(
+                      "Error adding member:",
+                      error instanceof Error
+                        ? error.message
+                        : "An unknown error occurred"
+                    )
+
+                    const errorMessage =
+                      (error as any)?.response?.data?.message ||
+                      "Failed to add member"
+
+                    setFieldError("email", errorMessage) // Show error on the form field
+                  } finally {
+                    setIsLoading(false) // Reset loading state
+                    setSubmitting(false) // Form is no longer submitting
+                    setAddMemberModal(false) // Close the modal
+                  }
+                }}
+              >
+                {({ errors, touched, isSubmitting }) => (
+                  <Form>
+                    <div className="Form-group">
+                      <label htmlFor="email">Email</label>
+                      <Field
+                        className="Form-input-box"
+                        type="email"
+                        id="email"
+                        name="email"
+                      />
+                      {errors.email && touched.email && (
+                        <div className="Form-error">{errors.email}</div>
+                      )}
+                    </div>
+                    <button
+                      type="submit"
+                      className="Button Button-color--dark-1000 Width--100"
+                      disabled={isSubmitting || isLoading}
+                    >
+                      {isSubmitting || isLoading ? (
+                        <AsyncSubmit loading={isLoading} />
+                      ) : (
+                        "Add Member"
+                      )}
+                    </button>
+                  </Form>
+                )}
+              </Formik>
+            </>
+          }
+        />
+      )}
+
+      {expenseModal && currExpense && (
+        <Modal
+          header={currExpense.description || "Expense Details"}
+          subheader="View and manage this expense"
+          action={() => setExpenseModal(false)}
+          body={
+            <div className="Expense-details">
+              <div className="Expense-info">
+                <div>
+                  <strong>Amount:</strong> ${currExpense.amount.toFixed(2)}
+                </div>
+                <div>
+                  <strong>Date:</strong>{" "}
+                  {new Date(currExpense.date).toLocaleDateString("en-US")}
+                </div>
+                <div>
+                  <strong>Status:</strong> {currExpense.status || "N/A"}
+                </div>
+              </div>
+
+              <div className="Expense-allocated">
+                <strong>Allocated To:</strong>
+                {/* <ul>
+                  {currExpense.allocatedTo.map((user: any) => (
+                    <li key={user._id}>
+                      {user.name}: ${currExpense.allocatedTo[user._id]}
+                    </li>
+                  ))}
+                </ul> */}
+              </div>
+
+              <div className="Expense-created-by">
+                <strong>Created By:</strong> {currExpense.createdBy.name}
+              </div>
+
+              <div
+                className="Button Button-color--red-1000 Margin-top--20"
+                onClick={() => deleteExpense(currExpense)}
+              >
+                Delete Expense
+              </div>
+            </div>
+          }
         />
       )}
 
       <Navbar />
       <div className="Group">
         <div className="Group-top">
-          <div className="Group-top-title">Class Group 7</div>
-          <div className="Group-top-subtitle">Group Description</div>
+          <div className="Group-top-title">{groupInfo?.groupDescription}</div>
+          <div className="Group-top-subtitle">
+            Manage your group and add expenses.
+          </div>
         </div>
         <div className="row d-flex">
           <div className="col-lg-3">
@@ -464,7 +658,7 @@ const Group = () => {
               groupInfo.members.map((member: any, index: number) => (
                 <div
                   key={member._id}
-                  className="Card Flex Flex-row Margin-bottom--20 Flex-row--verticallyCentered"
+                  className="Card Flex Flex-row Margin-bottom--10 Flex-row--verticallyCentered"
                 >
                   <div className="Purchase-item">
                     <div
@@ -481,20 +675,45 @@ const Group = () => {
                       {member.role}
                     </div>
                   </div>
-                  <div
-                    className="Group-icon"
-                    onClick={() => setEditModal(true)}
-                  >
-                    <Icon glyph="ellipsis-v" />
-                  </div>
+
+                  {/* Conditionally render edit icon if member is not the current user */}
+                  {member._id !== userInfo?._id && ( // Replace currentUserId with your current user's ID
+                    <div
+                      className="Group-icon"
+                      onClick={() => {
+                        setEditModal(true)
+                        setSelectedMember(member)
+                        console.log("Selected Member:", member)
+                      }}
+                    >
+                      <Icon glyph="ellipsis-v" />
+                    </div>
+                  )}
                 </div>
               ))}
+
+            <div
+              className="Button Button-color--dark-1000"
+              onClick={() => {
+                setAddMemberModal(true)
+              }}
+            >
+              Add Member
+            </div>
           </div>
           <div className="col-lg-6">
             <div className="Group-header">Group Purchase History</div>
             {groupInfo &&
               groupInfo.expenses.map((transaction: any, index: number) => (
-                <div key={index} className="Card Purchase">
+                <div
+                  key={index}
+                  className="Card Purchase"
+                  onClick={() => {
+                    setExpenseModal(true)
+                    console.log("Selected Expense:", transaction)
+                    setCurrExpense(transaction)
+                  }}
+                >
                   <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
                     <div className="Purchase-item " style={{ width: 75 }}>
                       {new Date(transaction.date).toLocaleDateString("en-US")}

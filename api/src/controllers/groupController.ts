@@ -19,13 +19,12 @@ export const getGroup = async (req: Request, res: Response) => {
   const group = await Group.findById(groupID)
     .populate("members")
     .populate({
-        path: "expenses",
-        populate: [
-            { path: "createdBy" }, // Populate the 'createdBy' field
-            { path: "allocatedToUsers" }, // Populate the 'allocatedToUsers' field
-        ],
-    });
-
+      path: "expenses",
+      populate: [
+        { path: "createdBy" }, // Populate the 'createdBy' field
+        { path: "allocatedToUsers" }, // Populate the 'allocatedToUsers' field
+      ],
+    })
 
   if (!group) {
     return res.status(404).json({
@@ -137,9 +136,84 @@ export const createGroup = async (req: any, res: Response) => {
   })
 }
 
+export const addMember = async (req: Request, res: Response) => {
+  const { groupID } = req.params
+  const { email } = req.body
+
+  if (!groupID || !email) {
+    return res.status(400).json({
+      message: "Invalid data. Please provide group ID and member email.",
+    })
+  }
+
+  try {
+    const group = await Group.findById(groupID)
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" })
+    }
+
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "User not found with provided email" })
+    }
+
+    await group.addMember(user) // Use the addMember method
+
+    return res.status(200).json({
+      message: "Member added successfully",
+      group,
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({
+      message: "An error occurred while adding the member",
+    })
+  }
+}
+
+export const deleteMember = async (req: Request, res: Response) => {
+  const { groupID } = req.params
+  const { userID } = req.body
+
+  if (!groupID || !userID) {
+    return res
+      .status(400)
+      .json({ message: "Group ID and User ID are required" })
+  }
+
+  try {
+    // Find the group by ID
+    const group = await Group.findById(groupID)
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" })
+    }
+
+    // Use the `removeMember` method to remove the user
+    await group.removeMember(userID)
+
+    // Optionally, remove the group from the user's list of groups
+    const user = await User.findById(userID)
+    if (user) {
+      user.groups = user.groups.filter((group) => group.toString() !== groupID)
+      await user.save()
+    }
+
+    return res.status(200).json({ message: "Member removed successfully" })
+  } catch (error) {
+    console.error("Error removing member:", error)
+    return res
+      .status(500)
+      .json({ message: "An error occurred while removing the member" })
+  }
+}
+
 // default export
 export default {
   getGroup,
   getGroups,
   createGroup,
+  addMember,
+  deleteMember,
 }

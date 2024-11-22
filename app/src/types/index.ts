@@ -13,6 +13,7 @@ export interface IExpense {
   date: Date
   status: string
   createdBy: IUser
+  allocatedTo: IUser[]
 }
 
 export interface IGroup {
@@ -20,12 +21,4 @@ export interface IGroup {
   groupName: string
   members: IUser[]
   expenses?: IExpense[]
-}
-
-export interface Auth0User {
-  sub: string // Unique user ID
-  email?: string // User's email
-  name?: string // User's name
-  picture?: string // User's profile picture
-  [key: string]: any // Allow other optional claims or custom claims
 }

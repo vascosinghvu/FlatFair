@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from "react"
-import { Formik, Form, Field, FieldArray } from "formik"
-import * as yup from "yup"
 import Navbar from "../components/Navbar"
-import AsyncSubmit from "../components/AsyncSubmit"
 import { useNavigate } from "react-router-dom"
-import Modal from "../components/Modal"
 import Icon from "../components/Icon"
 import { api } from "../api"
-import { User, useAuth0 } from "@auth0/auth0-react"
 
 import { IGroup, IExpense, IUser } from "../types"
 // import { API_URL } from "../config"
 
 const Dashboard = () => {
-  const [isModal, setIsModal] = useState(false)
   const navigate = useNavigate()
 
   // Get user info from backend
@@ -25,7 +19,7 @@ const Dashboard = () => {
       try {
         const response = await api.get(`/user/get-user`)
         console.log("Full response:", response)
-        
+
         if (response && response.data && response.data.currentUser) {
           setUserInfo(response.data.currentUser)
           setTransactions(response.data.currentUser.expenses || [])
@@ -34,6 +28,8 @@ const Dashboard = () => {
         }
       } catch (error) {
         console.error("Error fetching user info:", error)
+        // Optionally redirect to login or show error message
+        // navigate('/login');
       }
     }
 
@@ -42,15 +38,6 @@ const Dashboard = () => {
 
   console.log("CURRENT USER: ", userInfo)
   console.log(transactions)
-
-  function formatTime(date: Date): string {
-    const hours = date.getHours()
-    const minutes = date.getMinutes()
-    const period = hours >= 12 ? "PM" : "AM"
-    const formattedHours = hours % 12 || 12 // Convert to 12-hour format
-    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes
-    return `${formattedHours}:${formattedMinutes} ${period}`
-  }
 
   return (
     <>

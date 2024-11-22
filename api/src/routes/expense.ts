@@ -13,8 +13,12 @@ const axios = require("axios").default
 // }),
 //   requiresAuth()
 
-router
-  .route("/add-expense")
-  .post(verifyToken, expenseController.createExpense)
+router.route("/add-expense").post(verifyToken, expenseController.createExpense)
+
+router.delete(
+  "/delete-expense/:expenseID",
+  verifyToken,
+  expenseController.deleteExpense
+)
 
 export default router

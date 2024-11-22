@@ -5,8 +5,6 @@ import { api } from "../api"
 import { useNavigate } from "react-router-dom"
 import * as yup from "yup"
 import { Formik, Form, Field } from "formik"
-import navigate from "react-router-dom"
-import { IUser } from "../types"
 
 interface GroupFormValues {
   groupName: string
@@ -54,10 +52,7 @@ const CreateGroup = (): ReactElement => {
 
     try {
       // Send POST request to the /create-group endpoint
-      const response = await api.post(
-        `/group/create-group`,
-        groupData
-      )
+      const response = await api.post(`/group/create-group`, groupData)
 
       console.log("Group created successfully:", response)
       // const groupId = response.groupId

@@ -87,5 +87,31 @@ const createExpense = async (req: any, res: Response) => {
   })
 }
 
+// delete expense
+const deleteExpense = async (req: Request, res: Response) => {
+  const { expenseID } = req.params
+
+  if (!expenseID) {
+    return res.status(400).json({
+      message: "Invalid data. Please provide expense ID.",
+    })
+  }
+
+  try {
+    const expense = await Expense.findByIdAndDelete(expenseID)
+    if (!expense) {
+      return res.status(404).json({ message: "Expense not found" })
+    }
+
+    return res.status(200).json({
+      message: "Expense deleted successfully",
+      expenseID: expense._id,
+    })
+  } catch (error) {
+    console.error("Error deleting expense:", error)
+    return res.status(500).json({ message: "Internal server error", error })
+  }
+}
+
 // Export the controller functions
-export { createExpense }
+export { createExpense, deleteExpense }

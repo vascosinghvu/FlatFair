@@ -9,19 +9,19 @@ export const api: any = {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": token ? `Bearer ${token}` : ''
-      }
+        Authorization: token ? `Bearer ${token}` : "",
+      },
     })
       .then(async (res) => {
         if (!res.ok) {
           const errorText = await res.text()
-          console.error('Error details:', errorText)
+          console.error("Error details:", errorText)
           throw new Error(`Server error: ${res.status}`)
         }
         const json = await res.json()
         return {
           data: json,
-          status: res.status
+          status: res.status,
         }
       })
       .catch((err) => {
@@ -41,16 +41,16 @@ export const api: any = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": token ? `Bearer ${token}` : ''
+        Authorization: token ? `Bearer ${token}` : "",
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     })
       .then(async (res) => {
         const data = await res.json()
         console.log("Response from server:", data)
 
         if (!res.ok) {
-          console.error('Error response:', data)
+          console.error("Error response:", data)
           throw new Error(data.message || `Server error: ${res.status}`)
         }
 
@@ -65,7 +65,7 @@ export const api: any = {
         throw err
       })
   },
-  
+
   // async
   put: async (route: string, data: any): Promise<any> => {
     const url = `${process.env.REACT_APP_API_URL as string}${route}`
@@ -74,9 +74,9 @@ export const api: any = {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     })
       .then(async (res) => {
         if (!res.ok) {
@@ -101,9 +101,9 @@ export const api: any = {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     })
       .then(async (res) => {
         if (!res.ok) {
@@ -121,4 +121,3 @@ export const api: any = {
       })
   },
 }
-

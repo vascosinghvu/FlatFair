@@ -6,14 +6,18 @@ import { verifyToken } from "../config/authMiddleware"
 import groupController from "../controllers/groupController"
 import { requiresAuth } from "express-openid-connect"
 
-router
-  .route("/get-group/:groupID")
-  .get(verifyToken, groupController.getGroup)
+router.route("/get-group/:groupID").get(verifyToken, groupController.getGroup)
 
 // router.route("/add-expense").post(requiresAuth(), groupController.createExpense)
 
 // router.route('/create-group').post(allController.createGroup)
-router.route('/create-group').post(verifyToken, groupController.createGroup)
+router.route("/create-group").post(verifyToken, groupController.createGroup)
+router
+  .route("/add-member/:groupID")
+  .post(verifyToken, groupController.addMember)
 
+router
+  .route("/delete-member/:groupID")
+  .post(verifyToken, groupController.deleteMember)
 
 export default router
