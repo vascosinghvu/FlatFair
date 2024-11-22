@@ -10,6 +10,7 @@ interface IExpense extends Document {
     amount: number;
     description: string;
     category: string;
+    statusMap: Map<Schema.Types.ObjectId, string>;
     status: string;
     receipt: File;
     date: Date;
@@ -30,7 +31,8 @@ const expenseSchema: Schema<IExpense> = new Schema({
     amount: { type: Number, required: true },
     description: { type: String, default: "" },
     category: { type: String, default: "General" },
-    status: { type: String, default: 'Pending' },  // e.g., 'pending', 'approved', 'rejected'
+    statusMap: { type: Map, of: String, required: true },  // e.g., 'pending', 'approved', 'rejected'
+    status: { type: String, default: "Pending" },
     receipt: { type: Buffer },  // File storage for the receipt (you can handle file uploads in your app)
     date: { type: Date, default: Date.now },
     allocatedTo: {

@@ -48,6 +48,13 @@ const createExpense = async (req: any, res: Response) => {
 
   console.log("ALLOCATED TO:", allocatedTo)
 
+  const statusMap = new Map()
+  for (const { memberID, amountDue } of memberBreakdown) {
+    const memberIDObj = new mongoose.Types.ObjectId(memberID)
+    statusMap.set(memberIDObj, "Pending")
+  }
+  statusMap.set(currentUser?._id, "Settled")
+
   // Create the new expense document
   const newExpense = new Expense({
     amount: totalCost,
@@ -57,6 +64,7 @@ const createExpense = async (req: any, res: Response) => {
     date: Date.parse(date),
     allocatedTo: allocatedTo,
     allocatedToUsers: Array.from(allocatedTo.keys()),
+    statusMap: statusMap,
   })
 
   // Save the new expense
@@ -121,6 +129,45 @@ const deleteExpense = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Expense not found" })
     }
 
+    // Remove the expense from the group's expenses array
+    const group = await Group.findById(expense.group)
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" })
+    }
+    group.expenses = group.expenses.filter(
+      (expenseId) => String(expenseId) !== expenseID
+    )
+    await group.save()
+
+    // Remove the expense from each user's expenses array
+    // Remove the expense from everyone's balances related to createdBy user
+    const createdByUserId = expense.createdBy;
+    await User.updateMany(
+      { [`balances.${createdByUserId}`]: expenseID }, // Match balances pointing to createdBy
+      { $pull: { [`balances.${createdByUserId}`]: expenseID } } // Remove the expense ID
+    );
+
+    // Iterate through allocatedToUserIds and remove the expense from the createdBy user's balances
+    const balancePromises = expense.allocatedToUsers.map(async (friendId) => {
+      return User.updateOne(
+        { _id: createdByUserId }, // Match the createdBy user
+        { $pull: { [`balances.${friendId}`]: expenseID } } // Remove the expense ID for the friend
+      );
+    });
+    
+    // Iterate through allocatedToUserIds and remove the expense from the createdBy user's balances
+    const expensePromises = expense.allocatedToUsers.map(async (userId) => {
+      return User.updateOne(
+        { _id: userId }, // Match the createdBy user
+        { $pull: { expenses: expenseID } } // Remove the expense ID for the friend
+      );
+    });
+
+    // Execute all updates concurrently
+    await Promise.all([...expensePromises, ...balancePromises]);
+    console.log(`Successfully removed expense ${expenseID} from balances.`);
+    
+
     return res.status(200).json({
       message: "Expense deleted successfully",
       expenseID: expense._id,
@@ -142,7 +189,8 @@ const getExpensesBtwUsers = async (req: any, res: Response) => {
   }
 
   // Find the user with the provided user ID
-  const currentUser = await User.findOne({ _id: (req as any).user.userId })
+  const userId = (req as any).user.userId
+  const currentUser = await User.findOne({ _id: userId })
   const user2 = await User.findById(userId2)
 
   if (!currentUser || !user2) {
@@ -154,13 +202,30 @@ const getExpensesBtwUsers = async (req: any, res: Response) => {
   const expenseIds = Array.from(currentUser.balances.get(userId2) || [])
 
   // Get the expenses between the two users
-  const expenses = await Expense.find({ _id: { $in: expenseIds } })
+  const expenses = await Expense.find({
+      _id: { $in: expenseIds },
+      $or: [
+        { [`statusMap.${userId}`]: "Pending" }, // Check if status[userId] is "Pending"
+        { [`statusMap.${userId2}`]: "Pending" } // Check if status[userId2] is "Pending"
+      ]
+    })
     .populate("createdBy")
     .populate("allocatedToUsers")
+
+  // Calculate the total amount owed between the two users
+  let totalAmountOwed = 0
+  expenses.forEach((expense: IExpense) => {
+    if (String((expense.createdBy as IUser)._id) === String(currentUser._id)) {
+      totalAmountOwed -= expense.allocatedTo.get(userId2) || 0
+    } else {
+      totalAmountOwed += expense.allocatedTo.get(userId) || 0
+    }
+  })
 
   return res.status(200).json({
     message: "Expenses found",
     expenses,
+    totalAmountOwed,
   })
 }
 
