@@ -21,4 +21,12 @@ router.delete(
   expenseController.deleteExpense
 )
 
+router
+  .route("/get-expenses-between-users/:userId2")
+  .get(verifyToken, expenseController.getExpensesBtwUsers)
+
+router
+  .route("/settle-expenses-between-users/:userId2")
+  .post(verifyToken, expenseController.settleExpenses)
+
 export default router

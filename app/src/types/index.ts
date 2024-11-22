@@ -13,6 +13,7 @@ export interface IExpense {
   amount: number
   description: string
   category: string
+  statusMap: Map<string, string>
   status: string
   receipt: File
   date: Date
