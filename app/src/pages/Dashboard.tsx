@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar"
 import { useNavigate } from "react-router-dom"
 import Icon from "../components/Icon"
 import { api } from "../api"
+import SpendingChart from "../components/SpendingChart"
 
 import { IGroup, IExpense, IUser } from "../types"
 // import { API_URL } from "../config"
@@ -70,41 +71,46 @@ const Dashboard = () => {
           </div>
           <div className="col-lg-6 Flex Flex-column Padding-x--20">
             <div className="Home-subtitle">Spending Log</div>
+            <div className="Home-chart">
+              <SpendingChart transactions={transactions} />
+            </div>
             <div className="Home-subtitle">Purchase Log</div>
-            {transactions.map((transaction, index) => (
-              <div key={index} className="Card Purchase">
-                <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
-                  <div className="Purchase-item" style={{ width: 75 }}>
-                    {new Date(transaction.date).toLocaleDateString("en-US")}
-                  </div>
-                  <div className="Purchase-item Padding-x--20">
-                    <div className="Purchase-item-icon">
-                      {userInfo.name.charAt(0).toUpperCase()}
+            <div className="Home-purchases">
+              {transactions.map((transaction, index) => (
+                <div key={index} className="Card Purchase">
+                  <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
+                    <div className="Purchase-item" style={{ width: 75 }}>
+                      {new Date(transaction.date).toLocaleDateString("en-US")}
+                    </div>
+                    <div className="Purchase-item Padding-x--20">
+                      <div className="Purchase-item-icon">
+                        {userInfo.name.charAt(0).toUpperCase()}
+                      </div>
+                    </div>
+                    <div className="Purchase-item">
+                      {transaction.description}
+                      <div className="Purchase-item-subtitle">
+                        {/* {transaction.group} */}
+                      </div>
                     </div>
                   </div>
-                  <div className="Purchase-item">
-                    {transaction.description}
-                    <div className="Purchase-item-subtitle">
-                      {/* {transaction.group} */}
-                    </div>
-                  </div>
-                </div>
 
-                <div className="Purchase-item">${transaction.amount}</div>
-                <div
-                  className={`Badge Badge-color--${
-                    transaction.status === "Pending" ? "yellow" : "purple"
-                  }-1000 Margin-left--20`}
-                  style={{ width: 100 }}
-                >
-                  {transaction.status}
+                  <div className="Purchase-item">${transaction.amount}</div>
+                  <div
+                    className={`Badge Badge-color--${
+                      transaction.status === "Pending" ? "yellow" : "purple"
+                    }-1000 Margin-left--20`}
+                    style={{ width: 100 }}
+                  >
+                    {transaction.status}
+                  </div>
                 </div>
-              </div>
-            ))}
-            {/* <div className="Block Margin-top--20">
+              ))}
+              {/* <div className="Block Margin-top--20">
               <div className="Block-header">Purchase History</div>
               <div className="Block-subtitle">View your recent purchases.</div>
             </div> */}
+            </div>
           </div>
           <div className="col-lg-3">
             <div className="Block">
