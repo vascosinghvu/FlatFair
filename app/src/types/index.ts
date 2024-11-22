@@ -7,12 +7,17 @@ export interface IUser {
 }
 
 export interface IExpense {
-  _id?: string
-  description: string
+  _id: string
+  group: string
+  createdBy: string
   amount: number
-  date: Date
+  description: string
+  category: string
   status: string
-  createdBy: IUser
+  receipt: File
+  date: Date
+  allocatedTo: Map<IUser, number>
+  allocatedToUsers: IUser[]
 }
 
 export interface IGroup {
