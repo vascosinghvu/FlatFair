@@ -9,6 +9,7 @@ import Icon from "../components/Icon"
 import SpendingChart from "../components/SpendingChart"
 
 import { IGroup, IExpense, IUser } from "../types"
+import { api } from "../api"
 
 const Home = () => {
   const [isModal, setIsModal] = useState(false)
@@ -17,22 +18,18 @@ const Home = () => {
 
   // Get user info from backend
   const [userInfo, setUserInfo] = useState<any>(null)
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await fetch("http://localhost:8000/user/get-user", {
-          method: "GET", // GET request to retrieve data
-          credentials: "include", // Include credentials (cookies, etc.)
-        })
+        // Use the api.get method to fetch user info
+        const response = await api.get("/user/get-user")
+        const data = response.data
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`)
-        }
-
-        const data = await response.json() // Parse the JSON response
         console.log("User Info:", data)
-        // Store the response in a variable or state
-        setUserInfo(data.currentUser) // Assuming you're using state to store the info
+
+        // Assuming the user info is stored in data.currentUser
+        setUserInfo(data.currentUser)
       } catch (error) {
         console.error("Error fetching user info:", error)
       }
@@ -42,7 +39,6 @@ const Home = () => {
   }, []) // Empty dependency array to run once on component mount
 
   console.log("CURRENT USER: ", userInfo)
-
   function formatTime(date: Date): string {
     const hours = date.getHours()
     const minutes = date.getMinutes()

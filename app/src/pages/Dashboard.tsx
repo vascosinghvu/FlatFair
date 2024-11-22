@@ -18,20 +18,23 @@ const Dashboard = () => {
     const fetchUserInfo = async () => {
       try {
         const response = await api.get(`/user/get-user`)
-        console.log("Response:", response)
+        console.log("Full response:", response)
 
-        const data = await response.data // Parse the JSON response
-        console.log("User Info:", data)
-        // Store the response in a variable or state
-        setUserInfo(data.currentUser) // Assuming you're using state to store the info
-        setTransactions(data.currentUser.expenses)
+        if (response && response.data && response.data.currentUser) {
+          setUserInfo(response.data.currentUser)
+          setTransactions(response.data.currentUser.expenses || [])
+        } else {
+          console.error("Invalid response structure:", response)
+        }
       } catch (error) {
         console.error("Error fetching user info:", error)
+        // Optionally redirect to login or show error message
+        // navigate('/login');
       }
     }
 
-    fetchUserInfo() // Call the fetch function inside useEffect
-  }, []) // Empty dependency array to run once on component mount
+    fetchUserInfo()
+  }, [])
 
   console.log("CURRENT USER: ", userInfo)
   console.log(transactions)
