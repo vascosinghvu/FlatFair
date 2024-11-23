@@ -90,7 +90,6 @@ const createExpense = async (req: any, res: Response) => {
       console.log("Expense ID:", newExpense._id)
       console.log("Created by:", newExpense.createdBy)
       if (String(user._id) !== String(newExpense.createdBy)) {
-        
         console.log("Updating balances")
         if (!user.balances.get(String(payingUser?._id!))) {
           console.log("Creating new balance array")
@@ -141,32 +140,31 @@ const deleteExpense = async (req: Request, res: Response) => {
 
     // Remove the expense from each user's expenses array
     // Remove the expense from everyone's balances related to createdBy user
-    const createdByUserId = expense.createdBy;
+    const createdByUserId = expense.createdBy
     await User.updateMany(
       { [`balances.${createdByUserId}`]: expenseID }, // Match balances pointing to createdBy
       { $pull: { [`balances.${createdByUserId}`]: expenseID } } // Remove the expense ID
-    );
+    )
 
     // Iterate through allocatedToUserIds and remove the expense from the createdBy user's balances
     const balancePromises = expense.allocatedToUsers.map(async (friendId) => {
       return User.updateOne(
         { _id: createdByUserId }, // Match the createdBy user
         { $pull: { [`balances.${friendId}`]: expenseID } } // Remove the expense ID for the friend
-      );
-    });
-    
+      )
+    })
+
     // Iterate through allocatedToUserIds and remove the expense from the createdBy user's balances
     const expensePromises = expense.allocatedToUsers.map(async (userId) => {
       return User.updateOne(
         { _id: userId }, // Match the createdBy user
         { $pull: { expenses: expenseID } } // Remove the expense ID for the friend
-      );
-    });
+      )
+    })
 
     // Execute all updates concurrently
-    await Promise.all([...expensePromises, ...balancePromises]);
-    console.log(`Successfully removed expense ${expenseID} from balances.`);
-    
+    await Promise.all([...expensePromises, ...balancePromises])
+    console.log(`Successfully removed expense ${expenseID} from balances.`)
 
     return res.status(200).json({
       message: "Expense deleted successfully",
@@ -203,12 +201,12 @@ const getExpensesBtwUsers = async (req: any, res: Response) => {
 
   // Get the expenses between the two users
   const expenses = await Expense.find({
-      _id: { $in: expenseIds },
-      $or: [
-        { [`statusMap.${userId}`]: "Pending" }, // Check if status[userId] is "Pending"
-        { [`statusMap.${userId2}`]: "Pending" } // Check if status[userId2] is "Pending"
-      ]
-    })
+    _id: { $in: expenseIds },
+    $or: [
+      { [`statusMap.${userId}`]: "Pending" }, // Check if status[userId] is "Pending"
+      { [`statusMap.${userId2}`]: "Pending" }, // Check if status[userId2] is "Pending"
+    ],
+  })
     .populate("createdBy")
     .populate("allocatedToUsers")
 
@@ -254,12 +252,12 @@ const settleExpenses = async (req: any, res: Response) => {
 
   // Get the expenses between the two users
   const expenses = await Expense.find({
-      _id: { $in: expenseIds },
-      $or: [
-        { [`statusMap.${userId}`]: "Pending" }, // Check if status[userId] is "Pending"
-        { [`statusMap.${userId2}`]: "Pending" } // Check if status[userId2] is "Pending"
-      ]
-    })
+    _id: { $in: expenseIds },
+    $or: [
+      { [`statusMap.${userId}`]: "Pending" }, // Check if status[userId] is "Pending"
+      { [`statusMap.${userId2}`]: "Pending" }, // Check if status[userId2] is "Pending"
+    ],
+  })
     .populate("createdBy")
     .populate("allocatedToUsers")
 
@@ -292,5 +290,49 @@ const settleExpenses = async (req: any, res: Response) => {
   })
 }
 
+const getExpensesByGroupId = async (req: Request, res: Response) => {
+  const { groupID } = req.params
+
+  // Validate the request parameter
+  if (!groupID) {
+    return res.status(400).json({
+      message: "Invalid request. Please provide a group ID.",
+    })
+  }
+
+  console.log("got here")
+
+  try {
+    // Find all expenses for the specified group ID
+    const expenses = await Expense.find({ group: groupID })
+      .populate("createdBy", "name email") // Include creator's name and email
+      .populate("group", "groupName") // Include group's name
+      .populate("allocatedToUsers", "name email") // Include allocated users' names and emails
+
+    if (!expenses || expenses.length === 0) {
+      return res.status(404).json({
+        message: "No expenses found for this group",
+      })
+    }
+
+    return res.status(200).json({
+      message: "Expenses retrieved successfully",
+      expenses,
+    })
+  } catch (error) {
+    console.error("Error retrieving expenses:", error)
+    return res.status(500).json({
+      message: "Internal server error",
+      error,
+    })
+  }
+}
+
 // Export the controller functions
-export { createExpense, deleteExpense, getExpensesBtwUsers, settleExpenses }
+export {
+  createExpense,
+  deleteExpense,
+  getExpensesBtwUsers,
+  settleExpenses,
+  getExpensesByGroupId,
+}
