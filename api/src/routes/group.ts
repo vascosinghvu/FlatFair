@@ -4,7 +4,6 @@ const express = require("express")
 const router = express.Router()
 import { verifyToken } from "../config/authMiddleware"
 import groupController from "../controllers/groupController"
-import { requiresAuth } from "express-openid-connect"
 
 router.route("/get-group/:groupID").get(verifyToken, groupController.getGroup)
 

@@ -29,4 +29,9 @@ router
   .route("/settle-expenses-between-users/:userId2")
   .post(verifyToken, expenseController.settleExpenses)
 
+// get expenses by group id
+router
+  .route("/get-expenses/:groupID")
+  .get(verifyToken, expenseController.getExpensesByGroupId)
+
 export default router

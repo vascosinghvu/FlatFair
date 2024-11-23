@@ -20,7 +20,7 @@ const Group = () => {
   const [memberMap, setMemberMap] = useState<any>({})
   const [memberInitialValues, setMemberInitialValues] = useState<any>([])
   const [userInfo, setUserInfo] = useState<any>(null)
-  const [balances, setBalances] = useState<any>(null)
+  const [expenses, setExpenses] = useState<IExpense[]>([])
 
   const [isModal, setIsModal] = useState(false)
   const [isEditModal, setEditModal] = useState(false)
@@ -34,61 +34,102 @@ const Group = () => {
   const [addMemberModal, setAddMemberModal] = useState(false)
   const [expenseModal, setExpenseModal] = useState(false)
   const [currExpense, setCurrExpense] = useState<IExpense>()
+  const [idToName, setIdToName] = useState<Map<string, string>>(new Map())
+
+  console.log("Group ID:", groupid)
+
+  const fetchUserInfo = async () => {
+    try {
+      const response = await api.get("/user/get-user")
+      if (response.data && response.data.currentUser) {
+        setUserInfo(response.data.currentUser)
+      }
+    } catch (error) {
+      console.error("Error fetching user info:", error)
+    }
+  }
+
+  const fetchGroupInfo = async () => {
+    try {
+      const response = await api.get(`/group/get-group/${groupid}`)
+
+      const data = response.data // Parse the JSON response
+      console.log("Group Info:", data)
+      // Store the response in a variable or state
+      setGroupInfo(data.group) // Assuming you're using state to store the info
+      setMemberInitialValues(
+        data.group.members.map((member: any) => ({
+          name: member.name,
+          selected: false,
+          splitValue: undefined,
+          id: member._id,
+        }))
+      )
+
+      setMemberMap(() => {
+        const groupMembers: IUser[] = data.group.members
+        return groupMembers.reduce<{ [name: string]: string }>((map, user) => {
+          const username = user.name as string
+          const userID = user._id as string
+          map[username] = userID
+          return map
+        }, {})
+      })
+      setIdToName(() => {
+        const map = new Map<string, string>()
+        data.group.members.forEach((member: any) => {
+          map.set(member._id, member.name)
+        })
+        return map
+      })
+    } catch (error) {
+      console.error("Error fetching user info:", error)
+    }
+  }
+
+  const fetchExpenseInfo = async () => {
+    try {
+      const response = await api.get(`/expense/get-expenses/${groupid}`)
+
+      if (response.data && response.data.expenses) {
+        // Set expenses in state
+        setExpenses(response.data.expenses)
+      }
+    } catch (error) {
+      console.error("Error fetching expense info:", error)
+    }
+  }
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
+    console.log("use effect triggered")
+    const fetchAllData = async () => {
       try {
-        const response = await api.get("/user/get-user")
-        if (response.data && response.data.currentUser) {
-          setUserInfo(response.data.currentUser)
-        }
+        // Step 1: Fetch User Info
+        await fetchUserInfo()
+
+        // Step 2: Fetch Group Info
+        await fetchGroupInfo()
+
+        // Step 3: Fetch Expense Info
+        await fetchExpenseInfo()
       } catch (error) {
-        console.error("Error fetching user info:", error)
+        console.error("Error fetching data:", error)
       }
     }
 
-    const fetchGroupInfo = async () => {
-      try {
-        const response = await api.get(`/group/get-group/${groupid}`)
-
-        const data = response.data // Parse the JSON response
-        console.log("Group Info:", data)
-        // Store the response in a variable or state
-        setGroupInfo(data.group) // Assuming you're using state to store the info
-        setMemberInitialValues(
-          data.group.members.map((member: any) => ({
-            name: member.name,
-            selected: false,
-            splitValue: undefined,
-            id: member._id,
-          }))
-        )
-
-        setMemberMap(() => {
-          const groupMembers: IUser[] = data.group.members
-          return groupMembers.reduce<{ [name: string]: string }>(
-            (map, user) => {
-              const username = user.name as string
-              const userID = user._id as string
-              map[username] = userID
-              return map
-            },
-            {}
-          )
-        })
-      } catch (error) {
-        console.error("Error fetching user info:", error)
-      }
+    if (groupid) {
+      fetchAllData()
     }
+  }, []) // Only runs when groupid changes
 
-    fetchGroupInfo() // Call the fetch function inside useEffect
-    fetchUserInfo() // Call the fetch function inside useEffect
-  }, []) // Empty dependency array to run once on component mount
+  // fetch expenses
 
-  // console.log("CURRENT GROUP: ", groupInfo)
-  // console.log("user info: ", userInfo)
+  console.log("user info: ", userInfo)
 
-  // console.log("Members:", groupInfo?.members)
+  console.log("expenses:", expenses)
+
+  console.log("group info:", groupInfo)
+
   const initialValues = {
     item: "",
     cost: 0,
@@ -250,7 +291,7 @@ const Group = () => {
     }
   }
 
-  const deleteExpense = async (expense: IExpense | undefined) => {
+  const deleteExpense = async (expense: IExpense) => {
     if (!expense) return
 
     try {
@@ -703,51 +744,58 @@ const Group = () => {
           </div>
           <div className="col-lg-6">
             <div className="Group-header">Group Purchase History</div>
-            {groupInfo &&
-              groupInfo.expenses.map((transaction: any, index: number) => (
-                <div
-                  key={index}
-                  className="Card Purchase"
-                  onClick={() => {
-                    setExpenseModal(true)
-                    console.log("Selected Expense:", transaction)
-                    setCurrExpense(transaction)
-                  }}
-                >
-                  <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
-                    <div className="Purchase-item " style={{ width: 75 }}>
-                      {new Date(transaction.date).toLocaleDateString("en-US")}
-                    </div>
-                    <div className="Purchase-item Padding-x--20">
-                      <div className="Purchase-item-icon">
-                        {transaction.createdBy.name.charAt(0).toUpperCase()}
-                      </div>
-                    </div>
-                    <div className="Purchase-item">
-                      {transaction.allocatedToUsers
-                        .map((user: any) => user.name.split(" ")[0]) // Extract first name
-                        .slice(0, 3) // Limit to first 3 names
-                        .join(", ") // Join with commas
-                        .concat(
-                          transaction.allocatedToUsers.length > 3 ? ", ..." : ""
-                        )}
-                      <div className="Purchase-item-subtitle">
-                        {transaction && transaction.description}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="Purchase-item">${transaction.amount}</div>
+            {!expenses || expenses.length === 0 ? (
+              <>Add an expense</>
+            ) : (
+              <>
+                {expenses.map((transaction: any, index: number) => (
                   <div
-                    className={`Badge Badge-color--${
-                      transaction.status === "Pending" ? "yellow" : "purple"
-                    }-1000 Margin-left--20`}
-                    style={{ width: 100 }}
+                    key={index}
+                    className="Card Purchase"
+                    onClick={() => {
+                      setExpenseModal(true)
+                      console.log("Selected Expense:", transaction)
+                      setCurrExpense(transaction)
+                    }}
                   >
-                    {transaction.status}
+                    <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
+                      <div className="Purchase-item" style={{ width: 75 }}>
+                        {new Date(transaction.date).toLocaleDateString("en-US")}
+                      </div>
+                      <div className="Purchase-item Padding-x--20">
+                        <div className="Purchase-item-icon">
+                          {transaction.createdBy.name.charAt(0).toUpperCase()}
+                        </div>
+                      </div>
+                      <div className="Purchase-item">
+                        {transaction.allocatedToUsers
+                          .map((user: any) => user.name.split(" ")[0]) // Extract first name
+                          .slice(0, 3) // Limit to first 3 names
+                          .join(", ") // Join with commas
+                          .concat(
+                            transaction.allocatedToUsers.length > 3
+                              ? ", ..."
+                              : ""
+                          )}
+                        <div className="Purchase-item-subtitle">
+                          {transaction.description}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="Purchase-item">${transaction.amount}</div>
+                    <div
+                      className={`Badge Badge-color--${
+                        transaction.status === "Pending" ? "yellow" : "purple"
+                      }-1000 Margin-left--20`}
+                      style={{ width: 100 }}
+                    >
+                      {transaction.status}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </>
+            )}
             <div
               onClick={() => {
                 setIsModal(true)
@@ -764,7 +812,7 @@ const Group = () => {
               <div className="Block-header">Total Due</div>
               <div className="Block-subtitle">$120.00</div>
 
-              <div className="Flex Flex-row Margin-bottom--20">
+              {/* <div className="Flex Flex-row Margin-bottom--20">
                 <div className="">Brandon: </div>
                 <div className="Text-color--dark-700 Margin-left--auto">
                   $40.00
@@ -783,7 +831,7 @@ const Group = () => {
                 <div className="Text-color--dark-700 Margin-left--auto">
                   $40.00
                 </div>
-              </div>
+              </div> */}
 
               <div
                 className="Button Button-color--purple-1000"
