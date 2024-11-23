@@ -84,12 +84,12 @@ const createExpense = async (req: any, res: Response) => {
     console.log("Loop user:", user)
     if (user) {
       console.log("User balances before:", user.balances)
-      user.expenses.push(newExpense._id)
       //check if the user is the creator of the expense, otherwise update the balances
       console.log("User ID:", user._id)
       console.log("Expense ID:", newExpense._id)
       console.log("Created by:", newExpense.createdBy)
       if (String(user._id) !== String(newExpense.createdBy)) {
+        user.expenses.push(newExpense._id)
         console.log("Updating balances")
         if (!user.balances.get(String(payingUser?._id!))) {
           console.log("Creating new balance array")
@@ -105,6 +105,11 @@ const createExpense = async (req: any, res: Response) => {
       await payingUser!.save()
     }
   }
+
+  // Add the expense to the currentUser's expenses array
+  console.log("Current user expenses before:", currentUser?.expenses)
+  currentUser!.expenses.push(newExpense._id)
+  await currentUser!.save()
 
   return res.status(201).json({
     message: "Expense created successfully",
@@ -155,7 +160,7 @@ const deleteExpense = async (req: Request, res: Response) => {
     })
 
     // Iterate through allocatedToUserIds and remove the expense from the createdBy user's balances
-    const expensePromises = expense.allocatedToUsers.map(async (userId) => {
+    const expensePromises = [...expense.allocatedToUsers, expense.createdBy].map(async (userId) => {
       return User.updateOne(
         { _id: userId }, // Match the createdBy user
         { $pull: { expenses: expenseID } } // Remove the expense ID for the friend
