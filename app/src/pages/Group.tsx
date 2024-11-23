@@ -34,6 +34,8 @@ const Group = () => {
   const [addMemberModal, setAddMemberModal] = useState(false)
   const [expenseModal, setExpenseModal] = useState(false)
   const [currExpense, setCurrExpense] = useState<IExpense>()
+  const [expensesByMember, setExpensesByMember] = useState<any[]>([])
+  const [totalDue, setTotalDue] = useState<number>(0)
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -81,14 +83,55 @@ const Group = () => {
       }
     }
 
+    const fetchExpensesForAllMembers = async () => {
+      try {
+        // Iterate through each member
+        const expensesResults = await Promise.all(
+          groupInfo.members.map(async (member: IUser) => {
+            try {
+              // Call the API for each member
+              const response = await api.get(
+                `/expense/get-expenses-between-users/${member._id}`
+              )
+
+              // Return member details along with expenses
+              setTotalDue(
+                (prevTotalDue) => prevTotalDue + response.data.totalAmountOwed
+              )
+              return {
+                memberId: member._id,
+                memberName: member.name,
+                expenses: response.data.expenses,
+                totalAmountOwed: response.data.totalAmountOwed,
+              }
+            } catch (error) {
+              console.error(
+                `Error fetching expenses for ${member.name}:`,
+                error
+              )
+              return null // Handle errors gracefully
+            }
+          })
+        )
+
+        console.log("Expenses Results:", expensesResults)
+
+        setExpensesByMember(expensesResults)
+      } catch (error) {
+        console.error("Error fetching expenses for all members:", error)
+      }
+    }
+
     fetchGroupInfo() // Call the fetch function inside useEffect
     fetchUserInfo() // Call the fetch function inside useEffect
+    fetchExpensesForAllMembers()
   }, []) // Empty dependency array to run once on component mount
 
   // console.log("CURRENT GROUP: ", groupInfo)
   // console.log("user info: ", userInfo)
 
   // console.log("Members:", groupInfo?.members)
+
   const initialValues = {
     item: "",
     cost: 0,
@@ -762,28 +805,20 @@ const Group = () => {
             <div className="Group-header">Amounts</div>
             <div className="Block">
               <div className="Block-header">Total Due</div>
-              <div className="Block-subtitle">$120.00</div>
+              <div className="Block-subtitle">${totalDue.toFixed(2)}</div>
 
-              <div className="Flex Flex-row Margin-bottom--20">
-                <div className="">Brandon: </div>
-                <div className="Text-color--dark-700 Margin-left--auto">
-                  $40.00
-                </div>
-              </div>
-
-              <div className="Flex Flex-row Margin-bottom--20">
-                <div className="">Vasco: </div>
-                <div className="Text-color--dark-700 Margin-left--auto">
-                  $40.00
-                </div>
-              </div>
-
-              <div className="Flex Flex-row Margin-bottom--20">
-                <div className="">Ryan: </div>
-                <div className="Text-color--dark-700 Margin-left--auto">
-                  $40.00
-                </div>
-              </div>
+              {expensesByMember && expensesByMember.length > 0 ? (
+                expensesByMember.map((result, index) => (
+                  <div key={index} className="Flex Flex-row Margin-bottom--20">
+                    <div>{result.memberName}:</div>
+                    <div className="Text-color--dark-700 Margin-left--auto">
+                      ${result.totalAmountOwed.toFixed(2)}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div>No expenses to display.</div>
+              )}
 
               <div
                 className="Button Button-color--purple-1000"
