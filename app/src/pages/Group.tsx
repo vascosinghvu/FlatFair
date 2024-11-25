@@ -42,6 +42,91 @@ const Group = () => {
     totalAmountOwed: number // Total amount owed by/to this member
   }
 
+  const fetchGroupInfo = async () => {
+    try {
+      const response = await api.get(`/group/get-group/${groupid}`)
+      const data = response.data
+
+      console.log("Group Info:", data)
+
+      setGroupInfo(data.group)
+
+      // Set initial member values for form
+      setMemberInitialValues(
+        data.group.members.map((member: any) => ({
+          name: member.name,
+          selected: false,
+          splitValue: undefined,
+          id: member._id,
+        }))
+      )
+
+      // Create a name-to-ID map for quick lookups
+      setMemberMap(() => {
+        const groupMembers: IUser[] = data.group.members
+        return groupMembers.reduce<{ [name: string]: string }>((map, user) => {
+          const username = user.name as string
+          const userID = user._id as string
+          map[username] = userID
+          return map
+        }, {})
+      })
+
+      return data.group // Return group data for use in the next function
+    } catch (error) {
+      console.error("Error fetching group info:", error)
+    }
+  }
+
+  const fetchExpensesForAllMembers = async (groupMembers: IUser[]) => {
+    try {
+      if (!groupMembers) return
+
+      let totalDueAccumulator = 0
+      let expenseArrAccumulator: IExpenseEntry[] = []
+
+      const expensesResults = await Promise.all(
+        groupMembers.map(async (member: IUser) => {
+          try {
+            // Call the API for each member
+            const response = await api.get(
+              `/expense/get-expenses-between-users/${member._id}`
+            )
+
+            // Accumulate total due
+            totalDueAccumulator += response.data.totalAmountOwed
+
+            // Accumulate the expense array
+            expenseArrAccumulator.push({
+              memberId: member._id || "",
+              memberName: member.name,
+              expenses: response.data.expenses,
+              totalAmountOwed: response.data.totalAmountOwed,
+            })
+
+            return {
+              memberId: member._id,
+              memberName: member.name,
+              expenses: response.data.expenses,
+              totalAmountOwed: response.data.totalAmountOwed,
+            }
+          } catch (error) {
+            console.error(`Error fetching expenses for ${member.name}:`, error)
+            return null // Handle errors gracefully
+          }
+        })
+      )
+
+      // Update state once after all promises resolve
+      setTotalDue(totalDueAccumulator)
+      setExpenseArr(expenseArrAccumulator)
+
+      console.log("Expenses Results:", expensesResults)
+    } catch (error) {
+      console.error("Error fetching expenses for all members:", error)
+    }
+  }
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -51,97 +136,6 @@ const Group = () => {
         }
       } catch (error) {
         console.error("Error fetching user info:", error)
-      }
-    }
-
-    const fetchGroupInfo = async () => {
-      try {
-        const response = await api.get(`/group/get-group/${groupid}`)
-        const data = response.data
-
-        console.log("Group Info:", data)
-
-        setGroupInfo(data.group)
-
-        // Set initial member values for form
-        setMemberInitialValues(
-          data.group.members.map((member: any) => ({
-            name: member.name,
-            selected: false,
-            splitValue: undefined,
-            id: member._id,
-          }))
-        )
-
-        // Create a name-to-ID map for quick lookups
-        setMemberMap(() => {
-          const groupMembers: IUser[] = data.group.members
-          return groupMembers.reduce<{ [name: string]: string }>(
-            (map, user) => {
-              const username = user.name as string
-              const userID = user._id as string
-              map[username] = userID
-              return map
-            },
-            {}
-          )
-        })
-
-        return data.group // Return group data for use in the next function
-      } catch (error) {
-        console.error("Error fetching group info:", error)
-      }
-    }
-
-    const fetchExpensesForAllMembers = async (groupMembers: IUser[]) => {
-      try {
-        if (!groupMembers) return
-
-        let totalDueAccumulator = 0
-        let expenseArrAccumulator: IExpenseEntry[] = []
-
-        const expensesResults = await Promise.all(
-          groupMembers.map(async (member: IUser) => {
-            try {
-              // Call the API for each member
-              const response = await api.get(
-                `/expense/get-expenses-between-users/${member._id}`
-              )
-
-              // Accumulate total due
-              totalDueAccumulator += response.data.totalAmountOwed
-
-              // Accumulate the expense array
-              expenseArrAccumulator.push({
-                memberId: member._id || "",
-                memberName: member.name,
-                expenses: response.data.expenses,
-                totalAmountOwed: response.data.totalAmountOwed,
-              })
-
-              return {
-                memberId: member._id,
-                memberName: member.name,
-                expenses: response.data.expenses,
-                totalAmountOwed: response.data.totalAmountOwed,
-              }
-            } catch (error) {
-              console.error(
-                `Error fetching expenses for ${member.name}:`,
-                error
-              )
-              return null // Handle errors gracefully
-            }
-          })
-        )
-
-        // Update state once after all promises resolve
-        setTotalDue(totalDueAccumulator)
-        setExpenseArr(expenseArrAccumulator)
-
-        console.log("Expenses Results:", expensesResults)
-      } catch (error) {
-        console.error("Error fetching expenses for all members:", error)
       }
     }
 
@@ -296,14 +290,26 @@ const Group = () => {
     return errors
   }
 
-  const handleSettleUp = (user: string | null) => {
-    if (!user) return
-    // Logic to settle up with the selected user
-    console.log(`Settling up with ${user}`)
+  const handleSettleUp = async (user: IExpenseEntry | undefined) => {
+    if (!user || !user.memberId) {
+      alert("Invalid user. Please select a valid member.")
+      return
+    }
 
-    // Optionally call an API to update the balances and reflect changes
+    try {
+      const response = await api.post(
+        `/expense/settle-expenses-between-users/${user.memberId}`
+      )
 
-    setSettleModal(false) // Close the modal
+      console.log("Settle up successful:", response)
+
+      fetchGroupInfo() // Refresh the group info after a successful operation
+
+      setSettleModal(false) // Close the settle modal
+    } catch (error) {
+      console.error("Error settling up:", error)
+      alert("Failed to settle up. Please try again.")
+    }
   }
 
   const deleteMember = async (userID: string) => {
@@ -587,7 +593,7 @@ const Group = () => {
               <div className="Flex Flex-row Margin-top--20">
                 <button
                   className="Button Button-color--purple-1000 Margin-right--10"
-                  // onClick={() => handleSettleUp(selectedUser)}
+                  onClick={() => handleSettleUp(selectedUser)}
                   disabled={!selectedUser} // Disable button if no user is selected
                 >
                   Settle Up
@@ -854,7 +860,7 @@ const Group = () => {
                   <div className="Purchase-item">${transaction.amount}</div>
                   <div
                     className={`Badge Badge-color--${
-                      transaction.status === "Pending" ? "yellow" : "purple"
+                      transaction.status === "Pending" ? "yellow" : "green"
                     }-1000 Margin-left--20`}
                     style={{ width: 100 }}
                   >

@@ -60,13 +60,6 @@ const Dashboard = () => {
                 <div className="Account-details-item">{userInfo?.name}</div>
                 <div className="Account-details-item">{userInfo?.email}</div>
               </div>
-
-              <div
-                className="Button Button--hollow Button-color--dark-1000"
-                onClick={() => navigate("/profile")}
-              >
-                Edit Profile
-              </div>
             </div>
           </div>
           <div className="col-lg-6 Flex Flex-column Padding-x--20">
@@ -98,7 +91,7 @@ const Dashboard = () => {
                   <div className="Purchase-item">${transaction.amount}</div>
                   <div
                     className={`Badge Badge-color--${
-                      transaction.status === "Pending" ? "yellow" : "purple"
+                      transaction.status === "Pending" ? "yellow" : "green"
                     }-1000 Margin-left--20`}
                     style={{ width: 100 }}
                   >
