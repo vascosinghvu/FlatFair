@@ -49,4 +49,10 @@
             color: var(--fare-color-yellow-1000);
         }
     }
+
+    &-line {
+        // dotted line
+        margin: 10px 0;
+        border-bottom: 1px dashed var(--fare-color-dark-1000);
+    }
 }

@@ -8,14 +8,12 @@ import { api } from "../api"
 import { useParams } from "react-router-dom"
 import { IGroup, IExpense, IUser } from "../types"
 import Icon from "../components/Icon"
-import { Button } from "react-bootstrap"
 import { error } from "console"
 
 const Group = () => {
   const { groupid } = useParams()
 
-  // Get group data from the backend
-  // Get user info from backend
+  // State variables
   const [groupInfo, setGroupInfo] = useState<any>(null)
   const [memberMap, setMemberMap] = useState<any>({})
   const [memberInitialValues, setMemberInitialValues] = useState<any>([])
@@ -29,13 +27,20 @@ const Group = () => {
   const [selection, setSelection] = useState("Equally") // Default to "Equally"
   const [errorMessage, setErrorMessage] = useState("")
   const [settleModal, setSettleModal] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<string | null>(null)
+  const [selectedUser, setSelectedUser] = useState<IExpenseEntry>()
   const [selectedMember, setSelectedMember] = useState<IUser>()
   const [addMemberModal, setAddMemberModal] = useState(false)
   const [expenseModal, setExpenseModal] = useState(false)
   const [currExpense, setCurrExpense] = useState<IExpense>()
-  const [expensesByMember, setExpensesByMember] = useState<any[]>([])
   const [totalDue, setTotalDue] = useState<number>(0)
+  const [expenseArr, setExpenseArr] = useState<any[]>([])
+
+  interface IExpenseEntry {
+    memberId: string // User ID of the member
+    memberName: string // Name of the member
+    expenses: IExpense[] // Array of expenses with this user
+    totalAmountOwed: number // Total amount owed by/to this member
+  }
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -52,11 +57,13 @@ const Group = () => {
     const fetchGroupInfo = async () => {
       try {
         const response = await api.get(`/group/get-group/${groupid}`)
+        const data = response.data
 
-        const data = response.data // Parse the JSON response
         console.log("Group Info:", data)
-        // Store the response in a variable or state
-        setGroupInfo(data.group) // Assuming you're using state to store the info
+
+        setGroupInfo(data.group)
+
+        // Set initial member values for form
         setMemberInitialValues(
           data.group.members.map((member: any) => ({
             name: member.name,
@@ -66,6 +73,7 @@ const Group = () => {
           }))
         )
 
+        // Create a name-to-ID map for quick lookups
         setMemberMap(() => {
           const groupMembers: IUser[] = data.group.members
           return groupMembers.reduce<{ [name: string]: string }>(
@@ -78,26 +86,39 @@ const Group = () => {
             {}
           )
         })
+
+        return data.group // Return group data for use in the next function
       } catch (error) {
-        console.error("Error fetching user info:", error)
+        console.error("Error fetching group info:", error)
       }
     }
 
-    const fetchExpensesForAllMembers = async () => {
+    const fetchExpensesForAllMembers = async (groupMembers: IUser[]) => {
       try {
-        // Iterate through each member
+        if (!groupMembers) return
+
+        let totalDueAccumulator = 0
+        let expenseArrAccumulator: IExpenseEntry[] = []
+
         const expensesResults = await Promise.all(
-          groupInfo.members.map(async (member: IUser) => {
+          groupMembers.map(async (member: IUser) => {
             try {
               // Call the API for each member
               const response = await api.get(
                 `/expense/get-expenses-between-users/${member._id}`
               )
 
-              // Return member details along with expenses
-              setTotalDue(
-                (prevTotalDue) => prevTotalDue + response.data.totalAmountOwed
-              )
+              // Accumulate total due
+              totalDueAccumulator += response.data.totalAmountOwed
+
+              // Accumulate the expense array
+              expenseArrAccumulator.push({
+                memberId: member._id || "",
+                memberName: member.name,
+                expenses: response.data.expenses,
+                totalAmountOwed: response.data.totalAmountOwed,
+              })
+
               return {
                 memberId: member._id,
                 memberName: member.name,
@@ -114,23 +135,36 @@ const Group = () => {
           })
         )
 
-        console.log("Expenses Results:", expensesResults)
+        // Update state once after all promises resolve
+        setTotalDue(totalDueAccumulator)
+        setExpenseArr(expenseArrAccumulator)
 
-        setExpensesByMember(expensesResults)
+        console.log("Expenses Results:", expensesResults)
       } catch (error) {
         console.error("Error fetching expenses for all members:", error)
       }
     }
 
-    fetchGroupInfo() // Call the fetch function inside useEffect
-    fetchUserInfo() // Call the fetch function inside useEffect
-    fetchExpensesForAllMembers()
-  }, []) // Empty dependency array to run once on component mount
+    const fetchAllData = async () => {
+      try {
+        await fetchUserInfo()
+        const groupData = await fetchGroupInfo()
+        await fetchExpensesForAllMembers(groupData.members)
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
+    }
+
+    if (groupid) {
+      fetchAllData()
+    }
+  }, [groupid]) // Removed groupInfo from dependency array
 
   // console.log("CURRENT GROUP: ", groupInfo)
   // console.log("user info: ", userInfo)
 
   // console.log("Members:", groupInfo?.members)
+  console.log("Expense arr", expenseArr)
 
   const initialValues = {
     item: "",
@@ -497,26 +531,63 @@ const Group = () => {
               <div className="Form-group">
                 <select
                   className="Form-input-box"
-                  onChange={(e) => setSelectedUser(e.target.value)} // Handle selection
-                  value={selectedUser || ""}
+                  onChange={(e) => {
+                    const selectedMemberId = e.target.value
+                    const foundUser = expenseArr.find(
+                      (entry) => entry.memberId === selectedMemberId
+                    ) // Find the selected user's data in expenseArr
+                    setSelectedUser(foundUser || null) // Update selectedUser with the corresponding IExpenseEntry
+                  }}
+                  value={selectedUser?.memberId || ""}
                 >
                   <option value="" disabled>
                     Select a member
                   </option>
                   {groupInfo.members
-                    .filter((member: IUser) => member._id !== userInfo._id) // Filter out the current user
+                    .filter((member: IUser) => member._id !== userInfo._id) // Exclude the current user
                     .map((member: IUser) => (
-                      <option key={member._id} value={member.name}>
+                      <option key={member._id} value={member._id}>
                         {member.name}
                       </option>
                     ))}
                 </select>
               </div>
 
+              {/* Display expenses for the selected user */}
+              {selectedUser ? (
+                <>
+                  <h3>Expenses with {selectedUser.memberName}:</h3>
+                  {selectedUser.expenses && selectedUser.expenses.length > 0 ? (
+                    selectedUser.expenses.map((expense, index) => (
+                      <div key={index} className="Flex-row">
+                        <span className="Margin-right--4">
+                          {new Date(expense.date).toLocaleDateString("en-US")}:
+                        </span>
+                        <span>{expense.description}</span>
+                        <span className="Margin-left--auto">
+                          ${expense.amount.toFixed(2)}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div>No expenses to display for this user.</div>
+                  )}
+                  <div className="Group-line"></div>
+                  <div className="Flex-row">
+                    <span>Total Amount Due:</span>
+                    <span className="Margin-left--auto">
+                      $ {selectedUser.totalAmountOwed.toFixed(2)}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div>Please select a user to view their expenses.</div>
+              )}
+
               <div className="Flex Flex-row Margin-top--20">
                 <button
                   className="Button Button-color--purple-1000 Margin-right--10"
-                  onClick={() => handleSettleUp(selectedUser)}
+                  // onClick={() => handleSettleUp(selectedUser)}
                   disabled={!selectedUser} // Disable button if no user is selected
                 >
                   Settle Up
@@ -807,12 +878,12 @@ const Group = () => {
               <div className="Block-header">Total Due</div>
               <div className="Block-subtitle">${totalDue.toFixed(2)}</div>
 
-              {expensesByMember && expensesByMember.length > 0 ? (
-                expensesByMember.map((result, index) => (
+              {expenseArr && expenseArr.length > 0 ? (
+                expenseArr.map((entry, index) => (
                   <div key={index} className="Flex Flex-row Margin-bottom--20">
-                    <div>{result.memberName}:</div>
+                    <div>{entry.memberName}:</div>
                     <div className="Text-color--dark-700 Margin-left--auto">
-                      ${result.totalAmountOwed.toFixed(2)}
+                      ${entry.totalAmountOwed.toFixed(2)}
                     </div>
                   </div>
                 ))
