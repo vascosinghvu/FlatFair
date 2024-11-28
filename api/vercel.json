@@ -21,6 +21,5 @@
       "src": "/(.*)",
       "dest": "src/index.ts"
     }
-  ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/index.js" }]
+  ]
 }
