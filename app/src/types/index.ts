@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 export interface IUser {
   _id?: string
   name: string
