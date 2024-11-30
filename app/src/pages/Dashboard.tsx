@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import Icon from "../components/Icon"
 import { api } from "../api"
 import SpendingChart from "../components/SpendingChart"
+import Modal from "../components/Modal"
 
 import { IGroup, IExpense, IUser } from "../types"
 // import { API_URL } from "../config"
@@ -15,6 +16,8 @@ const Dashboard = () => {
   const [userInfo, setUserInfo] = useState<any>(null)
   const [transactions, setTransactions] = useState<IExpense[]>([])
   const [filter, setFilter] = useState<string>("pending")
+  const [expenseModal, setExpenseModal] = useState(false)
+  const [currExpense, setCurrExpense] = useState<IExpense>()
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -44,6 +47,44 @@ const Dashboard = () => {
   return (
     <>
       {" "}
+      {expenseModal && currExpense && (
+        <Modal
+          header={currExpense.description || "Expense Details"}
+          subheader="View and manage this expense"
+          action={() => setExpenseModal(false)}
+          body={
+            <div className="Expense-details">
+              <div className="Expense-info">
+                <div>
+                  <strong>Amount:</strong> ${currExpense.amount.toFixed(2)}
+                </div>
+                <div>
+                  <strong>Date:</strong>{" "}
+                  {new Date(currExpense.date).toLocaleDateString("en-US")}
+                </div>
+                <div>
+                  <strong>Status:</strong> {currExpense.status || "N/A"}
+                </div>
+              </div>
+
+              <div className="Expense-allocated">
+                <strong>Allocated To:</strong>
+                {/* <ul>
+                  {currExpense.allocatedTo.map((user: any) => (
+                    <li key={user._id}>
+                      {user.name}: ${currExpense.allocatedTo[user._id]}
+                    </li>
+                  ))}
+                </ul> */}
+              </div>
+
+              <div className="Expense-created-by">
+                <strong>Created By:</strong> {currExpense.createdBy.name}
+              </div>
+            </div>
+          }
+        />
+      )}
       <Navbar />
       <div className="Home">
         {/* <div className="Home-title">Welcome back, *User*</div> */}
@@ -100,7 +141,16 @@ const Dashboard = () => {
                   return true
                 })
                 .map((transaction, index) => (
-                  <div key={index} className="Card Purchase">
+                  <div
+                    key={index}
+                    className="Card Purchase"
+                    onClick={() => {
+                      setExpenseModal(true)
+                      console.log("Selected Expense:", transaction)
+                      setCurrExpense(transaction)
+                      console.log("Current Expense:", currExpense)
+                    }}
+                  >
                     <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
                       <div className="Purchase-item" style={{ width: 75 }}>
                         {new Date(transaction.date).toLocaleDateString("en-US")}
