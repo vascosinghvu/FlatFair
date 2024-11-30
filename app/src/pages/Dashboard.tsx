@@ -14,6 +14,7 @@ const Dashboard = () => {
   // Get user info from backend
   const [userInfo, setUserInfo] = useState<any>(null)
   const [transactions, setTransactions] = useState<IExpense[]>([])
+  const [filter, setFilter] = useState<string>("pending")
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -68,37 +69,66 @@ const Dashboard = () => {
               <SpendingChart transactions={transactions} />
             </div>
             <div className="Home-subtitle">Purchase Log</div>
+            <div className="Flex-row">
+              <div
+                className={`Button Button-color--yellow-1000 Margin-right--20 ${
+                  filter === "settled" ? "Button--hollow" : ""
+                }`}
+                onClick={() => setFilter("pending")}
+              >
+                Pending
+              </div>
+              <div
+                className={`Button Button-color--green-1000 Margin-right--20 ${
+                  filter === "pending" ? "Button--hollow" : ""
+                }`}
+                onClick={() => setFilter("settled")}
+              >
+                Settled
+              </div>
+            </div>
             <div className="Home-purchases">
-              {transactions.map((transaction, index) => (
-                <div key={index} className="Card Purchase">
-                  <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
-                    <div className="Purchase-item" style={{ width: 75 }}>
-                      {new Date(transaction.date).toLocaleDateString("en-US")}
-                    </div>
-                    <div className="Purchase-item Padding-x--20">
-                      <div className="Purchase-item-icon">
-                        {userInfo.name.charAt(0).toUpperCase()}
+              {transactions
+                .filter((transaction) => {
+                  // Only include transactions matching the filter
+                  if (filter === "pending") {
+                    return transaction.status !== "Settled"
+                  } else {
+                    return transaction.status === "Settled"
+                  }
+                  // If no filter or a different filter, include all transactions
+                  return true
+                })
+                .map((transaction, index) => (
+                  <div key={index} className="Card Purchase">
+                    <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
+                      <div className="Purchase-item" style={{ width: 75 }}>
+                        {new Date(transaction.date).toLocaleDateString("en-US")}
+                      </div>
+                      <div className="Purchase-item Padding-x--20">
+                        <div className="Purchase-item-icon">
+                          {userInfo.name.charAt(0).toUpperCase()}
+                        </div>
+                      </div>
+                      <div className="Purchase-item">
+                        {transaction.description}
+                        <div className="Purchase-item-subtitle">
+                          {/* {transaction.group} */}
+                        </div>
                       </div>
                     </div>
-                    <div className="Purchase-item">
-                      {transaction.description}
-                      <div className="Purchase-item-subtitle">
-                        {/* {transaction.group} */}
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="Purchase-item">${transaction.amount}</div>
-                  <div
-                    className={`Badge Badge-color--${
-                      transaction.status === "Pending" ? "yellow" : "green"
-                    }-1000 Margin-left--20`}
-                    style={{ width: 100 }}
-                  >
-                    {transaction.status}
+                    <div className="Purchase-item">${transaction.amount}</div>
+                    <div
+                      className={`Badge Badge-color--${
+                        transaction.status === "Pending" ? "yellow" : "green"
+                      }-1000 Margin-left--20`}
+                      style={{ width: 100 }}
+                    >
+                      {transaction.status}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
               {/* <div className="Block Margin-top--20">
               <div className="Block-header">Purchase History</div>
               <div className="Block-subtitle">View your recent purchases.</div>
@@ -109,8 +139,6 @@ const Dashboard = () => {
             <div className="Block">
               <div className="Block-header">Groups</div>
               <div className="Block-subtitle"> Manage your groups.</div>
-              {console.log("CURRENT USER INFO:", userInfo)}
-              {console.log("CURRENT USER GROUPS:", userInfo?.groups)}
               {userInfo &&
                 userInfo.groups &&
                 userInfo.groups.map((group: IGroup, index: number) => (
