@@ -240,6 +240,32 @@ export const deleteMember = async (req: Request, res: Response) => {
   }
 }
 
+export const deleteGroup = async (req: Request, res: Response) => {
+  const { groupID } = req.params
+
+  if (!groupID) {
+    return res.status(400).json({ message: "Group ID is required" })
+  }
+
+  try {
+    // Find the group by ID
+    const group = await Group.findById(groupID)
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" })
+    }
+
+    // Delete the group
+    await group.delete()
+
+    return res.status(200).json({ message: "Group deleted successfully" })
+  } catch (error) {
+    console.error("Error deleting group:", error)
+    return res
+      .status(500)
+      .json({ message: "An error occurred while deleting the group" })
+  }
+}
+
 // default export
 export default {
   getGroup,
@@ -247,4 +273,5 @@ export default {
   createGroup,
   addMember,
   deleteMember,
+  deleteGroup,
 }
