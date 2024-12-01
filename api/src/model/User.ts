@@ -12,20 +12,24 @@ interface IUser extends Document {
   expenses: (Schema.Types.ObjectId | IExpense)[]
   addFriend: (friendId: string) => Promise<void>
   password: string
+  isDummy: boolean
 }
 
 // Mongoose User Schema
+// Updated Mongoose User Schema
 const userSchema: Schema<IUser> = new Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  balances: { type: Map,
+  name: { type: String, required: false }, // Changed to not required for dummy users
+  email: { type: String, required: true, unique: true },
+  balances: {
+    type: Map,
     of: [{ type: Schema.Types.ObjectId, ref: "Expense" }],
-    default: () => new Map(), 
+    default: () => new Map(),
   },
   groups: [{ type: Schema.Types.ObjectId, ref: "Group" }],
   friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
   expenses: [{ type: Schema.Types.ObjectId, ref: "Expense" }],
-  password: { type: String, required: true },
+  password: { type: String, required: false }, // Changed to not required for dummy users
+  isDummy: { type: Boolean, default: true }, // New field to indicate a dummy user
 })
 
 // Instance method to add a friend

@@ -3,6 +3,7 @@ import { User, IUser } from "../model/User"
 import { Group, IGroup } from "../model/Group"
 import { Expense, IExpense } from "../model/Expense"
 import mongoose from "mongoose"
+import sendEmailInvite from "../config/sendgridInvite"
 // import { defaultIconPrefixCls } from "antd/es/config-provider"
 
 export const getGroup = async (req: Request, res: Response) => {
@@ -56,8 +57,8 @@ export const getGroups = async (req: any, res: Response) => {
 // Function to create a group
 export const createGroup = async (req: any, res: Response) => {
   console.log("Creating group")
-  const { userId } = (req as any).user
-  const { groupName, groupDescription, members } = req.body //members are emails
+  const { userId } = req.user
+  const { groupName, groupDescription, members } = req.body // members are emails
 
   // Validate request body
   if (
@@ -72,58 +73,88 @@ export const createGroup = async (req: any, res: Response) => {
     })
   }
 
-  // Log the received data for debugging
   console.log("Received group data:", { groupName, groupDescription, members })
 
-  // Use $in to find all users whose email is in the members array
-  const users = await User.find({ email: { $in: members } })
-  console.log("Users found:", users)
-
-  // If no valid users, return 404
-  if (users.length === 0) {
-    return res.status(404).json({
-      message: "No valid users found with the provided emails",
-    })
-  }
-
-  // Extract the ObjectIds of the found users
-  const memberIds = users.map((user) => user._id)
+  const memberIds = []
+  const emailPromises = [] // Array to hold email sending promises
+  const dummyUsers = [] // Array to keep track of dummy users
 
   // Get the current user
-  const currentUser = await User.findOne({ _id: userId })
+  const currentUser = await User.findById(userId)
   const curUserId = currentUser?._id
+
+  // Ensure current user's email is not in the members array
+  const filteredMembers = members.filter(
+    (email) => email !== currentUser?.email
+  )
+
+  for (const email of filteredMembers) {
+    let user = await User.findOne({ email })
+
+    if (!user) {
+      // Create a dummy user
+      user = new User({
+        email,
+        isDummy: true,
+        groups: [],
+        friends: [],
+        expenses: [],
+      })
+
+      await user.save()
+      console.log(`Created dummy user for email: ${email}`)
+
+      // Add to dummyUsers array
+      dummyUsers.push({ user, email })
+    } else {
+      console.log(`Found existing user for email: ${email}`)
+    }
+
+    memberIds.push(user._id)
+  }
+
+  // Ensure current user is in the members list
+  if (!memberIds.includes(curUserId)) {
+    memberIds.push(curUserId)
+  }
 
   // Create the new group document
   const newGroup = new Group({
     groupName,
     groupDescription,
-    members: [curUserId, memberIds], // Add the ObjectIds of the found users
-    leader: curUserId, // Assuming the first user is the leader
+    members: memberIds,
+    leader: curUserId,
   })
-
-  console.log("New Group: ", newGroup)
-  // // Create the new group document
-  // console.log("MemberIds", memberIds)
-  // const newGroup = new Group({
-  //     groupName,
-  //     groupDescription,
-  //     members: [memberIds],  // Add the ObjectIds of the found users
-  //     expenses: [],
-  //     leader: memberIds[0],  // Assuming the first user is the leader
-  // });
 
   await newGroup.save()
   console.log("Group created successfully:", newGroup)
 
-  // Add group to the user's groups using populate
-  console.log("Pre-populate", newGroup)
+  // Add group to the users' groups
   const groupMembers = await newGroup.populate("members")
-  console.log("Post-populate", groupMembers)
+  console.log("Populated group members:", groupMembers.members)
+
   for (const member of groupMembers.members as IUser[]) {
-    console.log("Member", member)
-    member.groups.push(newGroup._id)
-    member.save()
+    console.log("Updating member:", member.email)
+    if (!member.groups.includes(newGroup._id)) {
+      member.groups.push(newGroup._id)
+      await member.save()
+    }
   }
+
+  // Send email invites to dummy users
+  for (const { user, email } of dummyUsers) {
+    // Generate an invite link
+    const inviteLink =
+      "https://flat-fair-app-git-main-vasco-singhs-projects.vercel.app/"
+
+    // Send an email invite
+    emailPromises.push(
+      sendEmailInvite(email, inviteLink, groupName, newGroup._id.toString())
+    )
+  }
+
+  // Wait for all email invites to be sent
+  await Promise.all(emailPromises)
 
   return res.status(200).json({
     message: "Group created successfully",
