@@ -8,7 +8,7 @@ const app = express()
 
 // CORS configuration
 app.use(cors({
-  origin: "https://flat-fair-app-git-main-vasco-singhs-projects.vercel.app",
+  origin: "https://flat-fair-app.vercel.app",
   credentials: true,
 }))
 
