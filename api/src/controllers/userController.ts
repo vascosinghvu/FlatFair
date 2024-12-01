@@ -84,6 +84,7 @@ const login = async (req: Request, res: Response) => {
 // Create a new user
 const createUser = async (req: Request, res: Response) => {
   try {
+    console.log("Creating user with data:", req.body)
     const { password, email, name } = req.body
 
     if (!email || !password || !name) {
@@ -93,26 +94,39 @@ const createUser = async (req: Request, res: Response) => {
     // Check if the user already exists
     const existingUser = await User.findOne({ email })
     if (existingUser) {
-      return res
-        .status(200)
-        .json({ message: "User already exists", userId: existingUser._id })
+      if (existingUser.isDummy) {
+        // Update the dummy user with real user data
+        existingUser.name = name
+        existingUser.password = await bcrypt.hash(password, 10)
+        existingUser.isDummy = false
+
+        console.log("Updating existing dummy user:", existingUser)
+
+        await existingUser.save()
+
+        return res.status(200).json({
+          message: "User updated successfully",
+          userId: existingUser._id,
+        })
+      } else {
+        return res
+          .status(200)
+          .json({ message: "User already exists", userId: existingUser._id })
+      }
     }
 
     // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    console.log(hashedPassword)
-
     const newUser = new User({
       name,
       email,
-      password: hashedPassword, // Store hashed password
+      password: hashedPassword,
       groups: [],
       friends: [],
       expenses: [],
+      isDummy: false, // Explicitly set isDummy to false
     })
-
-    console.log(newUser)
 
     await newUser.save()
 
