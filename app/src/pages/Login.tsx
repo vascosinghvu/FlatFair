@@ -20,6 +20,7 @@ const initialValues: LoginFormValues = {
 const Login = (): ReactElement => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const navigate = useNavigate()
+  const [error, setError] = useState<string>('');
 
   const validationSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -85,6 +86,7 @@ const Login = (): ReactElement => {
                       <div className="Form-error">{errors.password}</div>
                     )}
                   </div>
+                  {error && <div className="Form-error">{error}</div>}
                   <button
                     className="Button Button-color--dark-1000 Width--100 Margin-top--10"
                     type="submit"
@@ -109,6 +111,3 @@ const Login = (): ReactElement => {
 }
 
 export default Login
-function setError(arg0: string) {
-  throw new Error("Function not implemented.")
-}

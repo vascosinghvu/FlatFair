@@ -162,6 +162,7 @@ const CreateGroup = (): ReactElement => {
                         placeholder="johndoe@gmail.com"
                       />
                       <div
+                        data-testid="add-member-button"
                         className="Button Button-color--purple-1000 Margin-left--10"
                         onClick={() => {
                           addMember(values.groupMemberEmail, () =>
