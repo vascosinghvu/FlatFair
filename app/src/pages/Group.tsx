@@ -928,7 +928,7 @@ const Group = () => {
                     >
                       {entry.memberName
                         ? entry.memberName
-                        : "Member Signup Pending"}
+                        : "Pending member"}
                       :
                     </div>
                     <div
