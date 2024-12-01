@@ -532,7 +532,6 @@ const Group = () => {
                         accept="image/*"
                       />
                     </div>
-                    hello
                     <button
                       type="submit"
                       className="Button Button-color--dark-1000 Width--100"
