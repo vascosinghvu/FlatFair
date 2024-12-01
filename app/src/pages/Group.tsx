@@ -182,42 +182,42 @@ const Group = () => {
 
     try {
       // Initialize a variable to hold the breakdown for each member
-      let memberBreakdown: { memberID: string; amountDue: any }[] = []
+      let memberBreakdown: { memberID: string; amountDue: any }[] = [];
 
       // Calculate total amount owed based on the selection method
-      const totalCost = values.cost
+      const totalCost = values.cost;
       const selectedMembers = values.members.filter(
         (member: { selected: any }) => member.selected
-      )
+      );
 
       if (selection === "Equally") {
         // Split the total cost equally between the selected members
-        const amountPerMember = totalCost / selectedMembers.length
+        const amountPerMember = totalCost / selectedMembers.length;
         selectedMembers.forEach((member: { name: any }) => {
           memberBreakdown.push({
             memberID: memberMap[member.name],
             amountDue: amountPerMember,
-          })
-        })
+          });
+        });
       } else if (selection === "By Percent") {
         // Split the total cost based on the percentage provided for each selected member
         selectedMembers.forEach((member: { splitValue: number; name: any }) => {
-          const percentage = member.splitValue || 0 // default to 0 if no percentage provided
-          const amountDue = (percentage / 100) * totalCost
+          const percentage = member.splitValue || 0; // default to 0 if no percentage provided
+          const amountDue = (percentage / 100) * totalCost;
           memberBreakdown.push({
             memberID: memberMap[member.name],
             amountDue: amountDue,
-          })
-        })
+          });
+        });
       } else if (selection === "Manual") {
         // Use the manual amounts provided for each selected member
         selectedMembers.forEach((member: { splitValue: number; name: any }) => {
-          const amountDue = member.splitValue || 0 // default to 0 if no amount provided
+          const amountDue = member.splitValue || 0; // default to 0 if no amount provided
           memberBreakdown.push({
             memberID: memberMap[member.name],
             amountDue: amountDue,
-          })
-        })
+          });
+        });
       }
 
       // Package the final data to submit
@@ -227,18 +227,33 @@ const Group = () => {
         date: values.date,
         memberBreakdown: memberBreakdown,
         groupID: groupid,
-      }
+      };
 
-      console.log("Submitting data:", finalData)
+      console.log("Submitting data:", finalData);
 
-      // Send POST request to the /group/add-expense endpoint
-      // const response = await api.post("/group/add-expense", finalData)
-      const response = await api.post(`/expense/add-expense`, finalData)
-      console.log("Expense logged successfully:", response)
+      // Send POST request to the /expense/add-expense endpoint
+      const response = await api.post(`/expense/add-expense`, finalData);
+      console.log("Expense logged successfully:", response);
 
-      setSuccess(true)
-      setErrorMessage("") // Ensure error message is cleared on success
-      resetForm()
+      // Send email notifications to each member
+      memberBreakdown.forEach(async (breakdown) => {const member = groupInfo.members.find(
+          (m: any) => m._id === breakdown.memberID
+        );
+        if (member && member.email) {
+          const expenseLink = "https://flat-fair-app-git-main-vasco-singhs-projects.vercel.app/";
+          const inviteResponse = await api.post(`/user/send-email`, {
+            email: member.email,
+            subject: `New FlatFair Expense in ${groupInfo.groupName}!`,
+            text: `Hello ${member.name},\n\nA new expense has been added to the group "${groupInfo.groupName}".\n\nItem: ${values.item}\nAmount Owed: $${breakdown.amountDue.toFixed(2)}\n\nClick the link to view the expense in FlatFair: ${expenseLink}`,
+            html: `<p>Hello ${member.name},</p><p>A new expense has been added to the group "<strong>${groupInfo.groupName}</strong>".</p><p><strong>Item:</strong> ${values.item}<br/><strong>Amount Owed:</strong> $${breakdown.amountDue.toFixed(2)}</p><p>Click the link to view the expense in FlatFair: <a href="${expenseLink}">${expenseLink}</a></p>`,
+          });
+          console.log(`New expense notification to ${member.email} sent successfully:`, inviteResponse.data);
+        }
+      });
+
+      setSuccess(true);
+      setErrorMessage(""); // Ensure error message is cleared on success
+      resetForm();
     } catch (error) {
       console.error("Error submitting:", error)
     } finally {
@@ -340,16 +355,34 @@ const Group = () => {
       // Use DELETE method for consistency
       const response = await api.delete(
         `/expense/delete-expense/${expense._id}`
-      )
-      console.log("Expense deleted successfully:", response.data)
+      );
+      console.log("Expense deleted successfully:", response.data);
 
       // Update the groupInfo state to remove the deleted expense
       setGroupInfo((prev: { expenses: any[] }) => ({
         ...prev,
         expenses: prev.expenses.filter((item) => item._id !== expense._id),
-      }))
+      }));
 
-      setExpenseModal(false) // Close the modal after deletion
+      // Send email notifications to each member about the deleted expense
+      groupInfo.members.forEach(async (member: any) => {
+        if (member.email) {
+          const expenseLink =
+            "https://flat-fair-app-git-main-vasco-singhs-projects.vercel.app/";
+          const inviteResponse = await api.post(`/user/send-email`, {
+            email: member.email,
+            subject: `Expense Deleted in ${groupInfo.groupName}`,
+            text: `Hello ${member.name},\n\nThe expense "${expense.description}" has been deleted from the group "${groupInfo.groupName}".\n\nClick the link to view the group in FlatFair: ${expenseLink}`,
+            html: `<p>Hello ${member.name},</p><p>The expense "<strong>${expense.description}</strong>" has been deleted from the group "<strong>${groupInfo.groupName}</strong>".</p><p>Click the link to view the group in FlatFair: <a href="${expenseLink}">${expenseLink}</a></p>`,
+          });
+          console.log(
+            `Expense deletion notification to ${member.email} sent successfully:`,
+            inviteResponse.data
+          );
+        }
+      });
+
+      setExpenseModal(false); // Close the modal after deletion
     } catch (error) {
       console.error("Error deleting expense:", error)
       alert("Failed to delete expense")
@@ -424,7 +457,7 @@ const Group = () => {
                             : "Button Button-color--green-1000"
                         }
                         onClick={() => {
-                          setSelection("Equally")
+                          setSelection("Equally");
                         }}
                       >
                         Equally
@@ -436,7 +469,7 @@ const Group = () => {
                             : "Button Button-color--green-1000"
                         }
                         onClick={() => {
-                          setSelection("By Percent")
+                          setSelection("By Percent");
                         }}
                       >
                         By Percent
@@ -448,7 +481,7 @@ const Group = () => {
                             : "Button Button-color--green-1000"
                         }
                         onClick={() => {
-                          setSelection("Manual")
+                          setSelection("Manual");
                         }}
                       >
                         Manual
@@ -463,30 +496,31 @@ const Group = () => {
                         render={() => (
                           <div className="Flex Flex-column">
                             {(values.members || []).map(
-                              (member: IUser, index: number) => (
-                                <div key={index} className="Flex Flex-column">
-                                  <div className="Flex-row Margin-y--10">
-                                    <Field
-                                      type="checkbox"
-                                      name={`members[${index}].selected`}
-                                    />
-                                    {member.name}
-                                  </div>
-                                  {values.members[index].selected &&
-                                    selection !== "Equally" && (
+                              (member: IUser, index: number) =>
+                                member.name && (
+                                  <div key={index} className="Flex Flex-column">
+                                    <div className="Flex-row Margin-y--10">
                                       <Field
-                                        className="Form-input-box"
-                                        type="number"
-                                        name={`members[${index}].splitValue`}
-                                        placeholder={
-                                          selection === "By Percent"
-                                            ? "Enter %"
-                                            : "Enter amount"
-                                        }
+                                        type="checkbox"
+                                        name={`members[${index}].selected`}
                                       />
-                                    )}
-                                </div>
-                              )
+                                      {member.name}
+                                    </div>
+                                    {values.members[index].selected &&
+                                      selection !== "Equally" && (
+                                        <Field
+                                          className="Form-input-box"
+                                          type="number"
+                                          name={`members[${index}].splitValue`}
+                                          placeholder={
+                                            selection === "By Percent"
+                                              ? "Enter %"
+                                              : "Enter amount"
+                                          }
+                                        />
+                                      )}
+                                  </div>
+                                )
                             )}
                           </div>
                         )}
@@ -538,11 +572,11 @@ const Group = () => {
                 <select
                   className="Form-input-box"
                   onChange={(e) => {
-                    const selectedMemberId = e.target.value
+                    const selectedMemberId = e.target.value;
                     const foundUser = expenseArr.find(
                       (entry) => entry.memberId === selectedMemberId
-                    ) // Find the selected user's data in expenseArr
-                    setSelectedUser(foundUser || null) // Update selectedUser with the corresponding IExpenseEntry
+                    ); // Find the selected user's data in expenseArr
+                    setSelectedUser(foundUser || null); // Update selectedUser with the corresponding IExpenseEntry
                   }}
                   value={selectedUser?.memberId || ""}
                 >
@@ -619,7 +653,7 @@ const Group = () => {
               <div
                 className="Button Button-color--red-1000"
                 onClick={() => {
-                  deleteMember(selectedMember?._id ?? "")
+                  deleteMember(selectedMember?._id ?? "");
                 }}
               >
                 Delete Member
@@ -647,40 +681,40 @@ const Group = () => {
                   values,
                   { setSubmitting, setFieldError, resetForm }
                 ) => {
-                  console.log("Adding member:", values.email)
+                  console.log("Adding member:", values.email);
                   try {
-                    setIsLoading(true) // Show loading state
+                    setIsLoading(true); // Show loading state
 
                     const response = await api.post(
                       `/group/add-member/${groupid}`, // Ensure `groupid` is valid
                       { email: values.email } // Correctly format request body
-                    )
+                    );
 
-                    console.log("Member added successfully:", response.data)
+                    console.log("Member added successfully:", response.data);
                     // Update members state
                     // setMemberMap((prevMembers: any) => [
                     //   ...prevMembers,
                     //   response.data.newMember,
                     // ])
 
-                    resetForm() // Reset form after success
+                    resetForm(); // Reset form after success
                   } catch (error) {
                     console.error(
                       "Error adding member:",
                       error instanceof Error
                         ? error.message
                         : "An unknown error occurred"
-                    )
+                    );
 
                     const errorMessage =
                       (error as any)?.response?.data?.message ||
-                      "Failed to add member"
+                      "Failed to add member";
 
-                    setFieldError("email", errorMessage) // Show error on the form field
+                    setFieldError("email", errorMessage); // Show error on the form field
                   } finally {
-                    setIsLoading(false) // Reset loading state
-                    setSubmitting(false) // Form is no longer submitting
-                    setAddMemberModal(false) // Close the modal
+                    setIsLoading(false); // Reset loading state
+                    setSubmitting(false); // Form is no longer submitting
+                    setAddMemberModal(false); // Close the modal
                   }
                 }}
               >
@@ -786,11 +820,11 @@ const Group = () => {
                         member.role === "Admin" ? "purple" : "maroon"
                       }-1000`}
                     >
-                      {member.name.charAt(0).toUpperCase()}
+                      {member.name ? member.name.charAt(0).toUpperCase() : "?"}
                     </div>
                   </div>
                   <div key={index}>
-                    {member.name}
+                    {member.name ? member.name : member.email}
                     <div className="Text-color--dark-700 Text-fontSize--14">
                       {member.role}
                     </div>
@@ -801,9 +835,9 @@ const Group = () => {
                     <div
                       className="Group-icon"
                       onClick={() => {
-                        setEditModal(true)
-                        setSelectedMember(member)
-                        console.log("Selected Member:", member)
+                        setEditModal(true);
+                        setSelectedMember(member);
+                        console.log("Selected Member:", member);
                       }}
                     >
                       <Icon glyph="ellipsis-v" />
@@ -815,7 +849,7 @@ const Group = () => {
             <div
               className="Button Button-color--dark-1000"
               onClick={() => {
-                setAddMemberModal(true)
+                setAddMemberModal(true);
               }}
             >
               Add Member
@@ -829,9 +863,9 @@ const Group = () => {
                   key={index}
                   className="Card Purchase"
                   onClick={() => {
-                    setExpenseModal(true)
-                    console.log("Selected Expense:", transaction)
-                    setCurrExpense(transaction)
+                    setExpenseModal(true);
+                    console.log("Selected Expense:", transaction);
+                    setCurrExpense(transaction);
                   }}
                 >
                   <div className="Flex Flex-row" style={{ flexGrow: 1 }}>
@@ -870,7 +904,7 @@ const Group = () => {
               ))}
             <div
               onClick={() => {
-                setIsModal(true)
+                setIsModal(true);
               }}
               className="Button Button-color--dark-1000 Margin-top--10"
             >
@@ -887,8 +921,23 @@ const Group = () => {
               {expenseArr && expenseArr.length > 0 ? (
                 expenseArr.map((entry, index) => (
                   <div key={index} className="Flex Flex-row Margin-bottom--20">
-                    <div>{entry.memberName}:</div>
-                    <div className="Text-color--dark-700 Margin-left--auto">
+                    <div
+                      className={`${
+                        entry.memberName ? "" : "Text-color--dark-200"
+                      }`}
+                    >
+                      {entry.memberName
+                        ? entry.memberName
+                        : "Member Signup Pending"}
+                      :
+                    </div>
+                    <div
+                      className={`${
+                        entry.memberName
+                          ? "Text-color--dark-700"
+                          : "Text-color--dark-200"
+                      } Margin-left--auto`}
+                    >
                       ${entry.totalAmountOwed.toFixed(2)}
                     </div>
                   </div>
@@ -908,7 +957,7 @@ const Group = () => {
         </div>
       </div>
     </>
-  )
+  );
 }
 
 export default Group
