@@ -3,7 +3,6 @@ import { User, IUser } from "../model/User"
 import { Group, IGroup } from "../model/Group"
 import { Expense, IExpense } from "../model/Expense"
 import mongoose from "mongoose"
-import sendEmailInvite from "../config/sendgridInvite"
 // import { defaultIconPrefixCls } from "antd/es/config-provider"
 
 export const getGroup = async (req: Request, res: Response) => {
@@ -140,21 +139,6 @@ export const createGroup = async (req: any, res: Response) => {
       await member.save()
     }
   }
-
-  // Send email invites to dummy users
-  for (const { user, email } of dummyUsers) {
-    // Generate an invite link
-    const inviteLink =
-      "https://flat-fair-app-git-main-vasco-singhs-projects.vercel.app/"
-
-    // Send an email invite
-    emailPromises.push(
-      sendEmailInvite(email, inviteLink, groupName, newGroup._id.toString())
-    )
-  }
-
-  // Wait for all email invites to be sent
-  await Promise.all(emailPromises)
 
   return res.status(200).json({
     message: "Group created successfully",

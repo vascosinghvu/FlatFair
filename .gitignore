@@ -11,7 +11,8 @@ node_modules/
 /coverage
 
 # production
-/build
+/app/build
+/api/dist
 
 # misc
 .DS_Store
@@ -23,3 +24,5 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+
