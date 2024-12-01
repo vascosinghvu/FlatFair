@@ -385,7 +385,6 @@ const Group = () => {
                         <div className="Form-error">{errors.item}</div>
                       )}
                     </div>
-
                     <div className="Form-group">
                       <label htmlFor="cost">Amount ($)</label>
                       <Field
@@ -398,7 +397,6 @@ const Group = () => {
                         <div className="Form-error">{errors.cost}</div>
                       )}
                     </div>
-
                     <div className="Form-group">
                       <label htmlFor="date">Date</label>
                       <Field
@@ -411,7 +409,6 @@ const Group = () => {
                         <div className="Form-error">{errors.date}</div>
                       )}
                     </div>
-
                     {/* Selection for Split Method */}
                     <div className="Text-fontSize--14 Margin-bottom--4">
                       Split Type
@@ -454,7 +451,6 @@ const Group = () => {
                         Manual
                       </div>
                     </div>
-
                     {/* Show different inputs based on selection */}
                     <div className="Form-group">
                       <label htmlFor="members">Members</label>
@@ -492,7 +488,17 @@ const Group = () => {
                         )}
                       />
                     </div>
-
+                    {/* upload receipt image */}
+                    <div className="Form-group">
+                      <label htmlFor="receipt">Upload Receipt</label>
+                      <input
+                        type="file"
+                        id="receipt"
+                        name="receipt"
+                        accept="image/*"
+                      />
+                    </div>
+                    hello
                     <button
                       type="submit"
                       className="Button Button-color--dark-1000 Width--100"
@@ -509,11 +515,9 @@ const Group = () => {
                         "Log Expense"
                       )}
                     </button>
-
                     {errorMessage && (
                       <div className="Form-error">{errorMessage}</div>
                     )}
-
                     {success && (
                       <div className="Form-success">
                         Expense logged successfully!
