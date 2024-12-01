@@ -49,11 +49,13 @@ const CreateAccount = (): ReactElement => {
         password: values.password, // Ensure this is hashed on the backend
       })
 
-      console.log("Account created successfully:", response.data)
+      console.log("Response:", response) // Debug log
+
+      console.log("Account created successfully:", response)
 
       // Save token if it's returned
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token)
+      if (response.token) {
+        localStorage.setItem("token", response.token)
       } else {
         // If no token in response, try login
         const loginResponse = await api.post("/user/login", {
@@ -61,10 +63,10 @@ const CreateAccount = (): ReactElement => {
           password: values.password,
         })
 
-        console.log("Login response:", loginResponse.data) // Debug log
+        console.log("Login response:", loginResponse) // Debug log
 
-        if (loginResponse.data.token) {
-          localStorage.setItem("token", loginResponse.data.token)
+        if (loginResponse.token) {
+          localStorage.setItem("token", loginResponse.token)
         }
       }
 
