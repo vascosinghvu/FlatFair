@@ -20,7 +20,7 @@ const initialValues: LoginFormValues = {
 const Login = (): ReactElement => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const navigate = useNavigate()
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("")
 
   const validationSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -36,13 +36,13 @@ const Login = (): ReactElement => {
       const response = await api.post(`/user/login`, values)
       console.log("Login successful:", response)
       localStorage.setItem("token", response.token)
+      navigate("/dashboard") // Redirect to the dashboard
       return response
     } catch (error) {
       console.error("Login failed:", error)
       setError("Invalid email or password") // Set error state to show a message
     } finally {
       console.log("here")
-      navigate("/dashboard") // Redirect to the dashboard
       setIsLoading(false)
     }
   }
