@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose"
 import { User, IUser } from "./User" // Import User interface
 import { IExpense } from "./Expense" // Import Expense interface
+import { group } from "console"
 
 // Interface for the Group document
 interface IGroup extends Document {
@@ -13,6 +14,7 @@ interface IGroup extends Document {
 
   addMember(user: IUser): Promise<void>
   removeMember(userID: string): Promise<void>
+  delete(): Promise<void>
   // notifyNewExpense(expense: IExpense): Promise<void>;
   // viewGroupBalance(): Promise<number>;
   // viewSettledAndUnsettledExpenses(): Promise<{ settled: IExpense[]; unsettled: IExpense[] }>;
@@ -45,6 +47,10 @@ groupSchema.methods.removeMember = async function (
       member._id.toString() !== userID.toString()
   )
   await this.save() // Persist changes
+}
+
+groupSchema.methods.delete = async function (): Promise<void> {
+  await this.deleteOne()
 }
 
 // // Method to notify members of a new expense

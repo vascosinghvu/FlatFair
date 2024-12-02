@@ -55,25 +55,23 @@ const CreateGroup = (): ReactElement => {
       const response = await api.post(`/group/create-group`, groupData)
 
       console.log("Group created successfully:", response)
-      // const groupId = response.groupId
 
       setSuccess(true) // Set success state to true
 
-      // // Send invite emails to members after successful group creation
-      // members.forEach(async (memberEmail) => {
-      //   const inviteLink = `https://flatfair.com/invite/${groupId}`
-      //   console.log("here")
-      //   const inviteResponse = await api.post("/user/send-invite", {
-      //     email: memberEmail,
-      //     inviteLink: inviteLink,
-      //     groupName: values.groupName,
-      //     groupId: groupId,
-      //   })
-      //   console.log(
-      //     `Invite to ${memberEmail} sent successfully:`,
-      //     inviteResponse.data
-      //   )
-      // })
+      members.forEach(async (memberEmail) => {
+        const inviteLink =
+          "https://flat-fair-app-git-main-vasco-singhs-projects.vercel.app/";
+        const inviteResponse = await api.post(`/user/send-email`, {
+          email: memberEmail,
+          subject: `You're invited to join a FlatFair Group!`,
+          text: `Click the link to join ${values.groupName} in FlatFair: ${inviteLink}`,
+          html: `<strong>Please join ${values.groupName} in FlatFair using the following link: <a href="${inviteLink}">${inviteLink}</a></strong>`,
+        });
+        console.log(
+          `Invite to ${memberEmail} sent successfully:`,
+          inviteResponse.data
+        );
+      });
 
       resetForm() // Reset the form after successful submission
       setMembers([]) // Clear the members array as well
@@ -164,6 +162,7 @@ const CreateGroup = (): ReactElement => {
                         placeholder="johndoe@gmail.com"
                       />
                       <div
+                        data-testid="add-member-button"
                         className="Button Button-color--purple-1000 Margin-left--10"
                         onClick={() => {
                           addMember(values.groupMemberEmail, () =>

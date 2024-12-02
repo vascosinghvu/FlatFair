@@ -5,7 +5,7 @@ const AsyncSubmit = (props: { loading: boolean }): ReactElement => {
   return (
     <>
       {props.loading && (
-        <div className="AsyncSubmit">
+        <div className="AsyncSubmit" data-testid="async-submit">
           <Spinner color="primary" style={{ width: 18, height: 18 }} />
         </div>
       )}

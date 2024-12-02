@@ -3,7 +3,7 @@ import { User, IUser } from "../model/User"
 import { Group, IGroup } from "../model/Group"
 import { Expense, IExpense } from "../model/Expense"
 import mongoose from "mongoose"
-import sendEmailInvite from "../config/sendgridInvite"
+import sendSendgridEmail from "../config/sendgridEmail"
 import bcrypt from "bcrypt" // For hashing passwords
 import jwt from "jsonwebtoken" // For generating JWT
 
@@ -84,6 +84,7 @@ const login = async (req: Request, res: Response) => {
 // Create a new user
 const createUser = async (req: Request, res: Response) => {
   try {
+    console.log("Creating user with data:", req.body)
     const { password, email, name } = req.body
 
     if (!email || !password || !name) {
@@ -93,26 +94,39 @@ const createUser = async (req: Request, res: Response) => {
     // Check if the user already exists
     const existingUser = await User.findOne({ email })
     if (existingUser) {
-      return res
-        .status(200)
-        .json({ message: "User already exists", userId: existingUser._id })
+      if (existingUser.isDummy) {
+        // Update the dummy user with real user data
+        existingUser.name = name
+        existingUser.password = await bcrypt.hash(password, 10)
+        existingUser.isDummy = false
+
+        console.log("Updating existing dummy user:", existingUser)
+
+        await existingUser.save()
+
+        return res.status(200).json({
+          message: "User updated successfully",
+          userId: existingUser._id,
+        })
+      } else {
+        return res
+          .status(200)
+          .json({ message: "User already exists", userId: existingUser._id })
+      }
     }
 
     // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    console.log(hashedPassword)
-
     const newUser = new User({
       name,
       email,
-      password: hashedPassword, // Store hashed password
+      password: hashedPassword,
       groups: [],
       friends: [],
       expenses: [],
+      isDummy: false, // Explicitly set isDummy to false
     })
-
-    console.log(newUser)
 
     await newUser.save()
 
@@ -151,20 +165,24 @@ const deleteUser = async (req: Request, res: Response) => {
   }
 }
 
-// Send an invite to a new user for a group
-const sendInvite = async (req: Request, res: Response) => {
-  const { email, inviteLink, groupName, groupId } = req.body
+const sendEmail = async (req: Request, res: Response) => {
+  console.log("sendEmail called")
+  const { email, subject, text, html } = req.body
 
-  if (!email || !inviteLink || !groupName || !groupId) {
-    return res.status(400).json({ message: "Invalid request body" })
+  // Validate request body
+  if (!email || !subject || !text || !html) {
+    console.error("Invalid request body:", req.body)
+    return res
+      .status(400)
+      .json({ message: "Invalid request body", email, subject, text, html })
   }
 
   try {
-    await sendEmailInvite(email, inviteLink, groupName, groupId)
-    res.status(200).json({ message: "Invite sent successfully" })
+    await sendSendgridEmail(email, subject, text, html)
+    res.status(200).json({ message: "Email sent successfully" })
   } catch (error) {
-    console.error("Error sending invite:", error)
-    res.status(500).json({ message: "Failed to send invite" })
+    console.error("Error sending email:", error)
+    res.status(500).json({ message: "Failed to send email" })
   }
 }
 
@@ -200,6 +218,6 @@ export default {
   login,
   createUser,
   deleteUser,
-  sendInvite,
   resetPassword,
+  sendEmail,
 }

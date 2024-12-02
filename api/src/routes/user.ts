@@ -15,7 +15,7 @@ router.route("/get-user").get(verifyToken, userController.getUser)
 
 router.route("/login").post(userController.login)
 
-router.route("/send-invite").post(userController.sendInvite)
+router.route("/send-email").post(userController.sendEmail)
 router.route("/create-user").post(userController.createUser)
 router.route("/delete-user").delete(userController.deleteUser)
 router.route("/reset-password").post(userController.resetPassword)
