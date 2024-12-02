@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
-import { act } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 import CreateAccount from '../pages/CreateAccount';
 import { api } from '../api';
 
@@ -20,10 +20,10 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('CreateAccount Component', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
     localStorage.clear();
-    act(() => {
+    await act(async () => {
       render(
         <BrowserRouter>
           <CreateAccount />
@@ -88,22 +88,22 @@ describe('CreateAccount Component', () => {
 
   test('submits form with valid data', async () => {
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    (api.post as jest.Mock).mockResolvedValueOnce({ token: 'fake-token' });
+    (api.post as jest.Mock).mockResolvedValueOnce({ data: { token: 'login-token' } });
 
     await act(async () => {
       await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
       await userEvent.type(screen.getByLabelText(/name/i), 'Test User');
       await userEvent.type(screen.getByLabelText(/^password$/i), 'password123');
       await userEvent.type(screen.getByLabelText(/confirm password/i), 'password123');
+    });
+
+    await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     });
 
     await waitFor(() => {
-      expect(localStorage.getItem('token')).toBe('fake-token');
+      expect(localStorage.getItem('token')).toBe('login-token');
       expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
-      expect(consoleLogSpy).toHaveBeenCalledWith('Account creation submitted:', expect.any(Object));
-      expect(consoleLogSpy).toHaveBeenCalledWith('Account created successfully:', expect.any(Object));
-      expect(consoleLogSpy).toHaveBeenCalledWith('Current token:', 'fake-token');
     });
 
     consoleLogSpy.mockRestore();

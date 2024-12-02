@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1733113614241" clover="3.2.0">
-  <project timestamp="1733113614241" name="All files">
-    <metrics statements="158" coveredstatements="139" conditionals="105" coveredconditionals="91" methods="47" coveredmethods="38" elements="310" coveredelements="268" complexity="0" loc="158" ncloc="158" packages="3" files="13" classes="13"/>
+<coverage generated="1733119752400" clover="3.2.0">
+  <project timestamp="1733119752400" name="All files">
+    <metrics statements="158" coveredstatements="138" conditionals="105" coveredconditionals="90" methods="47" coveredmethods="38" elements="310" coveredelements="266" complexity="0" loc="158" ncloc="158" packages="3" files="13" classes="13"/>
     <package name="src">
       <metrics statements="1" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
       <file name="App.tsx" path="/Users/vasco/Desktop/FlatFair/FlatFair/app/src/App.tsx">
@@ -61,9 +61,9 @@
       </file>
     </package>
     <package name="src.pages">
-      <metrics statements="127" coveredstatements="121" conditionals="85" coveredconditionals="76" methods="33" coveredmethods="30"/>
+      <metrics statements="127" coveredstatements="120" conditionals="85" coveredconditionals="75" methods="33" coveredmethods="30"/>
       <file name="CreateAccount.tsx" path="/Users/vasco/Desktop/FlatFair/FlatFair/app/src/pages/CreateAccount.tsx">
-        <metrics statements="24" coveredstatements="24" conditionals="22" coveredconditionals="20" methods="3" coveredmethods="3"/>
+        <metrics statements="24" coveredstatements="23" conditionals="22" coveredconditionals="19" methods="3" coveredmethods="3"/>
         <line num="16" count="1" type="stmt"/>
         <line num="23" count="1" type="stmt"/>
         <line num="24" count="14" type="stmt"/>
@@ -76,18 +76,18 @@
         <line num="46" count="4" type="stmt"/>
         <line num="52" count="2" type="stmt"/>
         <line num="54" count="2" type="stmt"/>
-        <line num="57" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="58" count="1" type="stmt"/>
-        <line num="61" count="1" type="stmt"/>
-        <line num="66" count="1" type="stmt"/>
-        <line num="68" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="57" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="58" count="0" type="stmt"/>
+        <line num="61" count="2" type="stmt"/>
+        <line num="66" count="2" type="stmt"/>
+        <line num="68" count="2" type="cond" truecount="1" falsecount="1"/>
         <line num="69" count="1" type="stmt"/>
-        <line num="73" count="2" type="stmt"/>
-        <line num="76" count="2" type="stmt"/>
-        <line num="78" count="2" type="stmt"/>
+        <line num="73" count="1" type="stmt"/>
+        <line num="76" count="1" type="stmt"/>
+        <line num="78" count="3" type="stmt"/>
         <line num="83" count="4" type="stmt"/>
         <line num="87" count="13" type="stmt"/>
-        <line num="100" count="398" type="stmt"/>
+        <line num="100" count="363" type="stmt"/>
       </file>
       <file name="CreateGroup.tsx" path="/Users/vasco/Desktop/FlatFair/FlatFair/app/src/pages/CreateGroup.tsx">
         <metrics statements="34" coveredstatements="34" conditionals="26" coveredconditionals="24" methods="9" coveredmethods="9"/>

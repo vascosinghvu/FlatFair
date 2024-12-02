@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    
     steps:
     - uses: actions/checkout@v3
     
@@ -17,25 +17,19 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './app/package-lock.json'
         
     - name: Install Dependencies
       working-directory: ./app
-      run: npm install
+      run: npm ci
       
-    - name: Run Tests
+    - name: Run Tests and Check Coverage
       working-directory: ./app
       run: |
-        npm test -- --coverage --coverageThreshold='{"global":{"statements":50,"branches":50,"functions":50,"lines":50}}'
-      continue-on-error: true
-
-    - name: Check Test Coverage
-      working-directory: ./app
-      run: |
-        COVERAGE=$(npm test -- --coverage --coverageThreshold='{"global":{"statements":50,"branches":50,"functions":50,"lines":50}}' 2>&1 | grep -A 4 "All files" | awk 'NR==2 {print $2}' | sed 's/%//')
-        if (( $(echo "$COVERAGE >= 50" | bc -l) )); then
-          echo "Coverage is above 50% ($COVERAGE%)"
-          exit 0
-        else
+        npm test -- --coverage --watchAll=false --ci
+        COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+        if (( $(echo "$COVERAGE < 50" | bc -l) )); then
           echo "Coverage is below 50% ($COVERAGE%)"
           exit 1
         fi
