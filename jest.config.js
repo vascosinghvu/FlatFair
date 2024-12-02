@@ -12,4 +12,10 @@ module.exports = {
     'src/pages/Group.tsx',  // Exclude Group.tsx
     'src/types/'
   ],
+  setupFilesAfterEnv: ['@testing-library/jest-dom'],
+  testEnvironment: 'jsdom',
+  transform: {
+    '^.+\\.(ts|tsx)$': 'ts-jest'
+  },
+  testTimeout: 10000
 }; 

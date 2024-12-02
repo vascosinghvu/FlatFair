@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
+import { act } from '@testing-library/react';
 import CreateAccount from '../pages/CreateAccount';
 import { api } from '../api';
 
@@ -22,11 +23,13 @@ describe('CreateAccount Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
-    render(
-      <BrowserRouter>
-        <CreateAccount />
-      </BrowserRouter>
-    );
+    act(() => {
+      render(
+        <BrowserRouter>
+          <CreateAccount />
+        </BrowserRouter>
+      );
+    });
   });
 
   test('renders all form fields and submit button', () => {
@@ -50,9 +53,10 @@ describe('CreateAccount Component', () => {
   });
 
   test('validates email format', async () => {
-    const emailInput = screen.getByLabelText(/email/i);
-    await userEvent.type(emailInput, 'invalid-email');
-    fireEvent.blur(emailInput);
+    await act(async () => {
+      await userEvent.type(screen.getByLabelText(/email/i), 'invalid-email');
+      fireEvent.blur(screen.getByLabelText(/email/i));
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/invalid email/i)).toBeInTheDocument();
@@ -82,16 +86,17 @@ describe('CreateAccount Component', () => {
     });
   });
 
-  test('submits form with valid data and receives token directly', async () => {
+  test('submits form with valid data', async () => {
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     (api.post as jest.Mock).mockResolvedValueOnce({ token: 'fake-token' });
 
-    await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await userEvent.type(screen.getByLabelText(/name/i), 'Test User');
-    await userEvent.type(screen.getByLabelText(/^password$/i), 'password123');
-    await userEvent.type(screen.getByLabelText(/confirm password/i), 'password123');
-
-    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await act(async () => {
+      await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
+      await userEvent.type(screen.getByLabelText(/name/i), 'Test User');
+      await userEvent.type(screen.getByLabelText(/^password$/i), 'password123');
+      await userEvent.type(screen.getByLabelText(/confirm password/i), 'password123');
+      fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    });
 
     await waitFor(() => {
       expect(localStorage.getItem('token')).toBe('fake-token');
