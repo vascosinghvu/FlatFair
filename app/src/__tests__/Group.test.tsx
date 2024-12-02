@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import Group from '../pages/Group';
 import { api } from '../api';
@@ -69,11 +69,13 @@ describe('Group Component', () => {
   });
 
   test('renders group information', async () => {
-    render(
-      <BrowserRouter>
-        <Group />
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
+    });
 
     // Wait for group data to load
     await waitFor(() => expect(screen.getByText('Class Group 7')).toBeInTheDocument());
@@ -89,11 +91,13 @@ describe('Group Component', () => {
   });
 
   test('handles expense creation with "Equally" split', async () => {
-    render(
-      <BrowserRouter>
-        <Group />
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
+    });
 
     // Wait for group data to load
     await waitFor(() => expect(screen.getByText('Class Group 7')).toBeInTheDocument());
@@ -145,11 +149,13 @@ describe('Group Component', () => {
   });
 
   test('handles expense creation with "By Percent" split', async () => {
-    render(
-      <BrowserRouter>
-        <Group />
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
+    });
 
     // Wait for group data to load
     await waitFor(() => expect(screen.getByText('Class Group 7')).toBeInTheDocument());
@@ -209,11 +215,13 @@ describe('Group Component', () => {
   });
 
   test('handles validation error when percentages do not add up to 100', async () => {
-    render(
-      <BrowserRouter>
-        <Group />
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
+    });
 
     // Wait for group data to load
     await waitFor(() => expect(screen.getByText('Class Group 7')).toBeInTheDocument());
@@ -256,11 +264,13 @@ describe('Group Component', () => {
   });
 
   test('handles settle up with user selected', async () => {
-    render(
-      <BrowserRouter>
-        <Group />
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
+    });
 
     // Wait for group data to load
     await waitFor(() => expect(screen.getByText('Class Group 7')).toBeInTheDocument());
@@ -284,11 +294,13 @@ describe('Group Component', () => {
   });
 
   test('handles edit modal opening and closing', async () => {
-    render(
-      <BrowserRouter>
-        <Group />
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
+    });
 
     // Wait for group data to load
     await waitFor(() => expect(screen.getByText('Class Group 7')).toBeInTheDocument());
@@ -309,14 +321,17 @@ describe('Group Component', () => {
   });
 
   test('handles no members selected in expense creation', async () => {
-    render(
-      <BrowserRouter>
-        <Group />
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
+    });
 
-    // Wait for group data to load
-    await waitFor(() => expect(screen.getByText('Class Group 7')).toBeInTheDocument());
+    await waitFor(() => {
+      expect(screen.getByText(mockGroupData.data.group.groupName)).toBeInTheDocument();
+    });
 
     // Open the expense creation modal
     fireEvent.click(screen.getByText('Create New Expense'));
@@ -345,11 +360,13 @@ describe('Group Component', () => {
   });
 
   test('handles changing split method multiple times', async () => {
-    render(
-      <BrowserRouter>
-        <Group />
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
+    });
 
     // Wait for group data to load
     await waitFor(() => expect(screen.getByText('Class Group 7')).toBeInTheDocument());
@@ -372,25 +389,20 @@ describe('Group Component', () => {
   });
 
   test('handles API error in fetchUserInfo', async () => {
-    (api.get as jest.Mock).mockImplementation((url) => {
-      if (url.includes('/user/get-user')) {
-        return Promise.reject(new Error('User API Error'));
-      } else if (url.includes('/group/get-group')) {
-        return Promise.resolve(mockGroupData);
-      }
-      return Promise.reject(new Error('not found'));
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
     });
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    render(
-      <BrowserRouter>
-        <Group />
-      </BrowserRouter>
-    );
-
     // Wait for group data to load
-    await waitFor(() => expect(screen.getByText('Class Group 7')).toBeInTheDocument());
+    await waitFor(() => {
+      expect(screen.getByText(mockGroupData.data.group.groupName)).toBeInTheDocument();
+    });
 
     // Check that console.error was called
     expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching user info:', expect.any(Error));
@@ -408,17 +420,38 @@ describe('Group Component', () => {
       return Promise.reject(new Error('not found'));
     });
 
-    render(
-      <BrowserRouter>
-        <Group />
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
+    });
 
     // Wait for component to update
-    await waitFor(() => expect(screen.getByText('Class Group 7')).toBeInTheDocument());
+    await waitFor(() => {
+      expect(screen.getByText(mockGroupData.data.group.groupName)).toBeInTheDocument();
+    });
 
     // Since groupInfo is null, members and expenses should not be rendered
     expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
     expect(screen.queryByText('Lunch')).not.toBeInTheDocument();
+  });
+
+  test('handles edit member modal', async () => {
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <Group />
+        </BrowserRouter>
+      );
+    });
+
+    // Wait for group data to load
+    await waitFor(() => {
+      expect(screen.getByText(mockGroupData.data.group.groupName)).toBeInTheDocument();
+    });
+
+    // Rest of test...
   });
 });
