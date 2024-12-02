@@ -3,7 +3,7 @@ import { User, IUser } from "../model/User"
 import { Group, IGroup } from "../model/Group"
 import { Expense, IExpense } from "../model/Expense"
 import mongoose from "mongoose"
-import sendSendgridEmail from "../config/sendgridEmail";
+import sendSendgridEmail from "../config/sendgridEmail"
 import bcrypt from "bcrypt" // For hashing passwords
 import jwt from "jsonwebtoken" // For generating JWT
 
@@ -166,25 +166,51 @@ const deleteUser = async (req: Request, res: Response) => {
 }
 
 const sendEmail = async (req: Request, res: Response) => {
-  console.log("sendEmail called");
-  const { email, subject, text, html } = req.body;
+  console.log("sendEmail called")
+  const { email, subject, text, html } = req.body
 
   // Validate request body
   if (!email || !subject || !text || !html) {
-    console.error("Invalid request body:", req.body);
+    console.error("Invalid request body:", req.body)
     return res
       .status(400)
-      .json({ message: "Invalid request body", email, subject, text, html });
+      .json({ message: "Invalid request body", email, subject, text, html })
   }
 
   try {
-    await sendSendgridEmail(email, subject, text, html);
-    res.status(200).json({ message: "Email sent successfully" });
+    await sendSendgridEmail(email, subject, text, html)
+    res.status(200).json({ message: "Email sent successfully" })
   } catch (error) {
-    console.error("Error sending email:", error);
-    res.status(500).json({ message: "Failed to send email" });
+    console.error("Error sending email:", error)
+    res.status(500).json({ message: "Failed to send email" })
   }
-};
+}
+
+// Reset the password for a user
+const resetPassword = async (req: Request, res: Response) => {
+  const { email, password } = req.body
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" })
+  }
+
+  try {
+    const user = await User.findOne({ email })
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" })
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+    user.password = hashedPassword
+    await user.save()
+
+    return res.status(200).json({ message: "Password reset successfully" })
+  } catch (error) {
+    console.error("Error resetting password:", error)
+    return res.status(500).json({ message: "Failed to reset password" })
+  }
+}
 
 export default {
   test,
@@ -192,5 +218,6 @@ export default {
   login,
   createUser,
   deleteUser,
+  resetPassword,
   sendEmail,
 }

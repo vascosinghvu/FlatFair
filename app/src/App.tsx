@@ -7,6 +7,7 @@ import Logout from "./pages/Logout"
 import Landing from "./pages/Landing"
 import CreateAccount from "./pages/CreateAccount"
 import Login from "./pages/Login"
+import ForgotPassword from "./pages/ForgotPassword"
 
 function App(): ReactElement {
   return (
@@ -19,6 +20,7 @@ function App(): ReactElement {
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </div>
   )
