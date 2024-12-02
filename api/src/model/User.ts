@@ -18,9 +18,10 @@ interface IUser extends Document {
 const userSchema: Schema<IUser> = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
-  balances: { type: Map,
+  balances: {
+    type: Map,
     of: [{ type: Schema.Types.ObjectId, ref: "Expense" }],
-    default: () => new Map(), 
+    default: () => new Map(),
   },
   groups: [{ type: Schema.Types.ObjectId, ref: "Group" }],
   friends: [{ type: Schema.Types.ObjectId, ref: "User" }],

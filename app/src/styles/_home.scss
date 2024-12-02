@@ -56,6 +56,19 @@
     }
 }
 
+.Form-box {
+    border-radius: var(--fare-border-radius-8);
+    border: none;
+    background-color: var(--fare-color-dark-50);
+    color: var(--fare-color-dark-700);
+    font-family: 'Exo 2', sans-serif;
+    font-size: var(--fare-font-size-14);
+    padding: 8px;
+    // width: 100%; // Ensure inputs fit within the container
+    box-sizing: border-box; // Include padding and border in width calculation
+    position: relative;
+}
+
 .Purchase {
     display: flex;
     flex-direction: row;
