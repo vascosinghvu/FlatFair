@@ -14,11 +14,7 @@ FlatFair allows users to:
 - **Frontend:** React with TypeScript
 - **Backend:** Node.js with Express.js
 - **Database:** MongoDB
-- **UI Libraries:** Chakra UI & Tailwind CSS
-- **Authentication:** Auth0
-- **API Integration:** OpenAI API (for intelligent features)
 - **Email Service:** SendGrid (for email notifications)
-- **SMS Service:** Twilio (for SMS notifications)
 
 ## Tools & Project Management
 - **Version Control:** GitHub (for collaboration and CI/CD)
@@ -28,7 +24,7 @@ FlatFair allows users to:
 ## Setup Instructions
 1. Clone the repository.
 2. Install dependencies using `npm install`.
-3. Set up your environment variables for MongoDB, Auth0, and API keys.
+3. Set up your environment variables for MongoDB, and API keys.
 4. cd into /app
 5. Run the front-end of the application using `npm start`.
 6. Create a new terminal.
