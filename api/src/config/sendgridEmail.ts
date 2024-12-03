@@ -1,5 +1,5 @@
 import sgMail from "@sendgrid/mail";
-import { Twilio } from "twilio";
+//import { Twilio } from "twilio";
 
 // SendGrid Setup
 const sendgridApiKey = process.env.SENDGRID_API_KEY;
