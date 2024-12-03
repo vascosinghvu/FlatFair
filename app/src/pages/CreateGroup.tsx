@@ -60,7 +60,7 @@ const CreateGroup = (): ReactElement => {
 
       members.forEach(async (memberEmail) => {
         const inviteLink =
-          "https://flat-fair-app-git-main-vasco-singhs-projects.vercel.app/";
+          "https://flat-fair-app.vercel.app/";
         const inviteResponse = await api.post(`/user/send-email`, {
           email: memberEmail,
           subject: `You're invited to join a FlatFair Group!`,
