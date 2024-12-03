@@ -250,6 +250,47 @@ export const deleteGroup = async (req: Request, res: Response) => {
   }
 }
 
+export const editLeader = async (req: Request, res: Response) => {
+  console.log(req.params, "req")
+  const { groupID } = req.params // Extract the group ID from the URL
+  const { userID } = req.body // Extract the new leader's user ID from the request body
+
+  console.log("Editing leader:", { groupID, userID })
+
+  if (!groupID || !userID) {
+    return res
+      .status(400)
+      .json({ message: "Group ID and User ID are required" })
+  }
+
+  try {
+    // Find the group by ID
+    const group = await Group.findById(groupID)
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" })
+    }
+
+    // Ensure the new leader is a member of the group
+    if (!group.members.includes(userID)) {
+      return res
+        .status(400)
+        .json({ message: "The selected user must be a member of the group" })
+    }
+
+    // Update the leader field
+    group.leader = userID
+    await group.save()
+
+    return res
+      .status(200)
+      .json({ message: "Leader updated successfully", group })
+  } catch (error) {
+    console.error("Error updating leader:", error)
+    return res.status(500).json({ message: "Failed to update leader" })
+  }
+}
+
 // default export
 export default {
   getGroup,
@@ -258,4 +299,5 @@ export default {
   addMember,
   deleteMember,
   deleteGroup,
+  editLeader,
 }
