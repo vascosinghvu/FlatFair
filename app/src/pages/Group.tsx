@@ -936,12 +936,13 @@ const Group = () => {
 
               {expenseArr && expenseArr.length > 0 ? (
                 expenseArr.map((entry, index) => (
+                  (entry.memberName !== userInfo.name) && (
                   <div key={index} className="Flex Flex-row Margin-bottom--20">
                     <div>{entry.memberName}:</div>
                     <div className="Text-color--dark-700 Margin-left--auto">
                       ${entry.totalAmountOwed.toFixed(2)}
                     </div>
-                  </div>
+                  </div>)
                 ))
               ) : (
                 <div>No expenses to display.</div>
