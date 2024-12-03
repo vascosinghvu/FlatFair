@@ -24,4 +24,8 @@ router
   .route("/delete-group/:groupID")
   .delete(verifyToken, groupController.deleteGroup)
 
+router
+  .route("/edit-leader/:groupID")
+  .post(verifyToken, groupController.editLeader)
+
 export default router
