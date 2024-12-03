@@ -842,7 +842,7 @@ const Group = () => {
             >
               Add Member
             </div>
-            {userInfo._id === groupInfo?.leader && (
+            {/* {userInfo._id === groupInfo?.leader && (
               <div
                 className="Button Button-color--red-1000 Margin-top--10"
                 onClick={() => {
@@ -851,7 +851,7 @@ const Group = () => {
               >
                 Delete Group
               </div>
-            )}
+            )} */}
           </div>
           <div className="col-lg-6">
             <div className="Group-header">Group Purchase History</div>
