@@ -93,6 +93,7 @@ export const createGroup = async (req: any, res: Response) => {
     if (!user) {
       // Create a dummy user
       user = new User({
+        name: email,
         email,
         isDummy: true,
         groups: [],

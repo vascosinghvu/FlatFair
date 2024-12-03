@@ -18,7 +18,7 @@ interface IUser extends Document {
 // Mongoose User Schema
 // Updated Mongoose User Schema
 const userSchema: Schema<IUser> = new Schema({
-  name: { type: String, required: false }, // Changed to not required for dummy users
+  name: { type: String, required: true }, // Changed to not required for dummy users
   email: { type: String, required: true, unique: true },
   balances: {
     type: Map,
