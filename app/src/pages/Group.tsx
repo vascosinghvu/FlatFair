@@ -42,6 +42,31 @@ const Group = () => {
     totalAmountOwed: number // Total amount owed by/to this member
   }
 
+  // Log the currexpense's created by
+  useEffect(() => {
+    console.log("Current Expense: ", currExpense)
+    console.log("Current Expense Created By: ", currExpense?.createdBy.name)
+  }
+  , [currExpense])
+
+  // Using the expense's allocatedToUsers array and allocatedTo map, 
+  // map them to a rendered list of users and their allocated amounts
+  const mapAllocatedTo = (expense: IExpense) => {
+    if (!expense || !expense.allocatedToUsers || !expense.allocatedTo) {
+      return
+    }
+
+    return(
+      <div style={{ paddingLeft: "20px" }}>
+          {expense.allocatedToUsers.map((user) => (
+              <div key={user._id} className="Flex-row">
+                  <span>{user.name}:</span>
+                  <span className="Margin-left--auto">${expense.allocatedTo[user._id as string]}</span>
+              </div>
+          ))}
+      </div>)
+  }
+
   const fetchGroupInfo = async () => {
     try {
       const response = await api.get(`/group/get-group/${groupid}`)
@@ -761,13 +786,7 @@ const Group = () => {
 
               <div className="Expense-allocated">
                 <strong>Allocated To:</strong>
-                {/* <ul>
-                  {currExpense.allocatedTo.map((user: any) => (
-                    <li key={user._id}>
-                      {user.name}: ${currExpense.allocatedTo[user._id]}
-                    </li>
-                  ))}
-                </ul> */}
+                {mapAllocatedTo(currExpense)}
               </div>
 
               <div className="Expense-created-by">

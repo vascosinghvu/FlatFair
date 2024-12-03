@@ -18,7 +18,7 @@ export interface IExpense {
   status: string
   receipt: File
   date: Date
-  allocatedTo: Map<IUser, number>
+  allocatedTo: { [key: string]: number };
   allocatedToUsers: IUser[]
 }
 
